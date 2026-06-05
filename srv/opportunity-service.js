@@ -37,15 +37,45 @@ function callClaude(system, prompt, apiKey) {
     });
 }
 
+async function fetchAllFromC4C(c4c, basePath) {
+    let all = [];
+    let path = basePath;
+    let page = 0;
+    const maxPages = 20;
+    while (path && page < maxPages) {
+        const result = await c4c.send({ method: 'GET', path });
+        const records = Array.isArray(result) ? result : (result.value || result);
+        if (!records || records.length === 0) break;
+        all = all.concat(records);
+        page++;
+        const nextLink = result['@odata.nextLink'] || result['odata.nextLink'];
+        if (nextLink && records.length >= 1000) {
+            const skip = all.length;
+            path = basePath + '&\$skip=' + skip;
+        } else {
+            break;
+        }
+    }
+    console.log('[CAP] Opportunities: ' + all.length + ' records fetched in ' + page + ' pages');
+    return all;
+}
+
 module.exports = cds.service.impl(async function () {
     const c4c = await cds.connect.to('c4c');
 
     this.on('READ', 'Opportunities', async (req) => {
-        const result = await c4c.send({
-            method: 'GET',
-            path: "OpportunityCollection?$filter=CreationDate ge datetime'2024-01-01T00:00:00'&$top=1000&$select=ObjectID,ID,Name,SalesOrganisationID,SalesOrganisationName,SalesCyclePhaseCode,SalesCyclePhaseCodeText,ExpectedRevenueAmount,ExpectedRevenueAmountCurrencyCode,ExpectedProcessingEndDate,LifeCycleStatusCode,LifeCycleStatusCodeText,ResultReasonCode,ResultReasonCodeText,ProbabilityPercent,ProspectPartyID,ProspectPartyName,MainEmployeeResponsiblePartyName,CreationDate,LastChangeDate"
-        });
-        return Array.isArray(result) ? result : (result.value || result);
+        const top = req.query.SELECT && req.query.SELECT.limit && req.query.SELECT.limit.rows && req.query.SELECT.limit.rows.val;
+        // If browser requests a specific small top (like $top=3 for testing), honour it
+        if (top && top <= 100) {
+            const result = await c4c.send({
+                method: 'GET',
+                path: "OpportunityCollection?$filter=CreationDate ge datetime'2025-06-05T00:00:00'&$top=" + top + "&$select=ObjectID,ID,Name,SalesOrganisationID,SalesOrganisationName,SalesCyclePhaseCode,SalesCyclePhaseCodeText,ExpectedRevenueAmount,ExpectedRevenueAmountCurrencyCode,ExpectedProcessingEndDate,LifeCycleStatusCode,LifeCycleStatusCodeText,ResultReasonCode,ResultReasonCodeText,ProbabilityPercent,ProspectPartyID,ProspectPartyName,MainEmployeeResponsiblePartyName,CreationDate,LastChangeDate"
+            });
+            return Array.isArray(result) ? result : (result.value || result);
+        }
+        // Otherwise fetch all pages
+        const basePath = "OpportunityCollection?$filter=CreationDate ge datetime'2025-06-05T00:00:00'&$top=1000&$select=ObjectID,ID,Name,SalesOrganisationID,SalesOrganisationName,SalesCyclePhaseCode,SalesCyclePhaseCodeText,ExpectedRevenueAmount,ExpectedRevenueAmountCurrencyCode,ExpectedProcessingEndDate,LifeCycleStatusCode,LifeCycleStatusCodeText,ResultReasonCode,ResultReasonCodeText,ProbabilityPercent,ProspectPartyID,ProspectPartyName,MainEmployeeResponsiblePartyName,CreationDate,LastChangeDate";
+        return await fetchAllFromC4C(c4c, basePath);
     });
 
     this.on('analyze', async (req) => {
