@@ -285,7 +285,7 @@ tbody tr:hover td{background:#f8fafc;}
   <div class="define-title">What do you want to know?</div>
   <div class="define-sub">Describe your report in plain English. AI reads your question, selects the right data and charts, then builds a full report from live C4C data.</div>
   <div class="define-box">
-    <textarea class="define-textarea" id="defineInput" placeholder='"Show me an executive summary of our 2024 pipeline performance across all sales orgs"'></textarea>
+    <textarea class="define-textarea" id="defineInput" placeholder='"Show me an executive summary of our pipeline performance across all sales orgs"'></textarea>
     <div class="define-footer">
       <span class="define-hint">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
@@ -298,14 +298,14 @@ tbody tr:hover td{background:#f8fafc;}
     </div>
   </div>
   <div class="suggestions">
-    <div class="sug" onclick="setSug(this)">Executive summary of 2024 pipeline</div>
+    <div class="sug" onclick="setSug(this)">Executive summary of last 12 months pipeline</div>
     <div class="sug" onclick="setSug(this)">Win rate analysis by sales org</div>
     <div class="sug" onclick="setSug(this)">Why are we losing deals?</div>
     <div class="sug" onclick="setSug(this)">Open pipeline health by owner</div>
     <div class="sug" onclick="setSug(this)">Revenue breakdown by phase</div>
     <div class="sug" onclick="setSug(this)">Top 10 opportunities by value</div>
     <div class="sug" onclick="setSug(this)">Sales org performance scorecard</div>
-    <div class="sug" onclick="setSug(this)">Monthly pipeline trend for 2024</div>
+    <div class="sug" onclick="setSug(this)">Monthly pipeline trend — last 12 months</div>
   </div>
 </div>
 
@@ -600,7 +600,7 @@ function renderReport(config){
     panels.push('<div class="panel"><div class="panel-hdr"><div class="panel-hdr-left"><div class="panel-icon" style="background:#eff6ff;"><svg viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="1.5" width="13" height="13"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div><div><div class="panel-title">Open Pipeline by Owner</div><div class="panel-sub">Top 8 · USD</div></div></div><span class="panel-tag tag-default">Top 8</span></div><div class="panel-body"><canvas id="cOwner" role="img" aria-label="Owner pipeline"></canvas></div></div>');
   }
   if(supporting.indexOf('trend')>=0||ql.includes('trend')||ql.includes('month')||ql.includes('time')||ql.includes('summary')){
-    panels.push('<div class="panel"><div class="panel-hdr"><div class="panel-hdr-left"><div class="panel-icon" style="background:#fff7ed;"><svg viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="1.5" width="13" height="13"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/></svg></div><div><div class="panel-title">Monthly Trend</div><div class="panel-sub">Revenue by month</div></div></div><span class="panel-tag tag-default">2024</span></div><div class="panel-body"><canvas id="cTrend" role="img" aria-label="Trend"></canvas></div></div>');
+    panels.push('<div class="panel"><div class="panel-hdr"><div class="panel-hdr-left"><div class="panel-icon" style="background:#fff7ed;"><svg viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="1.5" width="13" height="13"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/></svg></div><div><div class="panel-title">Monthly Trend</div><div class="panel-sub">Revenue by month</div></div></div><span class="panel-tag tag-default">Last 12M</span></div><div class="panel-body"><canvas id="cTrend" role="img" aria-label="Trend"></canvas></div></div>');
   }
 
   for(var i=0;i<panels.length;i+=3){
