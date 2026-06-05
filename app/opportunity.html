@@ -44,7 +44,9 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-h
 .btn svg{width:13px;height:13px;}
 .btn-primary{background:var(--blue);color:white;border-color:var(--blue);}
 .btn-primary:hover{background:var(--blue2);}
-.filter-bar{background:white;border-bottom:1px solid var(--border);padding:10px 24px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+.filter-bar{background:white;border-bottom:1px solid var(--border);padding:10px 24px 10px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+.filter-clear{font-size:0.7rem;color:var(--muted);background:none;border:1px solid var(--border);padding:4px 10px;border-radius:6px;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s;margin-left:auto;}
+.filter-clear:hover{border-color:var(--red);color:var(--red);}
 .filter-group{display:flex;align-items:center;gap:7px;}
 .filter-label{font-size:0.7rem;color:var(--muted);font-weight:500;white-space:nowrap;}
 select.fsel,input.finp{background:white;color:var(--text);border:1px solid var(--border2);padding:5px 10px;border-radius:7px;font-size:0.76rem;font-family:'Inter',sans-serif;height:30px;cursor:pointer;transition:border 0.15s,box-shadow 0.15s;}
@@ -61,7 +63,7 @@ select.fsel:focus,input.finp:focus{outline:none;border-color:var(--blue);box-sha
 .kpi-val{font-size:1.45rem;font-weight:300;line-height:1;color:var(--text);letter-spacing:-0.5px;}
 .kpi-label{font-size:0.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;font-weight:500;margin-top:5px;}
 .kpi-sub{font-size:0.65rem;color:var(--light);margin-top:3px;}
-.section-hdr{padding:18px 24px 4px;display:flex;align-items:center;gap:8px;}
+.section-hdr{padding:20px 24px 6px;display:flex;align-items:center;gap:8px;}
 .section-title{font-size:0.78rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
 .section-title-bar{width:3px;height:14px;border-radius:2px;}
 .health-grid-wrap{padding:0 20px 16px;}
@@ -78,7 +80,7 @@ select.fsel:focus,input.finp:focus{outline:none;border-color:var(--blue);box-sha
 .health-num.hn-orange{color:#fb923c;}
 .health-num.hn-blue{color:#60a5fa;}
 .health-lbl{font-size:0.62rem;color:rgba(255,255,255,0.5);margin-top:5px;line-height:1.3;}
-.chart-grid{padding:0 20px 14px;display:grid;gap:14px;}
+.chart-grid{padding:0 20px 18px;display:grid;gap:16px;}
 .cg-2{grid-template-columns:2fr 1fr;}
 .cg-2e{grid-template-columns:1fr 1fr;}
 .cg-3{grid-template-columns:1fr 1fr 1fr;}
@@ -93,7 +95,7 @@ select.fsel:focus,input.finp:focus{outline:none;border-color:var(--blue);box-sha
 .tag-live{background:var(--green-light);color:#166534;}
 .tag-default{background:var(--bg);color:var(--muted);border:1px solid var(--border);}
 .panel-body{padding:14px 16px;}
-canvas{max-height:210px;}
+canvas{max-height:240px;}
 .leg{display:flex;flex-wrap:wrap;gap:10px;padding:8px 16px 12px;}
 .leg-item{display:flex;align-items:center;gap:5px;font-size:0.68rem;color:var(--muted);}
 .leg-dot{width:8px;height:8px;border-radius:3px;flex-shrink:0;}
@@ -208,8 +210,6 @@ tbody tr:hover td{background:#f8fafc;}
 </div>
 
 <div class="filter-bar">
-  <div class="filter-live"><div class="live-dot"></div><span id="lastUpdate">Loading...</span></div>
-  <div class="filter-sep"></div>
   <div class="filter-group"><span class="filter-label">Sales Org</span><select class="fsel" id="fOrg" onchange="applyFilters()"><option value="">All Orgs</option></select></div>
   <div class="filter-sep"></div>
   <div class="filter-group"><span class="filter-label">Status</span>
@@ -222,7 +222,10 @@ tbody tr:hover td{background:#f8fafc;}
   <div class="filter-sep"></div>
   <div class="filter-group"><span class="filter-label">Opp Level</span><select class="fsel" id="fLevel" onchange="applyFilters()"><option value="">All Levels</option></select></div>
   <div class="filter-sep"></div>
-  <div class="filter-group"><span class="filter-label">Business Segment</span><select class="fsel" id="fSegment" onchange="applyFilters()"><option value="">All Segments</option></select></div>
+  <div class="filter-group"><span class="filter-label">Segment</span><select class="fsel" id="fSegment" onchange="applyFilters()"><option value="">All Segments</option></select></div>
+  <button class="filter-clear" onclick="clearFilters()">Clear</button>
+  <div class="filter-sep"></div>
+  <div class="filter-live"><div class="live-dot"></div><span id="lastUpdate">Loading...</span></div>
 </div>
 
 <div class="section-hdr"><div class="section-title-bar" style="background:var(--blue)"></div><span class="section-title">Pipeline Overview</span></div>
@@ -450,6 +453,15 @@ var PREDEFINED=[
   {label:'Opp Level Distribution',fn:function(d){var m={};d.filter(isOpen).forEach(function(x){var k=x.OpportunityLevel_KUTText||'(Not Set)';m[k]=(m[k]||0)+1;});var total=d.filter(isOpen).length||1;return'<b>Open Opportunities by Level:</b><br><br>'+Object.entries(m).sort(function(a,b){return b[1]-a[1];}).map(function(e,i){return(i+1)+'. '+e[0]+': <b style="color:var(--purple)">'+e[1]+'</b> ('+((e[1]/total)*100).toFixed(1)+'%)';}).join('<br>');}},
   {label:'Health Score Summary',fn:function(d){var openD=d.filter(isOpen);var t=openD.length;var stale90=openD.filter(function(x){return daysAgo(pd(x.LastChangeDate))>90;}).length;var sopPast=openD.filter(function(x){var s=pd(x.ExpectedProcessingEndDate);return s&&s<today;}).length;var noSup=openD.filter(function(x){return!x.ZHasSupplier_KUT;}).length;var noComp=openD.filter(function(x){return!x.ZHasCompetitor_KUT;}).length;var noSum=openD.filter(function(x){return!x.ZHasSummary_KUT;}).length;var zeroPct=openD.filter(function(x){return!x.ProbabilityPercent||parseFloat(x.ProbabilityPercent)===0;}).length;return'<b>Pipeline Health Summary:</b><br><br>Total Open: <b>'+t+'</b><br>Stale (90+ days): <b style="color:var(--red)">'+stale90+'</b> ('+((stale90/t||0)*100).toFixed(1)+'%)<br>SOP in Past: <b style="color:var(--red)">'+sopPast+'</b><br>No Supplier: <b style="color:var(--orange)">'+noSup+'</b><br>No Competitor: <b style="color:var(--orange)">'+noComp+'</b><br>No Summary: <b style="color:var(--orange)">'+noSum+'</b><br>Zero Probability: <b style="color:var(--red)">'+zeroPct+'</b>';}}
 ];
+
+function clearFilters(){
+  document.getElementById('fOrg').value='';
+  document.getElementById('fStatus').value='';
+  document.getElementById('fPhase').value='';
+  document.getElementById('fLevel').value='';
+  document.getElementById('fSegment').value='';
+  applyFilters();
+}
 
 function toggleQB(){var b=document.getElementById('qbBody'),h=document.getElementById('qbHdr'),t=document.getElementById('qbToggle');b.classList.toggle('open');h.classList.toggle('open');t.textContent=b.classList.contains('open')?'Collapse ↑':'Expand ↓';}
 function buildChips(){document.getElementById('chips').innerHTML=PREDEFINED.map(function(q,i){return'<div class="chip" onclick="runChip('+i+')" id="chip'+i+'">'+q.label+'</div>';}).join('');}

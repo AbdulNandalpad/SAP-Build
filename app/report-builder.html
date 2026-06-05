@@ -306,6 +306,13 @@ tbody tr:hover td{background:#f8fafc;}
     <div class="sug" onclick="setSug(this)">Top 10 opportunities by value</div>
     <div class="sug" onclick="setSug(this)">Sales org performance scorecard</div>
     <div class="sug" onclick="setSug(this)">Monthly pipeline trend — last 12 months</div>
+    <div class="sug" onclick="setSug(this)">Pipeline by business segment</div>
+    <div class="sug" onclick="setSug(this)">Opportunity level distribution and value</div>
+    <div class="sug" onclick="setSug(this)">SOP closing schedule — next 12 months by year</div>
+    <div class="sug" onclick="setSug(this)">Pipeline health — stale deals, missing data, overdue SOP</div>
+    <div class="sug" onclick="setSug(this)">Customer ABC classification breakdown</div>
+    <div class="sug" onclick="setSug(this)">Probability distribution of open pipeline</div>
+    <div class="sug" onclick="setSug(this)">Top customers by open pipeline value</div>
   </div>
 </div>
 
@@ -429,14 +436,27 @@ function goTo(n){
 
 function buildQuickSummary(){
   var d=allData;
+  var isOpen=function(x){return x.LifeCycleStatusCode==='1'||x.LifeCycleStatusCode==='2';};
   var won=d.filter(function(x){return x.LifeCycleStatusCode==='3';}).length;
   var lost=d.filter(function(x){return x.LifeCycleStatusCode==='5';}).length;
-  var open=d.filter(function(x){return x.LifeCycleStatusCode==='1';}).length;
+  var open=d.filter(isOpen).length;
   var rev=d.reduce(function(s,x){return s+parseFloat(x.ExpectedRevenueAmount||0);},0);
   var om={};d.forEach(function(x){var k=(x.SalesOrganisationName||'?').replace(/TSS\s*/,'');if(!om[k])om[k]={rev:0,won:0,lost:0,count:0};om[k].rev+=parseFloat(x.ExpectedRevenueAmount||0);om[k].count++;if(x.LifeCycleStatusCode==='3')om[k].won++;if(x.LifeCycleStatusCode==='5')om[k].lost++;});
   var pm={};d.forEach(function(x){var p=(x.SalesCyclePhaseCodeText||'?').substring(0,25);pm[p]=(pm[p]||0)+1;});
   var rm={};d.filter(function(x){return x.LifeCycleStatusCode==='5';}).forEach(function(x){var k=x.ResultReasonCodeText||'No Reason';rm[k]=(rm[k]||0)+1;});
-  var oom={};d.filter(function(x){return x.LifeCycleStatusCode==='1';}).forEach(function(x){var k=x.MainEmployeeResponsiblePartyName||'?';oom[k]=(oom[k]||0)+parseFloat(x.ExpectedRevenueAmount||0);});
+  var oom={};d.filter(isOpen).forEach(function(x){var k=x.MainEmployeeResponsiblePartyName||'?';oom[k]=(oom[k]||0)+parseFloat(x.ExpectedRevenueAmount||0);});
+  var sm={};d.filter(isOpen).forEach(function(x){var k=x.BUS_SEG_CDE_KUTText||'(Not Set)';sm[k]=(sm[k]||0)+parseFloat(x.ExpectedRevenueAmount||0);});
+  var lm={};d.filter(isOpen).forEach(function(x){var k=x.OpportunityLevel_KUTText||'(Not Set)';if(!lm[k])lm[k]={count:0,rev:0};lm[k].count++;lm[k].rev+=parseFloat(x.ExpectedRevenueAmount||0);});
+  var cm={};d.filter(isOpen).forEach(function(x){var k=x.CustomerABCClassificationCode_PSMText||'(Not Set)';cm[k]=(cm[k]||0)+1;});
+  var openD=d.filter(isOpen);
+  var today=new Date();today.setHours(0,0,0,0);
+  var sopYears={};openD.forEach(function(x){if(x.ExpectedProcessingEndDate){var m=String(x.ExpectedProcessingEndDate).match(/\/Date\((\d+)\)\//);var dt=m?new Date(parseInt(m[1])):new Date(x.ExpectedProcessingEndDate);if(dt>today){var yr=dt.getFullYear();if(!sopYears[yr])sopYears[yr]={count:0,rev:0};sopYears[yr].count++;sopYears[yr].rev+=parseFloat(x.ExpectedRevenueAmount||0);}}});
+  var stale90=openD.filter(function(x){if(!x.LastChangeDate)return true;var m=String(x.LastChangeDate).match(/\/Date\((\d+)\)\//);var dt=m?new Date(parseInt(m[1])):new Date(x.LastChangeDate);return Math.floor((today-dt)/86400000)>90;}).length;
+  var noSupplier=openD.filter(function(x){return!x.ZHasSupplier_KUT;}).length;
+  var noCompetitor=openD.filter(function(x){return!x.ZHasCompetitor_KUT;}).length;
+  var noSummary=openD.filter(function(x){return!x.ZHasSummary_KUT;}).length;
+  var zeroPct=openD.filter(function(x){return!x.ProbabilityPercent||parseFloat(x.ProbabilityPercent)===0;}).length;
+  var hi85=openD.filter(function(x){return parseFloat(x.ProbabilityPercent||0)>=85;}).length;
   return JSON.stringify({
     total:d.length,won:won,lost:lost,open:open,rev:Math.round(rev),
     winRate:won+lost>0?Math.round(won/(won+lost)*100):0,
@@ -444,7 +464,12 @@ function buildQuickSummary(){
     topPhases:Object.entries(pm).sort(function(a,b){return b[1]-a[1];}).slice(0,6).map(function(e){return{phase:e[0],count:e[1]};}),
     topReasons:Object.entries(rm).sort(function(a,b){return b[1]-a[1];}).slice(0,6).map(function(e){return{reason:e[0],count:e[1]};}),
     topOwners:Object.entries(oom).sort(function(a,b){return b[1]-a[1];}).slice(0,8).map(function(e){return{owner:e[0],rev:Math.round(e[1])};}),
-    months:(function(){var mm={};d.forEach(function(x){if(x.CreationDate){var m=x.CreationDate.substring(0,7);if(!mm[m])mm[m]={count:0,rev:0};mm[m].count++;mm[m].rev+=parseFloat(x.ExpectedRevenueAmount||0);}});return Object.entries(mm).sort().slice(-8).map(function(e){return{month:e[0],count:e[1].count,rev:Math.round(e[1].rev)};});}())
+    segments:Object.entries(sm).sort(function(a,b){return b[1]-a[1];}).slice(0,8).map(function(e){return{segment:e[0],rev:Math.round(e[1])};}),
+    levels:Object.entries(lm).sort(function(a,b){return b[1].count-a[1].count;}).map(function(e){return{level:e[0],count:e[1].count,rev:Math.round(e[1].rev)};}),
+    customerABC:Object.entries(cm).sort(function(a,b){return b[1]-a[1];}).map(function(e){return{class:e[0],count:e[1]};}),
+    sopByYear:Object.entries(sopYears).sort(function(a,b){return a[0]-b[0];}).map(function(e){return{year:e[0],count:e[1].count,rev:Math.round(e[1].rev)};}),
+    health:{stale90:stale90,noSupplier:noSupplier,noCompetitor:noCompetitor,noSummary:noSummary,zeroProbability:zeroPct,highProbability85:hi85},
+    months:(function(){var mm={};d.forEach(function(x){if(x.CreationDate){var m=x.CreationDate.substring(0,7);if(!mm[m])mm[m]={count:0,rev:0};mm[m].count++;mm[m].rev+=parseFloat(x.ExpectedRevenueAmount||0);}});return Object.entries(mm).sort().slice(-12).map(function(e){return{month:e[0],count:e[1].count,rev:Math.round(e[1].rev)};});}())
   });
 }
 
@@ -602,6 +627,15 @@ function renderReport(config){
   if(supporting.indexOf('trend')>=0||ql.includes('trend')||ql.includes('month')||ql.includes('time')||ql.includes('summary')){
     panels.push('<div class="panel"><div class="panel-hdr"><div class="panel-hdr-left"><div class="panel-icon" style="background:#fff7ed;"><svg viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="1.5" width="13" height="13"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/></svg></div><div><div class="panel-title">Monthly Trend</div><div class="panel-sub">Revenue by month</div></div></div><span class="panel-tag tag-default">Last 12M</span></div><div class="panel-body"><canvas id="cTrend" role="img" aria-label="Trend"></canvas></div></div>');
   }
+  if(supporting.indexOf('segment')>=0||ql.includes('segment')||ql.includes('business')||ql.includes('industry')||ql.includes('overview')||ql.includes('summary')){
+    panels.push('<div class="panel"><div class="panel-hdr"><div class="panel-hdr-left"><div class="panel-icon" style="background:#f0fdfa;"><svg viewBox="0 0 24 24" fill="none" stroke="#0e7e76" stroke-width="1.5" width="13" height="13"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg></div><div><div class="panel-title">Business Segment Pipeline</div><div class="panel-sub">Open opps · USD</div></div></div><span class="panel-tag tag-default">Top 8</span></div><div class="panel-body"><canvas id="cSegment" role="img" aria-label="Segment pipeline"></canvas></div></div>');
+  }
+  if(supporting.indexOf('level')>=0||ql.includes('level')||ql.includes('tier')||ql.includes('overview')||ql.includes('summary')){
+    panels.push('<div class="panel"><div class="panel-hdr"><div class="panel-hdr-left"><div class="panel-icon" style="background:#fff7ed;"><svg viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="1.5" width="13" height="13"><circle cx="12" cy="12" r="10"/></svg></div><div><div class="panel-title">Opportunity Level</div><div class="panel-sub">Open opp distribution</div></div></div></div><div class="leg" id="levelLeg"></div><div class="panel-body"><canvas id="cLevel" role="img" aria-label="Opp level"></canvas></div></div>');
+  }
+  if(supporting.indexOf('sop')>=0||ql.includes('sop')||ql.includes('closing')||ql.includes('production')||ql.includes('forecast')){
+    panels.push('<div class="panel"><div class="panel-hdr"><div class="panel-hdr-left"><div class="panel-icon" style="background:#faf5ff;"><svg viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="1.5" width="13" height="13"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><div><div class="panel-title">SOP by Year</div><div class="panel-sub">Expected closing year</div></div></div></div><div class="panel-body"><canvas id="cSopYear" role="img" aria-label="SOP by year"></canvas></div></div>');
+  }
 
   for(var i=0;i<panels.length;i+=3){
     html+='<div class="chart-grid cg-3">'+panels.slice(i,i+3).join('')+'</div>';
@@ -633,6 +667,10 @@ function renderReport(config){
   if(document.getElementById('cReason')){var rm={};lost.forEach(function(x){var k=x.ResultReasonCodeText||'(Null)';rm[k]=(rm[k]||0)+1;});var rs=Object.entries(rm).sort(function(a,b){return b[1]-a[1];}).slice(0,6);var rTot=rs.reduce(function(s,e){return s+e[1];},0);document.getElementById('reasonLeg').innerHTML=rs.map(function(e,i){return '<div class="leg-item"><div class="leg-dot" style="background:'+SAP[i]+'"></div>'+e[0].substring(0,16)+' '+(e[1]/rTot*100).toFixed(1)+'%</div>';}).join('');reportCharts.reason=makeChart('cReason','doughnut',rs.map(function(e){return e[0].substring(0,16);}), [{data:rs.map(function(e){return e[1];}),backgroundColor:SAP}]);}
   if(document.getElementById('cOwner')){var oo={};open.forEach(function(x){var k=x.MainEmployeeResponsiblePartyName||'?';oo[k]=(oo[k]||0)+parseFloat(x.ExpectedRevenueAmount||0);});var ooe=Object.entries(oo).sort(function(a,b){return b[1]-a[1];}).slice(0,8);reportCharts.owner=makeChart('cOwner','horizontalBar',ooe.map(function(e){return e[0].split(' ').slice(-1)[0];}), [{data:ooe.map(function(e){return e[1];}),backgroundColor:'rgba(99,102,241,0.75)'}]);}
   if(document.getElementById('cTrend')){var tm={};allData.forEach(function(x){if(x.CreationDate){var m=x.CreationDate.substring(0,7);if(!tm[m])tm[m]=0;tm[m]+=parseFloat(x.ExpectedRevenueAmount||0);}});var tms=Object.keys(tm).sort().slice(-12);reportCharts.trend=makeChart('cTrend','line',tms,[{data:tms.map(function(m){return tm[m];}),backgroundColor:'rgba(249,115,22,0.06)',borderColor:'#f97316',tension:0.4,fill:true,pointBackgroundColor:'#f97316',pointRadius:3}]);}
+  var isOp=function(x){return x.LifeCycleStatusCode==='1'||x.LifeCycleStatusCode==='2';};
+  if(document.getElementById('cSegment')){var segm={};allData.filter(isOp).forEach(function(x){var k=x.BUS_SEG_CDE_KUTText||'(Not Set)';segm[k]=(segm[k]||0)+parseFloat(x.ExpectedRevenueAmount||0);});var segs=Object.entries(segm).sort(function(a,b){return b[1]-a[1];}).slice(0,8);reportCharts.segment=makeChart('cSegment','horizontalBar',segs.map(function(e){return e[0].substring(0,22);}), [{data:segs.map(function(e){return e[1];}),backgroundColor:'rgba(14,126,118,0.75)'}]);}
+  if(document.getElementById('cLevel')){var lvm={};allData.filter(isOp).forEach(function(x){var k=x.OpportunityLevel_KUTText||'(Not Set)';lvm[k]=(lvm[k]||0)+1;});var lvKeys=Object.keys(lvm);var lvColors=['#0a6ed1','#6c32a9','#e9730c','#64748b'];if(document.getElementById('levelLeg'))document.getElementById('levelLeg').innerHTML=lvKeys.map(function(k,i){return '<div class="leg-item"><div class="leg-dot" style="background:'+lvColors[i%lvColors.length]+'"></div>'+k.substring(0,22)+'</div>';}).join('');reportCharts.level=makeChart('cLevel','doughnut',lvKeys,[{data:lvKeys.map(function(k){return lvm[k];}),backgroundColor:lvColors}]);}
+  if(document.getElementById('cSopYear')){var soym={};allData.filter(isOp).forEach(function(x){if(x.ExpectedProcessingEndDate){var m=String(x.ExpectedProcessingEndDate).match(/\/Date\((\d+)\)\//);var dt=m?new Date(parseInt(m[1])):new Date(x.ExpectedProcessingEndDate);var yr=dt.getFullYear();if(yr>=new Date().getFullYear()){soym[yr]=(soym[yr]||0)+parseFloat(x.ExpectedRevenueAmount||0);}}});var soye=Object.entries(soym).sort(function(a,b){return a[0]-b[0];});reportCharts.sopYear=makeChart('cSopYear','bar',soye.map(function(e){return e[0];}), [{data:soye.map(function(e){return e[1];}),backgroundColor:SAP}]);}
 
   var sc=function(s){return s==='3'?'b-won':s==='5'?'b-lost':'b-open';};
   var st=function(s){return s==='3'?'Won':s==='5'?'Lost':'Open';};
