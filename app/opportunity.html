@@ -23,13 +23,8 @@
 *{margin:0;padding:0;box-sizing:border-box;}
 html{scroll-behavior:smooth;}
 body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased;}
-
-/* SHELL */
 .shell{background:var(--shell);height:50px;display:flex;align-items:center;padding:0 24px;gap:12px;position:sticky;top:0;z-index:200;}
 .shell-logo{display:flex;align-items:center;gap:8px;}
-.shell-logo-box{background:var(--blue);border-radius:5px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;}
-.shell-logo-box svg{width:14px;height:14px;}
-.shell-brand{font-size:0.82rem;font-weight:600;color:white;}
 .shell-div{width:1px;height:16px;background:rgba(255,255,255,0.15);}
 .shell-app{font-size:0.75rem;color:rgba(255,255,255,0.5);}
 .shell-right{margin-left:auto;display:flex;align-items:center;gap:12px;}
@@ -39,15 +34,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-h
 .shell-back{font-size:0.72rem;color:rgba(255,255,255,0.6);text-decoration:none;display:flex;align-items:center;gap:4px;padding:5px 10px;border:1px solid rgba(255,255,255,0.15);border-radius:6px;transition:all 0.15s;}
 .shell-back:hover{background:rgba(255,255,255,0.08);color:white;}
 .shell-back svg{width:12px;height:12px;}
-
-/* PAGE HEADER */
-.page-hdr{
-  background:white;border-bottom:1px solid var(--border);
-  padding:14px 24px;
-  display:flex;align-items:center;justify-content:space-between;
-  flex-wrap:wrap;gap:12px;
-}
-.page-hdr-left{}
+.page-hdr{background:white;border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
 .page-title{font-size:1.05rem;font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px;}
 .page-title svg{width:18px;height:18px;color:var(--blue);}
 .page-sub{font-size:0.72rem;color:var(--muted);margin-top:3px;}
@@ -57,59 +44,46 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-h
 .btn svg{width:13px;height:13px;}
 .btn-primary{background:var(--blue);color:white;border-color:var(--blue);}
 .btn-primary:hover{background:var(--blue2);}
-
-/* FILTER BAR */
-.filter-bar{
-  background:white;border-bottom:1px solid var(--border);
-  padding:10px 24px;
-  display:flex;gap:10px;flex-wrap:wrap;align-items:center;
-}
+.filter-bar{background:white;border-bottom:1px solid var(--border);padding:10px 24px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
 .filter-group{display:flex;align-items:center;gap:7px;}
 .filter-label{font-size:0.7rem;color:var(--muted);font-weight:500;white-space:nowrap;}
-select.fsel,input.finp{
-  background:white;color:var(--text);
-  border:1px solid var(--border2);
-  padding:5px 10px;border-radius:7px;
-  font-size:0.76rem;font-family:'Inter',sans-serif;
-  height:30px;cursor:pointer;
-  transition:border 0.15s,box-shadow 0.15s;
-}
+select.fsel,input.finp{background:white;color:var(--text);border:1px solid var(--border2);padding:5px 10px;border-radius:7px;font-size:0.76rem;font-family:'Inter',sans-serif;height:30px;cursor:pointer;transition:border 0.15s,box-shadow 0.15s;}
 select.fsel:focus,input.finp:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(10,110,209,0.1);}
 .filter-sep{width:1px;height:18px;background:var(--border);}
 .filter-live{display:flex;align-items:center;gap:5px;font-size:0.7rem;color:var(--muted);}
-
-/* KPI ROW */
-.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:0;border-bottom:1px solid var(--border);}
-.kpi{
-  background:white;padding:16px 20px;
-  border-right:1px solid var(--border);
-  position:relative;cursor:pointer;
-  transition:background 0.15s;
-}
+.kpi-row{display:grid;grid-template-columns:repeat(6,1fr);gap:0;border-bottom:1px solid var(--border);}
+.kpi{background:white;padding:16px 20px;border-right:1px solid var(--border);position:relative;cursor:pointer;transition:background 0.15s;}
 .kpi:last-child{border-right:none;}
 .kpi:hover{background:#fafcff;}
-.kpi-accent{position:absolute;bottom:0;left:0;right:0;height:2.5px;border-radius:0 0 0 0;}
+.kpi-accent{position:absolute;bottom:0;left:0;right:0;height:2.5px;}
 .kpi-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;}
 .kpi-icon svg{width:15px;height:15px;}
-.kpi-val{font-size:1.55rem;font-weight:300;line-height:1;color:var(--text);letter-spacing:-0.5px;}
-.kpi-label{font-size:0.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;font-weight:500;margin-top:5px;}
-.kpi-sub{font-size:0.68rem;color:var(--light);margin-top:3px;}
-
-/* CHART GRID */
-.chart-grid{padding:16px 20px;display:grid;gap:14px;}
+.kpi-val{font-size:1.45rem;font-weight:300;line-height:1;color:var(--text);letter-spacing:-0.5px;}
+.kpi-label{font-size:0.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;font-weight:500;margin-top:5px;}
+.kpi-sub{font-size:0.65rem;color:var(--light);margin-top:3px;}
+.section-hdr{padding:18px 24px 4px;display:flex;align-items:center;gap:8px;}
+.section-title{font-size:0.78rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+.section-title-bar{width:3px;height:14px;border-radius:2px;}
+.health-grid-wrap{padding:0 20px 16px;}
+.health-grid{background:var(--shell);border-radius:14px;padding:18px 20px;display:grid;grid-template-columns:repeat(6,1fr);gap:10px;}
+.health-tile{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:12px 14px;cursor:pointer;transition:background 0.15s,transform 0.1s;}
+.health-tile:hover{background:rgba(255,255,255,0.11);transform:translateY(-1px);}
+.health-tile.ht-green{border-color:rgba(34,197,94,0.3);}
+.health-tile.ht-red{border-color:rgba(239,68,68,0.3);}
+.health-tile.ht-orange{border-color:rgba(249,115,22,0.3);}
+.health-tile.ht-blue{border-color:rgba(59,130,246,0.3);}
+.health-num{font-size:1.5rem;font-weight:300;line-height:1;letter-spacing:-0.5px;}
+.health-num.hn-green{color:#4ade80;}
+.health-num.hn-red{color:#f87171;}
+.health-num.hn-orange{color:#fb923c;}
+.health-num.hn-blue{color:#60a5fa;}
+.health-lbl{font-size:0.62rem;color:rgba(255,255,255,0.5);margin-top:5px;line-height:1.3;}
+.chart-grid{padding:0 20px 14px;display:grid;gap:14px;}
 .cg-2{grid-template-columns:2fr 1fr;}
+.cg-2e{grid-template-columns:1fr 1fr;}
 .cg-3{grid-template-columns:1fr 1fr 1fr;}
-
-/* PANEL */
-.panel{
-  background:var(--card);border:1px solid var(--border);border-radius:12px;
-  overflow:hidden;box-shadow:var(--shadow-sm);
-}
-.panel-hdr{
-  padding:14px 16px;border-bottom:1px solid var(--border);
-  display:flex;align-items:center;justify-content:space-between;
-  background:white;
-}
+.panel{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow-sm);}
+.panel-hdr{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:white;}
 .panel-hdr-left{display:flex;align-items:center;gap:8px;}
 .panel-hdr-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;}
 .panel-hdr-icon svg{width:13px;height:13px;}
@@ -120,16 +94,12 @@ select.fsel:focus,input.finp:focus{outline:none;border-color:var(--blue);box-sha
 .tag-default{background:var(--bg);color:var(--muted);border:1px solid var(--border);}
 .panel-body{padding:14px 16px;}
 canvas{max-height:210px;}
-
-/* LEGEND */
 .leg{display:flex;flex-wrap:wrap;gap:10px;padding:8px 16px 12px;}
 .leg-item{display:flex;align-items:center;gap:5px;font-size:0.68rem;color:var(--muted);}
 .leg-dot{width:8px;height:8px;border-radius:3px;flex-shrink:0;}
-
-/* TABLE */
-.tbl-wrap{padding:0 20px 24px;}
+.tbl-wrap{padding:0 20px 16px;}
 .tbl-panel{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow-sm);}
-.tbl-hdr{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:white;}
+.tbl-hdr{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:white;flex-wrap:wrap;gap:8px;}
 .tbl-title{font-size:0.8rem;font-weight:600;color:var(--text);}
 .tbl-ct{font-size:0.68rem;color:var(--muted);background:var(--bg);padding:3px 9px;border:1px solid var(--border);border-radius:10px;}
 .tbl-scroll{overflow-x:auto;}
@@ -142,11 +112,12 @@ tbody tr:hover td{background:#f8fafc;}
 .b-won{background:var(--green-light);color:#166534;}
 .b-lost{background:var(--red-light);color:#991b1b;}
 .b-open{background:var(--blue-light);color:#1e40af;}
+.b-lv1{background:#eff6ff;color:#1e40af;}
+.b-lv2{background:#f3e8ff;color:#6b21a8;}
+.b-lv3{background:#fef9c3;color:#854d0e;}
 .c4c-link{color:var(--blue);text-decoration:none;font-size:0.68rem;display:flex;align-items:center;gap:3px;font-weight:500;}
 .c4c-link:hover{text-decoration:underline;}
 .c4c-link svg{width:10px;height:10px;}
-
-/* QUERY BUILDER */
 .qb-wrap{padding:0 20px 16px;}
 .qb-panel{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow-sm);}
 .qb-hdr{padding:12px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:background 0.15s;border-bottom:1px solid transparent;}
@@ -174,24 +145,10 @@ tbody tr:hover td{background:#f8fafc;}
 .btn-ai svg{width:14px;height:14px;}
 .qb-result{margin-top:12px;padding:12px 14px;background:#f8fafc;border-radius:8px;font-size:0.82rem;color:var(--text);line-height:1.75;border-left:3px solid var(--blue);min-height:40px;}
 .qb-result.ai-r{border-left-color:var(--purple);}
-
-/* RESPONSIVE */
-@media(max-width:900px){
-  .kpi-row{grid-template-columns:repeat(2,1fr);}
-  .kpi:nth-child(2){border-right:none;}
-  .kpi:nth-child(3){border-top:1px solid var(--border);}
-  .kpi:nth-child(4){border-top:1px solid var(--border);}
-  .kpi:nth-child(5){border-top:1px solid var(--border);}
-  .cg-2,.cg-3{grid-template-columns:1fr;}
-}
-@media(max-width:600px){
-  .kpi-row{grid-template-columns:1fr 1fr;}
-  .page-hdr{padding:12px 16px;}
-  .filter-bar{padding:8px 16px;}
-  .chart-grid{padding:12px 14px;}
-  .tbl-wrap,.qb-wrap{padding:0 14px 14px;}
-  .shell{padding:0 16px;}
-}
+.lv-badge{display:inline-block;padding:2px 7px;border-radius:8px;font-size:0.6rem;font-weight:600;white-space:nowrap;}
+@media(max-width:1100px){.health-grid{grid-template-columns:repeat(4,1fr);}.kpi-row{grid-template-columns:repeat(3,1fr);}.kpi:nth-child(3){border-right:none;}.kpi:nth-child(4),.kpi:nth-child(5),.kpi:nth-child(6){border-top:1px solid var(--border);}}
+@media(max-width:900px){.health-grid{grid-template-columns:repeat(3,1fr);}.kpi-row{grid-template-columns:repeat(2,1fr);}.kpi:nth-child(2){border-right:none;}.kpi:nth-child(3),.kpi:nth-child(4),.kpi:nth-child(5),.kpi:nth-child(6){border-top:1px solid var(--border);}.cg-2,.cg-2e,.cg-3{grid-template-columns:1fr;}}
+@media(max-width:600px){.health-grid{grid-template-columns:repeat(2,1fr);}.kpi-row{grid-template-columns:1fr 1fr;}.page-hdr{padding:12px 16px;}.filter-bar{padding:8px 16px;}.chart-grid,.health-grid-wrap,.tbl-wrap,.qb-wrap{padding-left:14px;padding-right:14px;}.shell{padding:0 16px;}}
 </style>
 </head>
 <body>
@@ -225,7 +182,7 @@ tbody tr:hover td{background:#f8fafc;}
 </div>
 
 <div class="page-hdr">
-  <div class="page-hdr-left">
+  <div>
     <div class="page-title">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3v18h18"/><path d="m7 16 4-4 4 4 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>
       Opportunity Report
@@ -257,63 +214,102 @@ tbody tr:hover td{background:#f8fafc;}
   <div class="filter-sep"></div>
   <div class="filter-group"><span class="filter-label">Status</span>
     <select class="fsel" id="fStatus" onchange="applyFilters()">
-      <option value="">All</option><option value="1">Open</option><option value="3">Won</option><option value="5">Lost</option>
+      <option value="">All</option><option value="open">Open</option><option value="3">Won</option><option value="5">Lost</option>
     </select>
   </div>
   <div class="filter-sep"></div>
   <div class="filter-group"><span class="filter-label">Phase</span><select class="fsel" id="fPhase" onchange="applyFilters()"><option value="">All Phases</option></select></div>
+  <div class="filter-sep"></div>
+  <div class="filter-group"><span class="filter-label">Opp Level</span><select class="fsel" id="fLevel" onchange="applyFilters()"><option value="">All Levels</option></select></div>
+  <div class="filter-sep"></div>
+  <div class="filter-group"><span class="filter-label">Business Segment</span><select class="fsel" id="fSegment" onchange="applyFilters()"><option value="">All Segments</option></select></div>
 </div>
 
-<div class="kpi-row" id="kpiRow">
-  <div class="kpi"><div class="kpi-icon" style="background:#eff6ff;"><svg viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="1.5"><path d="M3 3v18h18"/><path d="m7 16 4-4 4 4 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="kpi-val">—</div><div class="kpi-label">Total Opps</div><div class="kpi-accent" style="background:var(--blue)"></div></div>
-  <div class="kpi"><div class="kpi-icon" style="background:#fff7ed;"><svg viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="1.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div class="kpi-val">—</div><div class="kpi-label">Expected Revenue</div><div class="kpi-accent" style="background:var(--orange)"></div></div>
-  <div class="kpi"><div class="kpi-icon" style="background:#f0fdf4;"><svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="1.5"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div><div class="kpi-val">—</div><div class="kpi-label">Win Rate</div><div class="kpi-accent" style="background:var(--green)"></div></div>
-  <div class="kpi"><div class="kpi-icon" style="background:#fef2f2;"><svg viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="1.5"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg></div><div class="kpi-val">—</div><div class="kpi-label">Lost Deals</div><div class="kpi-accent" style="background:var(--red)"></div></div>
-  <div class="kpi"><div class="kpi-icon" style="background:#faf5ff;"><svg viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div class="kpi-val">—</div><div class="kpi-label">Open Pipeline</div><div class="kpi-accent" style="background:var(--purple)"></div></div>
+<div class="section-hdr"><div class="section-title-bar" style="background:var(--blue)"></div><span class="section-title">Pipeline Overview</span></div>
+<div class="kpi-row" id="kpiRow"></div>
+
+<div class="section-hdr"><div class="section-title-bar" style="background:var(--orange)"></div><span class="section-title">Pipeline Health Scorecard</span></div>
+<div class="health-grid-wrap">
+  <div class="health-grid" id="healthGrid"></div>
 </div>
 
+<div class="section-hdr"><div class="section-title-bar" style="background:var(--purple)"></div><span class="section-title">Customer &amp; SOP Analysis</span></div>
 <div class="chart-grid cg-2">
   <div class="panel">
     <div class="panel-hdr">
       <div class="panel-hdr-left">
-        <div class="panel-hdr-icon" style="background:#eff6ff;"><svg viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="1.5" width="13" height="13"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div>
-        <div><div class="panel-title">Expected Value by Sales Org</div><div class="panel-sub">Top 8 · USD</div></div>
+        <div class="panel-hdr-icon" style="background:#eff6ff;"><svg viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="1.5" width="13" height="13"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+        <div><div class="panel-title">Top 10 Customers by Expected Value</div><div class="panel-sub">Open pipeline · USD</div></div>
       </div>
       <span class="panel-tag tag-live">Live</span>
     </div>
-    <div class="panel-body"><canvas id="cOrg" role="img" aria-label="Revenue by sales org"></canvas></div>
+    <div class="panel-body"><canvas id="cCustomer" role="img" aria-label="Top customers"></canvas></div>
   </div>
   <div class="panel">
     <div class="panel-hdr">
       <div class="panel-hdr-left">
-        <div class="panel-hdr-icon" style="background:#f0fdf4;"><svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="1.5" width="13" height="13"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
-        <div><div class="panel-title">Win / Loss / Open</div><div class="panel-sub">Status distribution</div></div>
+        <div class="panel-hdr-icon" style="background:#faf5ff;"><svg viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="1.5" width="13" height="13"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+        <div><div class="panel-title">SOP by Year</div><div class="panel-sub">Pipeline value by closing year</div></div>
       </div>
-      <span class="panel-tag tag-default">Count</span>
+      <span class="panel-tag tag-default">Value</span>
     </div>
-    <div class="leg" id="donutLeg"></div>
-    <div class="panel-body"><canvas id="cDonut" role="img" aria-label="Win loss open distribution"></canvas></div>
+    <div class="panel-body"><canvas id="cSopYear" role="img" aria-label="SOP by year"></canvas></div>
   </div>
 </div>
 
+<div class="section-hdr"><div class="section-title-bar" style="background:var(--teal)"></div><span class="section-title">Phase &amp; Level Analysis</span></div>
 <div class="chart-grid cg-3">
   <div class="panel">
     <div class="panel-hdr">
       <div class="panel-hdr-left">
         <div class="panel-hdr-icon" style="background:#faf5ff;"><svg viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="1.5" width="13" height="13"><path d="M3 3v18h18"/><path d="M18 17V9M13 17V5M8 17v-3"/></svg></div>
-        <div><div class="panel-title">Opportunities by Phase</div><div class="panel-sub">Pipeline stages</div></div>
+        <div><div class="panel-title">TSS Buying Phase by Value</div><div class="panel-sub">Expected revenue per phase</div></div>
       </div>
     </div>
-    <div class="panel-body"><canvas id="cPhase" role="img" aria-label="By phase"></canvas></div>
+    <div class="panel-body"><canvas id="cPhaseVal" role="img" aria-label="Phase by value"></canvas></div>
+  </div>
+  <div class="panel">
+    <div class="panel-hdr">
+      <div class="panel-hdr-left">
+        <div class="panel-hdr-icon" style="background:#fff7ed;"><svg viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="1.5" width="13" height="13"><circle cx="12" cy="12" r="10"/><path d="M12 2v10l4.5 4.5"/></svg></div>
+        <div><div class="panel-title">Opportunity Level Breakdown</div><div class="panel-sub">Distribution by level</div></div>
+      </div>
+    </div>
+    <div class="leg" id="levelLeg"></div>
+    <div class="panel-body"><canvas id="cLevel" role="img" aria-label="Opp level breakdown"></canvas></div>
   </div>
   <div class="panel">
     <div class="panel-hdr">
       <div class="panel-hdr-left">
         <div class="panel-hdr-icon" style="background:#f0fdf4;"><svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="1.5" width="13" height="13"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/></svg></div>
-        <div><div class="panel-title">Win Rate by Sales Org</div><div class="panel-sub">% won of closed</div></div>
+        <div><div class="panel-title">Win Rate by Sales Org</div><div class="panel-sub">% won of closed deals</div></div>
       </div>
     </div>
     <div class="panel-body"><canvas id="cWin" role="img" aria-label="Win rate by org"></canvas></div>
+  </div>
+</div>
+
+<div class="section-hdr"><div class="section-title-bar" style="background:var(--green)"></div><span class="section-title">Segment &amp; Status Analysis</span></div>
+<div class="chart-grid cg-3">
+  <div class="panel">
+    <div class="panel-hdr">
+      <div class="panel-hdr-left">
+        <div class="panel-hdr-icon" style="background:#f0fdf4;"><svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="1.5" width="13" height="13"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg></div>
+        <div><div class="panel-title">Business Segment Pipeline</div><div class="panel-sub">Top 8 segments · Open opps</div></div>
+      </div>
+    </div>
+    <div class="panel-body"><canvas id="cSegment" role="img" aria-label="Business segment pipeline"></canvas></div>
+  </div>
+  <div class="panel">
+    <div class="panel-hdr">
+      <div class="panel-hdr-left">
+        <div class="panel-hdr-icon" style="background:#f0fdf4;"><svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="1.5" width="13" height="13"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <div><div class="panel-title">Win / Loss / Open Status</div><div class="panel-sub">Count distribution</div></div>
+      </div>
+      <span class="panel-tag tag-default">Count</span>
+    </div>
+    <div class="leg" id="donutLeg"></div>
+    <div class="panel-body"><canvas id="cDonut" role="img" aria-label="Win loss open distribution"></canvas></div>
   </div>
   <div class="panel">
     <div class="panel-hdr">
@@ -326,7 +322,8 @@ tbody tr:hover td{background:#f8fafc;}
   </div>
 </div>
 
-<div class="chart-grid cg-2" style="padding-bottom:4px;">
+<div class="section-hdr"><div class="section-title-bar" style="background:var(--red)"></div><span class="section-title">Loss Analysis &amp; Owner Pipeline</span></div>
+<div class="chart-grid cg-2e" style="padding-bottom:4px;">
   <div class="panel">
     <div class="panel-hdr">
       <div class="panel-hdr-left">
@@ -345,6 +342,38 @@ tbody tr:hover td{background:#f8fafc;}
       </div>
     </div>
     <div class="panel-body"><canvas id="cOwner" role="img" aria-label="Pipeline by owner"></canvas></div>
+  </div>
+</div>
+
+<div class="section-hdr"><div class="section-title-bar" style="background:var(--blue)"></div><span class="section-title">Top 10 Open Opportunities</span></div>
+<div class="tbl-wrap">
+  <div class="tbl-panel">
+    <div class="tbl-hdr">
+      <div class="tbl-title">Top 10 Open Opportunities by Value</div>
+      <span class="tbl-ct" id="top10Ct">—</span>
+    </div>
+    <div class="tbl-scroll">
+      <table>
+        <thead><tr><th>Expected Value</th><th>ID</th><th>Opportunity Name</th><th>Owner</th><th>Opp Level</th><th>SOP Date</th><th>TSS Buying Phase</th><th>Account ID</th><th>Account Name</th></tr></thead>
+        <tbody id="top10Body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="section-hdr"><div class="section-title-bar" style="background:var(--green)"></div><span class="section-title">Top 10 Won Opportunities</span></div>
+<div class="tbl-wrap">
+  <div class="tbl-panel">
+    <div class="tbl-hdr">
+      <div class="tbl-title">Top 10 Won Opportunities by Value</div>
+      <span class="tbl-ct" id="won10Ct">—</span>
+    </div>
+    <div class="tbl-scroll">
+      <table>
+        <thead><tr><th>Expected Value</th><th>ID</th><th>Opportunity Name</th><th>Owner</th><th>Account Name</th><th>Phase at Win</th><th>Probability</th></tr></thead>
+        <tbody id="won10Body"></tbody>
+      </table>
+    </div>
   </div>
 </div>
 
@@ -378,7 +407,8 @@ tbody tr:hover td{background:#f8fafc;}
   </div>
 </div>
 
-<div class="tbl-wrap">
+<div class="section-hdr"><div class="section-title-bar" style="background:var(--muted)"></div><span class="section-title">Full Opportunity List</span></div>
+<div class="tbl-wrap" style="padding-bottom:32px;">
   <div class="tbl-panel">
     <div class="tbl-hdr">
       <div class="tbl-title">Opportunity List</div>
@@ -386,7 +416,7 @@ tbody tr:hover td{background:#f8fafc;}
     </div>
     <div class="tbl-scroll">
       <table>
-        <thead><tr><th>ID</th><th>Opportunity</th><th>Account</th><th>Sales Org</th><th>Phase</th><th>Revenue</th><th>Status</th><th>Owner</th><th>Open in C4C</th></tr></thead>
+        <thead><tr><th>ID</th><th>Opportunity</th><th>Account</th><th>Sales Org</th><th>Phase</th><th>Opp Level</th><th>Revenue</th><th>Status</th><th>Owner</th><th>SOP Date</th><th>Open in C4C</th></tr></thead>
         <tbody id="tBody"></tbody>
       </table>
     </div>
@@ -394,27 +424,35 @@ tbody tr:hover td{background:#f8fafc;}
 </div>
 
 <script>
-var allData=[],filtered=[],charts={};
+var allData=[],filtered=[],charts={},healthFilter=null;
 var C4C_BASE='https://my352500.crm.ondemand.com/sap/public/byd/runtime?bo_ns=http://sap.com/thingTypes&bo=COD_GENERIC&node=Root&operation=OnExtInspect&OBNRedirect=X';
 var SAP=['#0a6ed1','#107e3e','#e9730c','#bb0000','#6c32a9','#0e7e76','#c2781f','#64748b','#1589ee','#0aaf67'];
+var today=new Date();today.setHours(0,0,0,0);
 
-var PREDEFINED=[
-  {label:'Top 5 Orgs by Revenue',fn:function(d){var m={};d.forEach(function(x){var k=(x.SalesOrganisationName||'?');m[k]=(m[k]||0)+parseFloat(x.ExpectedRevenueAmount||0);});return '<b>Top Sales Orgs — Expected Revenue:</b><br><br>'+Object.entries(m).sort(function(a,b){return b[1]-a[1];}).slice(0,5).map(function(e,i){return (i+1)+'. '+e[0]+': <b style="color:var(--blue)">'+fmt(e[1])+'</b>';}).join('<br>');}},
-  {label:'Win Rate by Org',fn:function(d){var m={};d.forEach(function(x){var k=x.SalesOrganisationName||'?';if(!m[k])m[k]={w:0,l:0};if(x.LifeCycleStatusCode=='3')m[k].w++;if(x.LifeCycleStatusCode=='5')m[k].l++;});return '<b>Win Rate by Org (min 3 closed):</b><br><br>'+Object.entries(m).filter(function(e){return e[1].w+e[1].l>=3;}).map(function(e){return{k:e[0],r:e[1].w/(e[1].w+e[1].l)*100,w:e[1].w,l:e[1].l};}).sort(function(a,b){return b.r-a.r;}).slice(0,8).map(function(e,i){return (i+1)+'. '+e.k+': <b style="color:var(--green)">'+e.r.toFixed(1)+'%</b> ('+e.w+'W / '+e.l+'L)';}).join('<br>');}},
-  {label:'Lost Deal Reasons',fn:function(d){var m={};d.filter(function(x){return x.LifeCycleStatusCode=='5';}).forEach(function(x){var k=x.ResultReasonCodeText||'No Reason';m[k]=(m[k]||0)+1;});return '<b>Top Loss Reasons:</b><br><br>'+Object.entries(m).sort(function(a,b){return b[1]-a[1];}).slice(0,6).map(function(e,i){return (i+1)+'. '+e[0]+': <b style="color:var(--red)">'+e[1]+' deals</b>';}).join('<br>');}},
-  {label:'Top 10 by Revenue',fn:function(d){return '<b>Top 10 Opportunities:</b><br><br>'+d.slice().sort(function(a,b){return parseFloat(b.ExpectedRevenueAmount||0)-parseFloat(a.ExpectedRevenueAmount||0);}).slice(0,10).map(function(x,i){return (i+1)+'. '+(x.Name||'—')+' — <b style="color:var(--blue)">'+fmt(parseFloat(x.ExpectedRevenueAmount||0))+'</b> ['+x.LifeCycleStatusCodeText+']';}).join('<br>');}},
-  {label:'Open Pipeline by Owner',fn:function(d){var m={};d.filter(function(x){return x.LifeCycleStatusCode=='1';}).forEach(function(x){var k=x.MainEmployeeResponsiblePartyName||'?';m[k]=(m[k]||0)+parseFloat(x.ExpectedRevenueAmount||0);});return '<b>Open Pipeline by Owner:</b><br><br>'+Object.entries(m).sort(function(a,b){return b[1]-a[1];}).slice(0,8).map(function(e,i){return (i+1)+'. '+e[0]+': <b style="color:var(--blue)">'+fmt(e[1])+'</b>';}).join('<br>');}},
-  {label:'Revenue Summary',fn:function(d){var won=d.filter(function(x){return x.LifeCycleStatusCode=='3';}),lost=d.filter(function(x){return x.LifeCycleStatusCode=='5';}),open=d.filter(function(x){return x.LifeCycleStatusCode=='1';});var wr=((won.length/(won.length+lost.length||1))*100).toFixed(1);return '<b>Revenue Summary:</b><br><br>Total Pipeline: <b style="color:var(--blue)">'+fmt(d.reduce(function(s,x){return s+parseFloat(x.ExpectedRevenueAmount||0);},0))+'</b><br>Won Revenue: <b style="color:var(--green)">'+fmt(won.reduce(function(s,x){return s+parseFloat(x.ExpectedRevenueAmount||0);},0))+'</b><br>Open: <b style="color:var(--blue)">'+fmt(open.reduce(function(s,x){return s+parseFloat(x.ExpectedRevenueAmount||0);},0))+'</b><br>Win Rate: <b style="color:var(--green)">'+wr+'%</b>';}},
-  {label:'Avg Deal Size by Phase',fn:function(d){var m={};d.forEach(function(x){var k=x.SalesCyclePhaseCodeText||'?';if(!m[k])m[k]={s:0,c:0};m[k].s+=parseFloat(x.ExpectedRevenueAmount||0);m[k].c++;});return '<b>Avg Deal Size by Phase:</b><br><br>'+Object.entries(m).sort(function(a,b){return(b[1].s/b[1].c)-(a[1].s/a[1].c);}).slice(0,6).map(function(e,i){return (i+1)+'. '+e[0]+': <b style="color:var(--blue)">'+fmt(e[1].s/e[1].c)+'</b> avg ('+e[1].c+' deals)';}).join('<br>');}},
-  {label:'New Opps This Year',fn:function(d){var yr=new Date().getFullYear().toString(),m={};d.filter(function(x){return x.CreationDate&&x.CreationDate.substring(0,4)==yr;}).forEach(function(x){var mo=x.CreationDate.substring(5,7);m[mo]=(m[mo]||0)+1;});var total=Object.values(m).reduce(function(s,v){return s+v;},0);return '<b>New Opps in '+yr+':</b> <b style="color:var(--blue)">'+total+'</b><br><br>'+(Object.entries(m).sort().map(function(e){return 'Month '+e[0]+': <b>'+e[1]+'</b>';}).join('<br>')||'No data yet');}}
-];
-
-function pd(v){if(!v)return'';var m=v.match?v.match(/\/Date\((\d+)\)\/$/):null;if(m)return new Date(parseInt(m[1])).toISOString().substring(0,10);return v;}
+function isOpen(x){return x.LifeCycleStatusCode==='1'||x.LifeCycleStatusCode==='2';}
+function pd(v){if(!v)return null;var m=String(v).match(/\/Date\((\d+)\)\//);if(m)return new Date(parseInt(m[1]));return v?new Date(v):null;}
+function pds(v){var d=pd(v);if(!d)return'';return d.toISOString().substring(0,10);}
 function fmt(n){n=parseFloat(n)||0;if(n>=1e6)return'$'+(n/1e6).toFixed(1)+'M';if(n>=1e3)return'$'+(n/1e3).toFixed(0)+'K';return'$'+n.toFixed(0);}
 function fmtN(n){n=parseFloat(n)||0;if(n>=1e6)return(n/1e6).toFixed(1)+'M';if(n>=1e3)return(n/1e3).toFixed(0)+'K';return n.toFixed(0);}
+function daysAgo(d){if(!d)return 9999;return Math.floor((today-d)/86400000);}
+function lvlBadge(t){if(!t)return'<span style="color:var(--light);font-size:0.65rem;">—</span>';var c=t.indexOf('3')>=0?'b-lv3':t.indexOf('2')>=0?'b-lv2':'b-lv1';return'<span class="badge '+c+'">'+t.replace('Level ','L').replace(' - ','·').substring(0,16)+'</span>';}
+
+var PREDEFINED=[
+  {label:'Top 5 Orgs by Revenue',fn:function(d){var m={};d.forEach(function(x){var k=x.SalesOrganisationName||'?';m[k]=(m[k]||0)+parseFloat(x.ExpectedRevenueAmount||0);});return'<b>Top Sales Orgs:</b><br><br>'+Object.entries(m).sort(function(a,b){return b[1]-a[1];}).slice(0,5).map(function(e,i){return(i+1)+'. '+e[0]+': <b style="color:var(--blue)">'+fmt(e[1])+'</b>';}).join('<br>');}},
+  {label:'Win Rate by Org',fn:function(d){var m={};d.forEach(function(x){var k=x.SalesOrganisationName||'?';if(!m[k])m[k]={w:0,l:0};if(x.LifeCycleStatusCode==='3')m[k].w++;if(x.LifeCycleStatusCode==='5')m[k].l++;});return'<b>Win Rate by Org:</b><br><br>'+Object.entries(m).filter(function(e){return e[1].w+e[1].l>=3;}).map(function(e){return{k:e[0],r:e[1].w/(e[1].w+e[1].l)*100,w:e[1].w,l:e[1].l};}).sort(function(a,b){return b.r-a.r;}).slice(0,8).map(function(e,i){return(i+1)+'. '+e.k+': <b style="color:var(--green)">'+e.r.toFixed(1)+'%</b> ('+e.w+'W/'+e.l+'L)';}).join('<br>');}},
+  {label:'Lost Deal Reasons',fn:function(d){var m={};d.filter(function(x){return x.LifeCycleStatusCode==='5';}).forEach(function(x){var k=x.ResultReasonCodeText||'No Reason';m[k]=(m[k]||0)+1;});return'<b>Top Loss Reasons:</b><br><br>'+Object.entries(m).sort(function(a,b){return b[1]-a[1];}).slice(0,6).map(function(e,i){return(i+1)+'. '+e[0]+': <b style="color:var(--red)">'+e[1]+' deals</b>';}).join('<br>');}},
+  {label:'Top 10 by Revenue',fn:function(d){return'<b>Top 10 Opportunities:</b><br><br>'+d.slice().sort(function(a,b){return parseFloat(b.ExpectedRevenueAmount||0)-parseFloat(a.ExpectedRevenueAmount||0);}).slice(0,10).map(function(x,i){return(i+1)+'. '+(x.Name||'—')+' — <b style="color:var(--blue)">'+fmt(parseFloat(x.ExpectedRevenueAmount||0))+'</b> ['+x.LifeCycleStatusCodeText+']';}).join('<br>');}},
+  {label:'Open Pipeline by Owner',fn:function(d){var m={};d.filter(isOpen).forEach(function(x){var k=x.MainEmployeeResponsiblePartyName||'?';m[k]=(m[k]||0)+parseFloat(x.ExpectedRevenueAmount||0);});return'<b>Open Pipeline by Owner:</b><br><br>'+Object.entries(m).sort(function(a,b){return b[1]-a[1];}).slice(0,8).map(function(e,i){return(i+1)+'. '+e[0]+': <b style="color:var(--blue)">'+fmt(e[1])+'</b>';}).join('<br>');}},
+  {label:'Revenue Summary',fn:function(d){var won=d.filter(function(x){return x.LifeCycleStatusCode==='3';}),lost=d.filter(function(x){return x.LifeCycleStatusCode==='5';}),open=d.filter(isOpen);var wr=((won.length/(won.length+lost.length||1))*100).toFixed(1);return'<b>Revenue Summary:</b><br><br>Total Pipeline: <b style="color:var(--blue)">'+fmt(d.reduce(function(s,x){return s+parseFloat(x.ExpectedRevenueAmount||0);},0))+'</b><br>Won Revenue: <b style="color:var(--green)">'+fmt(won.reduce(function(s,x){return s+parseFloat(x.ExpectedRevenueAmount||0);},0))+'</b><br>Open: <b style="color:var(--blue)">'+fmt(open.reduce(function(s,x){return s+parseFloat(x.ExpectedRevenueAmount||0);},0))+'</b><br>Win Rate: <b style="color:var(--green)">'+wr+'%</b>';}},
+  {label:'Avg Deal Size by Phase',fn:function(d){var m={};d.forEach(function(x){var k=x.SalesCyclePhaseCodeText||'?';if(!m[k])m[k]={s:0,c:0};m[k].s+=parseFloat(x.ExpectedRevenueAmount||0);m[k].c++;});return'<b>Avg Deal Size by Phase:</b><br><br>'+Object.entries(m).sort(function(a,b){return(b[1].s/b[1].c)-(a[1].s/a[1].c);}).slice(0,6).map(function(e,i){return(i+1)+'. '+e[0]+': <b style="color:var(--blue)">'+fmt(e[1].s/e[1].c)+'</b> avg ('+e[1].c+' deals)';}).join('<br>');}},
+  {label:'New Opps This Year',fn:function(d){var yr=new Date().getFullYear().toString(),m={};d.filter(function(x){return x.CreationDate&&x.CreationDate.substring(0,4)===yr;}).forEach(function(x){var mo=x.CreationDate.substring(5,7);m[mo]=(m[mo]||0)+1;});var total=Object.values(m).reduce(function(s,v){return s+v;},0);return'<b>New Opps in '+yr+':</b> <b style="color:var(--blue)">'+total+'</b><br><br>'+(Object.entries(m).sort().map(function(e){return'Month '+e[0]+': <b>'+e[1]+'</b>';}).join('<br>')||'No data yet');}},
+  {label:'Pipeline by Business Segment',fn:function(d){var m={};d.filter(isOpen).forEach(function(x){var k=x.BUS_SEG_CDE_KUTText||'(Not Set)';m[k]=(m[k]||0)+parseFloat(x.ExpectedRevenueAmount||0);});return'<b>Open Pipeline by Business Segment:</b><br><br>'+Object.entries(m).sort(function(a,b){return b[1]-a[1];}).slice(0,8).map(function(e,i){return(i+1)+'. '+e[0]+': <b style="color:var(--blue)">'+fmt(e[1])+'</b>';}).join('<br>');}},
+  {label:'Opp Level Distribution',fn:function(d){var m={};d.filter(isOpen).forEach(function(x){var k=x.OpportunityLevel_KUTText||'(Not Set)';m[k]=(m[k]||0)+1;});var total=d.filter(isOpen).length||1;return'<b>Open Opportunities by Level:</b><br><br>'+Object.entries(m).sort(function(a,b){return b[1]-a[1];}).map(function(e,i){return(i+1)+'. '+e[0]+': <b style="color:var(--purple)">'+e[1]+'</b> ('+((e[1]/total)*100).toFixed(1)+'%)';}).join('<br>');}},
+  {label:'Health Score Summary',fn:function(d){var openD=d.filter(isOpen);var t=openD.length;var stale90=openD.filter(function(x){return daysAgo(pd(x.LastChangeDate))>90;}).length;var sopPast=openD.filter(function(x){var s=pd(x.ExpectedProcessingEndDate);return s&&s<today;}).length;var noSup=openD.filter(function(x){return!x.ZHasSupplier_KUT;}).length;var noComp=openD.filter(function(x){return!x.ZHasCompetitor_KUT;}).length;var noSum=openD.filter(function(x){return!x.ZHasSummary_KUT;}).length;var zeroPct=openD.filter(function(x){return!x.ProbabilityPercent||parseFloat(x.ProbabilityPercent)===0;}).length;return'<b>Pipeline Health Summary:</b><br><br>Total Open: <b>'+t+'</b><br>Stale (90+ days): <b style="color:var(--red)">'+stale90+'</b> ('+((stale90/t||0)*100).toFixed(1)+'%)<br>SOP in Past: <b style="color:var(--red)">'+sopPast+'</b><br>No Supplier: <b style="color:var(--orange)">'+noSup+'</b><br>No Competitor: <b style="color:var(--orange)">'+noComp+'</b><br>No Summary: <b style="color:var(--orange)">'+noSum+'</b><br>Zero Probability: <b style="color:var(--red)">'+zeroPct+'</b>';}}
+];
 
 function toggleQB(){var b=document.getElementById('qbBody'),h=document.getElementById('qbHdr'),t=document.getElementById('qbToggle');b.classList.toggle('open');h.classList.toggle('open');t.textContent=b.classList.contains('open')?'Collapse ↑':'Expand ↓';}
-function buildChips(){document.getElementById('chips').innerHTML=PREDEFINED.map(function(q,i){return '<div class="chip" onclick="runChip('+i+')" id="chip'+i+'">'+q.label+'</div>';}).join('');}
+function buildChips(){document.getElementById('chips').innerHTML=PREDEFINED.map(function(q,i){return'<div class="chip" onclick="runChip('+i+')" id="chip'+i+'">'+q.label+'</div>';}).join('');}
 function runChip(i){document.querySelectorAll('.chip').forEach(function(c){c.classList.remove('active');});document.getElementById('chip'+i).classList.add('active');var o=document.getElementById('qbResult');o.className='qb-result';o.innerHTML=PREDEFINED[i].fn(filtered);}
 
 async function runAI(){
@@ -433,36 +471,121 @@ async function runAI(){
   btn.disabled=false;btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/><path d="M22 2 12 12"/><circle cx="22" cy="2" r="2" fill="currentColor"/></svg> Ask AI';
 }
 
-function buildSummary(d){var won=d.filter(function(x){return x.LifeCycleStatusCode=='3';}).length,lost=d.filter(function(x){return x.LifeCycleStatusCode=='5';}).length,open=d.filter(function(x){return x.LifeCycleStatusCode=='1';}).length;var rev=d.reduce(function(s,x){return s+parseFloat(x.ExpectedRevenueAmount||0);},0);var om={};d.forEach(function(x){var k=x.SalesOrganisationName||'?';om[k]=(om[k]||0)+parseFloat(x.ExpectedRevenueAmount||0);});return 'Total:'+d.length+' Won:'+won+' Lost:'+lost+' Open:'+open+' WinRate:'+((won/(won+lost||1))*100).toFixed(1)+'% Revenue:'+fmtN(rev)+' TopOrgs:'+Object.entries(om).sort(function(a,b){return b[1]-a[1];}).slice(0,5).map(function(e){return e[0]+':'+fmtN(e[1]);}).join(',');}
-function runLocal(q){var ql=q.toLowerCase();if(ql.indexOf('win')>=0)return PREDEFINED[1].fn(filtered);if(ql.indexOf('lost')>=0||ql.indexOf('reason')>=0)return PREDEFINED[2].fn(filtered);if(ql.indexOf('owner')>=0)return PREDEFINED[4].fn(filtered);return PREDEFINED[0].fn(filtered);}
+function buildSummary(d){
+  var won=d.filter(function(x){return x.LifeCycleStatusCode==='3';}).length;
+  var lost=d.filter(function(x){return x.LifeCycleStatusCode==='5';}).length;
+  var open=d.filter(isOpen).length;
+  var rev=d.reduce(function(s,x){return s+parseFloat(x.ExpectedRevenueAmount||0);},0);
+  var om={};d.forEach(function(x){var k=x.SalesOrganisationName||'?';om[k]=(om[k]||0)+parseFloat(x.ExpectedRevenueAmount||0);});
+  return'Total:'+d.length+' Won:'+won+' Lost:'+lost+' Open:'+open+' WinRate:'+((won/(won+lost||1))*100).toFixed(1)+'% Revenue:'+fmtN(rev)+' TopOrgs:'+Object.entries(om).sort(function(a,b){return b[1]-a[1];}).slice(0,5).map(function(e){return e[0]+':'+fmtN(e[1]);}).join(',');
+}
+function runLocal(q){var ql=q.toLowerCase();if(ql.indexOf('win')>=0)return PREDEFINED[1].fn(filtered);if(ql.indexOf('lost')>=0||ql.indexOf('reason')>=0)return PREDEFINED[2].fn(filtered);if(ql.indexOf('owner')>=0)return PREDEFINED[4].fn(filtered);if(ql.indexOf('segment')>=0)return PREDEFINED[8].fn(filtered);if(ql.indexOf('level')>=0)return PREDEFINED[9].fn(filtered);if(ql.indexOf('health')>=0)return PREDEFINED[10].fn(filtered);return PREDEFINED[0].fn(filtered);}
 
 function populateFilters(data){
   var orgs=[...new Set(data.map(function(d){return d.SalesOrganisationName;}).filter(Boolean))].sort();
   var phases=[...new Set(data.map(function(d){return d.SalesCyclePhaseCodeText;}).filter(Boolean))].sort();
+  var levels=[...new Set(data.map(function(d){return d.OpportunityLevel_KUTText;}).filter(Boolean))].sort();
+  var segs=[...new Set(data.map(function(d){return d.BUS_SEG_CDE_KUTText;}).filter(Boolean))].sort();
   orgs.forEach(function(o){var e=document.createElement('option');e.value=o;e.textContent=o;document.getElementById('fOrg').appendChild(e);});
   phases.forEach(function(p){var e=document.createElement('option');e.value=p;e.textContent=p;document.getElementById('fPhase').appendChild(e);});
+  levels.forEach(function(l){var e=document.createElement('option');e.value=l;e.textContent=l;document.getElementById('fLevel').appendChild(e);});
+  segs.forEach(function(s){var e=document.createElement('option');e.value=s;e.textContent=s;document.getElementById('fSegment').appendChild(e);});
 }
 
 function applyFilters(){
-  var org=document.getElementById('fOrg').value,status=document.getElementById('fStatus').value,phase=document.getElementById('fPhase').value;
-  filtered=allData.filter(function(d){if(org&&d.SalesOrganisationName!==org)return false;if(status&&d.LifeCycleStatusCode!==status)return false;if(phase&&d.SalesCyclePhaseCodeText!==phase)return false;return true;});
-  renderKPIs();renderCharts();renderTable();
+  healthFilter=null;
+  var org=document.getElementById('fOrg').value;
+  var status=document.getElementById('fStatus').value;
+  var phase=document.getElementById('fPhase').value;
+  var level=document.getElementById('fLevel').value;
+  var segment=document.getElementById('fSegment').value;
+  filtered=allData.filter(function(d){
+    if(org&&d.SalesOrganisationName!==org)return false;
+    if(status==='open'&&!isOpen(d))return false;
+    if(status==='3'&&d.LifeCycleStatusCode!=='3')return false;
+    if(status==='5'&&d.LifeCycleStatusCode!=='5')return false;
+    if(phase&&d.SalesCyclePhaseCodeText!==phase)return false;
+    if(level&&d.OpportunityLevel_KUTText!==level)return false;
+    if(segment&&d.BUS_SEG_CDE_KUTText!==segment)return false;
+    return true;
+  });
+  renderKPIs();renderHealth();renderCharts();renderTop10();renderWon10();renderTable();
 }
 
 function renderKPIs(){
-  var d=filtered,total=d.length;
-  var won=d.filter(function(x){return x.LifeCycleStatusCode=='3';}).length;
-  var lost=d.filter(function(x){return x.LifeCycleStatusCode=='5';}).length;
-  var open=d.filter(function(x){return x.LifeCycleStatusCode=='1';}).length;
-  var rev=d.reduce(function(s,x){return s+parseFloat(x.ExpectedRevenueAmount||0);},0);
-  var wr=(won+lost)>0?((won/(won+lost))*100).toFixed(1):'0.0';
-  var orgs=[...new Set(d.map(function(x){return x.SalesOrganisationID;}).filter(Boolean))].length;
-  document.getElementById('kpiRow').innerHTML=
-    '<div class="kpi"><div class="kpi-icon" style="background:#eff6ff;"><svg viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="1.5" width="15" height="15"><path d="M3 3v18h18"/><path d="m7 16 4-4 4 4 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="kpi-val">'+total.toLocaleString()+'</div><div class="kpi-label">Total Opps</div><div class="kpi-sub">'+orgs+' sales orgs</div><div class="kpi-accent" style="background:var(--blue)"></div></div>'+
-    '<div class="kpi"><div class="kpi-icon" style="background:#fff7ed;"><svg viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="1.5" width="15" height="15"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div class="kpi-val">'+fmt(rev)+'</div><div class="kpi-label">Expected Revenue</div><div class="kpi-sub">pipeline value</div><div class="kpi-accent" style="background:var(--orange)"></div></div>'+
-    '<div class="kpi"><div class="kpi-icon" style="background:#f0fdf4;"><svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="1.5" width="15" height="15"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div><div class="kpi-val">'+wr+'%</div><div class="kpi-label">Win Rate</div><div class="kpi-sub">'+won+' won · '+lost+' lost</div><div class="kpi-accent" style="background:var(--green)"></div></div>'+
-    '<div class="kpi"><div class="kpi-icon" style="background:#fef2f2;"><svg viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="1.5" width="15" height="15"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg></div><div class="kpi-val">'+lost+'</div><div class="kpi-label">Lost Deals</div><div class="kpi-sub">'+((lost/(total||1))*100).toFixed(1)+'% of total</div><div class="kpi-accent" style="background:var(--red)"></div></div>'+
-    '<div class="kpi" style="border-right:none;"><div class="kpi-icon" style="background:#faf5ff;"><svg viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="1.5" width="15" height="15"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div class="kpi-val">'+open+'</div><div class="kpi-label">Open Pipeline</div><div class="kpi-sub">active deals</div><div class="kpi-accent" style="background:var(--purple)"></div></div>';
+  var d=filtered;
+  var now12=new Date(today);now12.setFullYear(now12.getFullYear()-1);
+  var next12=new Date(today);next12.setFullYear(next12.getFullYear()+1);
+  var yr=today.getFullYear();
+  var openV=d.filter(isOpen).reduce(function(s,x){return s+parseFloat(x.ExpectedRevenueAmount||0);},0);
+  var r12new=d.filter(function(x){var cd=pd(x.CreationDate||x.CreationDate);if(!cd)return false;return cd>=now12;}).reduce(function(s,x){return s+parseFloat(x.ExpectedRevenueAmount||0);},0);
+  var r12won=d.filter(function(x){if(x.LifeCycleStatusCode!=='3')return false;var cd=pd(x.CreationDate);return cd&&cd>=now12;}).reduce(function(s,x){return s+parseFloat(x.ExpectedRevenueAmount||0);},0);
+  var r12lost=d.filter(function(x){if(x.LifeCycleStatusCode!=='5')return false;var cd=pd(x.CreationDate);return cd&&cd>=now12;}).reduce(function(s,x){return s+parseFloat(x.ExpectedRevenueAmount||0);},0);
+  var sopN12=d.filter(function(x){if(!isOpen(x))return false;var s=pd(x.ExpectedProcessingEndDate);return s&&s>=today&&s<=next12;}).reduce(function(s,x){return s+parseFloat(x.ExpectedRevenueAmount||0);},0);
+  var cyrCt=d.filter(function(x){if(!x.CreationDate)return false;return parseInt(x.CreationDate.substring(0,4))===yr;}).length;
+  var kpis=[
+    {val:fmt(openV),lbl:'Open Pipeline Value',sub:'Active opportunities',bg:'#eff6ff',ic:'#3b82f6',accent:'var(--blue)',svg:'<path d="M3 3v18h18"/><path d="m7 16 4-4 4 4 4-4" stroke-linecap="round" stroke-linejoin="round"/>'},
+    {val:fmt(r12new),lbl:'R12 New Opp Value',sub:'Created last 12 months',bg:'#fff7ed',ic:'#f97316',accent:'var(--orange)',svg:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>'},
+    {val:fmt(r12won),lbl:'R12 Won Value',sub:'Won in last 12 months',bg:'#f0fdf4',ic:'#22c55e',accent:'var(--green)',svg:'<polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>'},
+    {val:fmt(r12lost),lbl:'R12 Lost Value',sub:'Lost in last 12 months',bg:'#fef2f2',ic:'#ef4444',accent:'var(--red)',svg:'<polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/>'},
+    {val:fmt(sopN12),lbl:'SOP Next 12 Months',sub:'Expected closings',bg:'#faf5ff',ic:'#a855f7',accent:'var(--purple)',svg:'<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>'},
+    {val:cyrCt.toLocaleString(),lbl:'Created This Year',sub:yr+' year to date',bg:'#f0fdfa',ic:'#14b8a6',accent:'var(--teal)',svg:'<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>'}
+  ];
+  document.getElementById('kpiRow').innerHTML=kpis.map(function(k,i){
+    return'<div class="kpi">'+'<div class="kpi-icon" style="background:'+k.bg+';"><svg viewBox="0 0 24 24" fill="none" stroke="'+k.ic+'" stroke-width="1.5" width="15" height="15">'+k.svg+'</svg></div>'+'<div class="kpi-val">'+k.val+'</div>'+'<div class="kpi-label">'+k.lbl+'</div>'+'<div class="kpi-sub">'+k.sub+'</div>'+'<div class="kpi-accent" style="background:'+k.accent+'"></div>'+'</div>';
+  }).join('');
+}
+
+function renderHealth(){
+  var d=filtered;
+  var openD=d.filter(isOpen);
+  var t=openD.length;
+  var upd90=openD.filter(function(x){return daysAgo(pd(x.LastChangeDate))<=90;}).length;
+  var stale90=openD.filter(function(x){return daysAgo(pd(x.LastChangeDate))>90;}).length;
+  var sopPast=openD.filter(function(x){var s=pd(x.ExpectedProcessingEndDate);return s&&s<today;}).length;
+  var noSup=openD.filter(function(x){return!x.ZHasSupplier_KUT;}).length;
+  var noComp=openD.filter(function(x){return!x.ZHasCompetitor_KUT;}).length;
+  var noSum=openD.filter(function(x){return!x.ZHasSummary_KUT;}).length;
+  var phStale=openD.filter(function(x){return daysAgo(pd(x.SalesCyclePhaseStartDate))>90;}).length;
+  var awStale=openD.filter(function(x){return x.SalesCyclePhaseCode==='1'&&daysAgo(pd(x.SalesCyclePhaseStartDate))>90;}).length;
+  var zeroPct=openD.filter(function(x){return!x.ProbabilityPercent||parseFloat(x.ProbabilityPercent)===0;}).length;
+  var hi85=openD.filter(function(x){return parseFloat(x.ProbabilityPercent||0)>=85;}).length;
+
+  var tiles=[
+    {n:t,lbl:'Total Open Opps',c:'blue',filter:'total'},
+    {n:upd90,lbl:'Updated Last 90 Days',c:'green',filter:'upd90'},
+    {n:stale90,lbl:'Stale 90+ Days',c:'red',filter:'stale90'},
+    {n:sopPast,lbl:'SOP in Past',c:'red',filter:'sopPast'},
+    {n:noSup,lbl:'Without Supplier',c:'orange',filter:'noSup'},
+    {n:noComp,lbl:'Without Competitor',c:'orange',filter:'noComp'},
+    {n:noSum,lbl:'Without Summary',c:'orange',filter:'noSum'},
+    {n:phStale,lbl:'Stale Phase 90+ Days',c:'orange',filter:'phStale'},
+    {n:awStale,lbl:'Awareness Stale 3M',c:'orange',filter:'awStale'},
+    {n:zeroPct,lbl:'Zero Probability',c:'red',filter:'zeroPct'},
+    {n:hi85,lbl:'High Probability ≥85%',c:'green',filter:'hi85'}
+  ];
+  document.getElementById('healthGrid').innerHTML=tiles.map(function(tile){
+    return'<div class="health-tile ht-'+tile.c+'" onclick="filterByHealth(\''+tile.filter+'\')">'+'<div class="health-num hn-'+tile.c+'">'+tile.n+'</div>'+'<div class="health-lbl">'+tile.lbl+'</div>'+'</div>';
+  }).join('');
+}
+
+function filterByHealth(type){
+  var openD=filtered.filter(isOpen);
+  var sub;
+  if(type==='total')sub=openD;
+  else if(type==='upd90')sub=openD.filter(function(x){return daysAgo(pd(x.LastChangeDate))<=90;});
+  else if(type==='stale90')sub=openD.filter(function(x){return daysAgo(pd(x.LastChangeDate))>90;});
+  else if(type==='sopPast')sub=openD.filter(function(x){var s=pd(x.ExpectedProcessingEndDate);return s&&s<today;});
+  else if(type==='noSup')sub=openD.filter(function(x){return!x.ZHasSupplier_KUT;});
+  else if(type==='noComp')sub=openD.filter(function(x){return!x.ZHasCompetitor_KUT;});
+  else if(type==='noSum')sub=openD.filter(function(x){return!x.ZHasSummary_KUT;});
+  else if(type==='phStale')sub=openD.filter(function(x){return daysAgo(pd(x.SalesCyclePhaseStartDate))>90;});
+  else if(type==='awStale')sub=openD.filter(function(x){return x.SalesCyclePhaseCode==='1'&&daysAgo(pd(x.SalesCyclePhaseStartDate))>90;});
+  else if(type==='zeroPct')sub=openD.filter(function(x){return!x.ProbabilityPercent||parseFloat(x.ProbabilityPercent)===0;});
+  else if(type==='hi85')sub=openD.filter(function(x){return parseFloat(x.ProbabilityPercent||0)>=85;});
+  else sub=openD;
+  renderTableData(sub,'tBody','tblCt');
+  document.getElementById('tBody').closest('.tbl-wrap').scrollIntoView({behavior:'smooth',block:'start'});
 }
 
 function destroyCharts(){Object.values(charts).forEach(function(c){c.destroy();});charts={};}
@@ -470,61 +593,117 @@ function destroyCharts(){Object.values(charts).forEach(function(c){c.destroy();}
 function renderCharts(){
   destroyCharts();
   var d=filtered,gc='#f1f5f9',tc='#94a3b8';
+  var openD=d.filter(isOpen);
 
-  var om={};d.forEach(function(x){var o=(x.SalesOrganisationName||'?').replace(/TSS\s*/,'');om[o]=(om[o]||0)+parseFloat(x.ExpectedRevenueAmount||0);});
-  var os=Object.entries(om).sort(function(a,b){return b[1]-a[1];}).slice(0,8);
-  charts.org=new Chart(document.getElementById('cOrg'),{type:'bar',data:{labels:os.map(function(e){return e[0];}),datasets:[{data:os.map(function(e){return e[1];}),backgroundColor:SAP,borderRadius:4,borderSkipped:false}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return' '+fmt(c.raw);}}}},scales:{x:{ticks:{color:tc,font:{size:9}},grid:{color:gc}},y:{ticks:{color:tc,callback:function(v){return fmtN(v);}},grid:{color:gc}}}}});
+  var cm={};openD.forEach(function(x){var k=x.ProspectPartyName||'(Unknown)';cm[k]=(cm[k]||0)+parseFloat(x.ExpectedRevenueAmount||0);});
+  var cs=Object.entries(cm).sort(function(a,b){return b[1]-a[1];}).slice(0,10);
+  charts.customer=new Chart(document.getElementById('cCustomer'),{type:'bar',data:{labels:cs.map(function(e){return e[0].substring(0,28);}),datasets:[{data:cs.map(function(e){return e[1];}),backgroundColor:SAP,borderRadius:4,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return' '+fmt(c.raw);}}}},scales:{x:{ticks:{color:tc,callback:function(v){return fmtN(v);}},grid:{color:gc}},y:{ticks:{color:tc,font:{size:9}},grid:{display:false}}}}});
 
-  var won=d.filter(function(x){return x.LifeCycleStatusCode=='3';}).length;
-  var lost=d.filter(function(x){return x.LifeCycleStatusCode=='5';}).length;
-  var open=d.filter(function(x){return x.LifeCycleStatusCode=='1';}).length;
-  var dColors=['#22c55e','#ef4444','#3b82f6'];
-  var dTotal=won+lost+open;
-  document.getElementById('donutLeg').innerHTML=['Won','Lost','Open'].map(function(l,i){return '<div class="leg-item"><div class="leg-dot" style="background:'+dColors[i]+'"></div>'+l+' '+(([won,lost,open][i]/dTotal*100)||0).toFixed(1)+'%</div>';}).join('');
-  charts.donut=new Chart(document.getElementById('cDonut'),{type:'doughnut',data:{labels:['Won','Lost','Open'],datasets:[{data:[won,lost,open],backgroundColor:dColors,borderWidth:3,borderColor:'white',hoverOffset:5}]},options:{responsive:true,cutout:'68%',plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return' '+(c.raw/dTotal*100).toFixed(1)+'% ('+c.raw+')';}}}}}}); 
+  var soy={};openD.forEach(function(x){var s=pd(x.ExpectedProcessingEndDate);if(!s)return;var yr=s.getFullYear();soy[yr]=(soy[yr]||0)+parseFloat(x.ExpectedRevenueAmount||0);});
+  var soye=Object.entries(soy).sort(function(a,b){return a[0]-b[0];});
+  charts.sopYear=new Chart(document.getElementById('cSopYear'),{type:'bar',data:{labels:soye.map(function(e){return e[0];}),datasets:[{data:soye.map(function(e){return e[1];}),backgroundColor:'rgba(108,50,169,0.75)',borderRadius:4,borderSkipped:false}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return' '+fmt(c.raw);}}}},scales:{x:{ticks:{color:tc,font:{size:9}},grid:{color:gc}},y:{ticks:{color:tc,callback:function(v){return fmtN(v);}},grid:{color:gc}}}}});
 
-  var pm={};d.forEach(function(x){var p=(x.SalesCyclePhaseCodeText||'?').replace(/^\d+\s/,'').substring(0,22);pm[p]=(pm[p]||0)+1;});
-  var ps=Object.entries(pm).sort(function(a,b){return b[1]-a[1];});
-  charts.phase=new Chart(document.getElementById('cPhase'),{type:'bar',data:{labels:ps.map(function(e){return e[0];}),datasets:[{data:ps.map(function(e){return e[1];}),backgroundColor:'rgba(168,85,247,0.75)',borderRadius:4,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:tc},grid:{color:gc}},y:{ticks:{color:tc,font:{size:9}},grid:{color:gc}}}}});
+  var pvm={};d.forEach(function(x){var p=x.SalesCyclePhaseCodeText||'?';pvm[p]=(pvm[p]||0)+parseFloat(x.ExpectedRevenueAmount||0);});
+  var pvs=Object.entries(pvm).sort(function(a,b){return b[1]-a[1];});
+  charts.phaseVal=new Chart(document.getElementById('cPhaseVal'),{type:'bar',data:{labels:pvs.map(function(e){return e[0].substring(0,22);}),datasets:[{data:pvs.map(function(e){return e[1];}),backgroundColor:'rgba(168,85,247,0.75)',borderRadius:4,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return' '+fmt(c.raw);}}}},scales:{x:{ticks:{color:tc,callback:function(v){return fmtN(v);}},grid:{color:gc}},y:{ticks:{color:tc,font:{size:9}},grid:{display:false}}}}});
 
-  var wm={};d.forEach(function(x){var k=(x.SalesOrganisationName||'?').replace(/TSS\s*/,'');if(!wm[k])wm[k]={w:0,l:0};if(x.LifeCycleStatusCode=='3')wm[k].w++;if(x.LifeCycleStatusCode=='5')wm[k].l++;});
+  var lvm={};d.filter(isOpen).forEach(function(x){var k=x.OpportunityLevel_KUTText||'(Not Set)';lvm[k]=(lvm[k]||0)+1;});
+  var lvKeys=Object.keys(lvm);var lvColors=['#0a6ed1','#6c32a9','#e9730c','#64748b'];
+  var lvTotal=Object.values(lvm).reduce(function(s,v){return s+v;},0);
+  document.getElementById('levelLeg').innerHTML=lvKeys.map(function(k,i){return'<div class="leg-item"><div class="leg-dot" style="background:'+lvColors[i%lvColors.length]+'"></div>'+k.substring(0,22)+' '+(((lvm[k]||0)/lvTotal*100)||0).toFixed(1)+'%</div>';}).join('');
+  charts.level=new Chart(document.getElementById('cLevel'),{type:'doughnut',data:{labels:lvKeys,datasets:[{data:lvKeys.map(function(k){return lvm[k];}),backgroundColor:lvColors,borderWidth:3,borderColor:'white',hoverOffset:5}]},options:{responsive:true,cutout:'65%',plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return' '+(c.raw/lvTotal*100).toFixed(1)+'% ('+c.raw+')';}}}}}});
+
+  var wm={};d.forEach(function(x){var k=(x.SalesOrganisationName||'?').replace(/TSS\s*/,'');if(!wm[k])wm[k]={w:0,l:0};if(x.LifeCycleStatusCode==='3')wm[k].w++;if(x.LifeCycleStatusCode==='5')wm[k].l++;});
   var ws=Object.entries(wm).filter(function(e){return e[1].w+e[1].l>=3;}).map(function(e){return{k:e[0],r:e[1].w/(e[1].w+e[1].l)*100};}).sort(function(a,b){return b.r-a.r;}).slice(0,8);
   charts.win=new Chart(document.getElementById('cWin'),{type:'bar',data:{labels:ws.map(function(e){return e.k;}),datasets:[{data:ws.map(function(e){return e.r;}),backgroundColor:ws.map(function(e){return e.r>=30?'#22c55e':e.r>=20?'#3b82f6':'#f97316';}),borderRadius:4,borderSkipped:false}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return' '+c.raw.toFixed(1)+'%';}}}},scales:{x:{ticks:{color:tc,font:{size:9}},grid:{color:gc}},y:{ticks:{color:tc,callback:function(v){return v+'%';}},grid:{color:gc},max:100}}}});
+
+  var sm={};openD.forEach(function(x){var k=x.BUS_SEG_CDE_KUTText||'(Not Set)';sm[k]=(sm[k]||0)+parseFloat(x.ExpectedRevenueAmount||0);});
+  var ss=Object.entries(sm).sort(function(a,b){return b[1]-a[1];}).slice(0,8);
+  charts.segment=new Chart(document.getElementById('cSegment'),{type:'bar',data:{labels:ss.map(function(e){return e[0].substring(0,20);}),datasets:[{data:ss.map(function(e){return e[1];}),backgroundColor:'rgba(14,126,118,0.75)',borderRadius:4,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return' '+fmt(c.raw);}}}},scales:{x:{ticks:{color:tc,callback:function(v){return fmtN(v);}},grid:{color:gc}},y:{ticks:{color:tc,font:{size:9}},grid:{display:false}}}}});
+
+  var won=d.filter(function(x){return x.LifeCycleStatusCode==='3';}).length;
+  var lost=d.filter(function(x){return x.LifeCycleStatusCode==='5';}).length;
+  var open=openD.length;
+  var dColors=['#22c55e','#ef4444','#3b82f6'];
+  var dTotal=won+lost+open||1;
+  document.getElementById('donutLeg').innerHTML=['Won','Lost','Open'].map(function(l,i){return'<div class="leg-item"><div class="leg-dot" style="background:'+dColors[i]+'"></div>'+l+' '+(([won,lost,open][i]/dTotal*100).toFixed(1))+'%</div>';}).join('');
+  charts.donut=new Chart(document.getElementById('cDonut'),{type:'doughnut',data:{labels:['Won','Lost','Open'],datasets:[{data:[won,lost,open],backgroundColor:dColors,borderWidth:3,borderColor:'white',hoverOffset:5}]},options:{responsive:true,cutout:'68%',plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return' '+(c.raw/dTotal*100).toFixed(1)+'% ('+c.raw+')';}}}}}});
 
   var tm={};d.forEach(function(x){if(x.CreationDate){var m=x.CreationDate.substring(0,7);if(!tm[m])tm[m]=0;tm[m]+=parseFloat(x.ExpectedRevenueAmount||0);}});
   var tms=Object.keys(tm).sort().slice(-12);
   charts.trend=new Chart(document.getElementById('cTrend'),{type:'line',data:{labels:tms,datasets:[{data:tms.map(function(m){return tm[m];}),borderColor:'#f97316',backgroundColor:'rgba(249,115,22,0.06)',tension:0.4,fill:true,pointBackgroundColor:'#f97316',pointRadius:3,pointHoverRadius:5}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:tc,font:{size:8}},grid:{color:gc}},y:{ticks:{color:tc,callback:function(v){return fmtN(v);}},grid:{color:gc}}}}});
 
-  var rm={};d.filter(function(x){return x.LifeCycleStatusCode=='5';}).forEach(function(x){var k=x.ResultReasonCodeText||'(Null)';rm[k]=(rm[k]||0)+1;});
+  var rm={};d.filter(function(x){return x.LifeCycleStatusCode==='5';}).forEach(function(x){var k=x.ResultReasonCodeText||'(Null)';rm[k]=(rm[k]||0)+1;});
   var rs=Object.entries(rm).sort(function(a,b){return b[1]-a[1];}).slice(0,6);
-  var rTotal=rs.reduce(function(s,e){return s+e[1];},0);
-  document.getElementById('reasonLeg').innerHTML=rs.map(function(e,i){return '<div class="leg-item"><div class="leg-dot" style="background:'+SAP[i]+'"></div>'+e[0].substring(0,18)+' '+(e[1]/rTotal*100).toFixed(1)+'%</div>';}).join('');
+  var rTotal=rs.reduce(function(s,e){return s+e[1];},0)||1;
+  document.getElementById('reasonLeg').innerHTML=rs.map(function(e,i){return'<div class="leg-item"><div class="leg-dot" style="background:'+SAP[i]+'"></div>'+e[0].substring(0,18)+' '+(e[1]/rTotal*100).toFixed(1)+'%</div>';}).join('');
   charts.reason=new Chart(document.getElementById('cReason'),{type:'doughnut',data:{labels:rs.map(function(e){return e[0].substring(0,18);}),datasets:[{data:rs.map(function(e){return e[1];}),backgroundColor:SAP,borderWidth:3,borderColor:'white',hoverOffset:5}]},options:{responsive:true,cutout:'60%',plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return' '+(c.raw/rTotal*100).toFixed(1)+'%';}}}}}});
 
-  var oo={};d.filter(function(x){return x.LifeCycleStatusCode=='1';}).forEach(function(x){var k=x.MainEmployeeResponsiblePartyName||'?';oo[k]=(oo[k]||0)+parseFloat(x.ExpectedRevenueAmount||0);});
+  var oo={};openD.forEach(function(x){var k=x.MainEmployeeResponsiblePartyName||'?';oo[k]=(oo[k]||0)+parseFloat(x.ExpectedRevenueAmount||0);});
   var ooe=Object.entries(oo).sort(function(a,b){return b[1]-a[1];}).slice(0,8);
-  charts.owner=new Chart(document.getElementById('cOwner'),{type:'bar',data:{labels:ooe.map(function(e){return e[0].split(' ').slice(-1)[0];}),datasets:[{data:ooe.map(function(e){return e[1];}),backgroundColor:'rgba(99,102,241,0.75)',borderRadius:4,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return' '+fmt(c.raw);}}}},scales:{x:{ticks:{color:tc,callback:function(v){return fmtN(v);}},grid:{color:gc}},y:{ticks:{color:tc,font:{size:9}},grid:{color:gc}}}}});
+  charts.owner=new Chart(document.getElementById('cOwner'),{type:'bar',data:{labels:ooe.map(function(e){return e[0].split(' ').slice(-1)[0];}),datasets:[{data:ooe.map(function(e){return e[1];}),backgroundColor:'rgba(99,102,241,0.75)',borderRadius:4,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return' '+fmt(c.raw);}}}},scales:{x:{ticks:{color:tc,callback:function(v){return fmtN(v);}},grid:{color:gc}},y:{ticks:{color:tc,font:{size:9}},grid:{display:false}}}}});
 }
 
-function renderTable(){
-  var sc=function(s){return s=='3'?'b-won':s=='5'?'b-lost':'b-open';};
-  var st=function(s){return s=='3'?'Won':s=='5'?'Lost':'Open';};
-  document.getElementById('tblCt').textContent='Showing '+Math.min(filtered.length,50)+' of '+filtered.length.toLocaleString();
-  document.getElementById('tBody').innerHTML=filtered.slice(0,50).map(function(row){
+function renderTop10(){
+  var openD=filtered.filter(isOpen).slice().sort(function(a,b){return parseFloat(b.ExpectedRevenueAmount||0)-parseFloat(a.ExpectedRevenueAmount||0);}).slice(0,10);
+  document.getElementById('top10Ct').textContent='Top '+openD.length+' of '+filtered.filter(isOpen).length+' open';
+  document.getElementById('top10Body').innerHTML=openD.map(function(row){
     var link=C4C_BASE+'&param.InternalID='+row.ID+'&param.Type=COD_OPPORTUNITY_THINGTYPE';
-    return '<tr>'+
+    return'<tr>'+
+      '<td style="font-weight:600;color:var(--blue)">'+fmt(parseFloat(row.ExpectedRevenueAmount||0))+'</td>'+
+      '<td style="color:var(--muted);font-family:monospace;font-size:0.68rem"><a class="c4c-link" href="'+link+'" target="_blank">'+row.ID+' <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 2h3v3M10 2 5 7M4 3H2v7h7V8"/></svg></a></td>'+
+      '<td style="font-weight:500;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+(row.Name||'—')+'</td>'+
+      '<td style="color:var(--muted);font-size:0.72rem">'+(row.MainEmployeeResponsiblePartyName||'—')+'</td>'+
+      '<td>'+lvlBadge(row.OpportunityLevel_KUTText)+'</td>'+
+      '<td style="color:var(--muted);font-size:0.72rem">'+pds(row.ExpectedProcessingEndDate)+'</td>'+
+      '<td style="color:var(--muted);font-size:0.72rem">'+(row.SalesCyclePhaseCodeText||'—')+'</td>'+
+      '<td style="color:var(--muted);font-family:monospace;font-size:0.68rem">'+(row.ProspectPartyID||'—')+'</td>'+
+      '<td style="color:var(--muted)">'+(row.ProspectPartyName||'—')+'</td>'+
+      '</tr>';
+  }).join('');
+}
+
+function renderWon10(){
+  var wonD=filtered.filter(function(x){return x.LifeCycleStatusCode==='3';}).slice().sort(function(a,b){return parseFloat(b.ExpectedRevenueAmount||0)-parseFloat(a.ExpectedRevenueAmount||0);}).slice(0,10);
+  document.getElementById('won10Ct').textContent='Top '+wonD.length+' of '+filtered.filter(function(x){return x.LifeCycleStatusCode==='3';}).length+' won';
+  document.getElementById('won10Body').innerHTML=wonD.map(function(row){
+    var link=C4C_BASE+'&param.InternalID='+row.ID+'&param.Type=COD_OPPORTUNITY_THINGTYPE';
+    var prob=row.ProbabilityPercent?parseFloat(row.ProbabilityPercent).toFixed(0)+'%':'—';
+    return'<tr>'+
+      '<td style="font-weight:600;color:var(--green)">'+fmt(parseFloat(row.ExpectedRevenueAmount||0))+'</td>'+
+      '<td style="color:var(--muted);font-family:monospace;font-size:0.68rem"><a class="c4c-link" href="'+link+'" target="_blank">'+row.ID+' <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 2h3v3M10 2 5 7M4 3H2v7h7V8"/></svg></a></td>'+
+      '<td style="font-weight:500;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+(row.Name||'—')+'</td>'+
+      '<td style="color:var(--muted);font-size:0.72rem">'+(row.MainEmployeeResponsiblePartyName||'—')+'</td>'+
+      '<td style="color:var(--muted)">'+(row.ProspectPartyName||'—')+'</td>'+
+      '<td style="color:var(--muted);font-size:0.72rem">'+(row.SalesCyclePhaseCodeText||'—')+'</td>'+
+      '<td style="font-weight:500">'+prob+'</td>'+
+      '</tr>';
+  }).join('');
+}
+
+function renderTableData(data,bodyId,ctId){
+  var sc=function(s){return isOpen({LifeCycleStatusCode:s})?'b-open':s==='3'?'b-won':'b-lost';};
+  var st=function(s){return isOpen({LifeCycleStatusCode:s})?'Open':s==='3'?'Won':'Lost';};
+  document.getElementById(ctId).textContent='Showing '+Math.min(data.length,50)+' of '+data.length.toLocaleString();
+  document.getElementById(bodyId).innerHTML=data.slice(0,50).map(function(row){
+    var link=C4C_BASE+'&param.InternalID='+row.ID+'&param.Type=COD_OPPORTUNITY_THINGTYPE';
+    return'<tr>'+
       '<td style="color:var(--muted);font-family:monospace;font-size:0.68rem">'+row.ID+'</td>'+
-      '<td style="font-weight:500;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+(row.Name||'—')+'</td>'+
+      '<td style="font-weight:500;max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+(row.Name||'—')+'</td>'+
       '<td style="color:var(--muted)">'+(row.ProspectPartyName||'—')+'</td>'+
       '<td style="color:var(--muted)">'+(row.SalesOrganisationName||'').replace(/TSS\s*/,'')+'</td>'+
       '<td style="color:var(--muted);font-size:0.72rem">'+(row.SalesCyclePhaseCodeText||'—')+'</td>'+
+      '<td>'+lvlBadge(row.OpportunityLevel_KUTText)+'</td>'+
       '<td style="font-weight:500">'+fmt(parseFloat(row.ExpectedRevenueAmount||0))+'</td>'+
       '<td><span class="badge '+sc(row.LifeCycleStatusCode)+'">'+st(row.LifeCycleStatusCode)+'</span></td>'+
       '<td style="color:var(--muted);font-size:0.72rem">'+(row.MainEmployeeResponsiblePartyName||'—')+'</td>'+
+      '<td style="color:var(--muted);font-size:0.72rem">'+pds(row.ExpectedProcessingEndDate)+'</td>'+
       '<td><a class="c4c-link" href="'+link+'" target="_blank">Open <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 2h3v3M10 2 5 7M4 3H2v7h7V8"/></svg></a></td>'+
       '</tr>';
   }).join('');
 }
+
+function renderTable(){renderTableData(filtered,'tBody','tblCt');}
 
 async function fetchAll(){
   var url='/odata/v4/opportunity/Opportunities?$top=1000',all=[];
@@ -541,7 +720,7 @@ async function init(){
     populateFilters(allData);buildChips();
     applyFilters();
   }catch(e){
-    document.getElementById('kpiRow').innerHTML='<div style="grid-column:span 5;padding:20px;color:var(--red);font-size:0.82rem;">Error: '+e.message+'</div>';
+    document.getElementById('kpiRow').innerHTML='<div style="grid-column:span 6;padding:20px;color:var(--red);font-size:0.82rem;">Error loading data: '+e.message+'</div>';
   }
 }
 init();
