@@ -1,0 +1,34 @@
+{
+  "namespace": "c4codata",
+  "definitions": {
+    "c4c": {
+      "kind": "service"
+    },
+    "c4c.OpportunityCollection": {
+      "kind": "entity",
+      "elements": {
+        "ObjectID": { "type": "cds.String", "@key": true },
+        "ID": { "type": "cds.String" },
+        "Name": { "type": "cds.String" },
+        "SalesOrganisationID": { "type": "cds.String" },
+        "SalesOrganisationName": { "type": "cds.String" },
+        "SalesCyclePhaseCode": { "type": "cds.String" },
+        "SalesCyclePhaseCodeText": { "type": "cds.String" },
+        "ExpectedRevenueAmount": { "type": "cds.Decimal" },
+        "ExpectedRevenueAmountCurrencyCode": { "type": "cds.String" },
+        "ExpectedProcessingEndDate": { "type": "cds.Date" },
+        "LifeCycleStatusCode": { "type": "cds.String" },
+        "LifeCycleStatusCodeText": { "type": "cds.String" },
+        "ResultReasonCode": { "type": "cds.String" },
+        "ResultReasonCodeText": { "type": "cds.String" },
+        "ProbabilityPercent": { "type": "cds.Decimal" },
+        "ProspectPartyID": { "type": "cds.String" },
+        "ProspectPartyName": { "type": "cds.String" },
+        "MainEmployeeResponsiblePartyName": { "type": "cds.String" },
+        "CreationDate": { "type": "cds.Date" },
+        "LastChangeDate": { "type": "cds.Date" }
+      }
+    }
+  },
+  "meta": { "creator": "manual" }
+}

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="1.0" xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx">
+  <edmx:DataServices m:DataServiceVersion="2.0" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata">
+    <Schema Namespace="c4codata" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">
+      <?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="1.0"
+    xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx">
+    <edmx:DataServices m:DataServiceVersion="2.0"
+        xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata">
+        <Schema Namespace="c4codata"
+            xmlns="http://schemas.microsoft.com/ado/2008/09/edm"
+            xmlns:sap="http://www.sap.com/Protocols/SAPData"
+            xmlns:c4c="http://www.sap.com/Protocols/C4CData">
+            <EntityType Name="BusinessAttribute">
+                <Key>
+                    <PropertyRef Name="ObjectID"/>
+                </Key>
+                <Property Name="ObjectID" Type="Edm.String" Nullable="false" MaxLength="70" FixedLength="true" sap:creatable="false" sap:updatable="false" sap:filterable="true"/>
+                <Property Name="BusinessAttributeID" Type="Edm.String" Nullable="false" MaxLength="30" FixedLength="true" sap:creatable="true" sap:updatable="false" sap:filterable="true"/>
+                <Property Name="FormatCode" Type="Edm.String" Nullable="false" MaxLength="4" FixedLength="true" sap:creatable="true" sap:updatable="false" sap:filterable="true" c4c:value-help="BusinessAttributeFormatCodeCollection"/>
+                <Property Name="CharacterNumberValue" Type="Edm.Int16" Nullable="true" sap:creatable="true" sap:updatable="true" sap:filterable="true"/>
+                <Property Name="DecimalNumberValue" Type="Edm.Int16" Nullable="true" sap:creatable="true" sap:updatable="true" sap:filterable="true"/>
+                <Property Name="MeasureUnitCode" Type="Edm.String" Nullable="true" MaxLength="5" FixedLength="true" sap:creatable="true" sap:updatable="true" sap:filterable="true" c4c:value-help="BusinessAttributeMeasureUnitCodeCollection"/>
+                <Property Name="DefaultValue" Type="Edm.String" Nullable="true" MaxLength="255" FixedLength="true" sap:creatable="true" sap:updatable="true" sap:filterable="true"/>
+                <Property Name="StatusCode" Type="Edm.String" Nullable="true" MaxLength="1" FixedLength="true" sap:creatable="true" sap:updatable="true" sap:filterable="true" c4c:value-help="BusinessAttributeStatusCodeCollection"/>
+                <Property Name="BusinessAttributeDescriptionForLogonLanguage" Type="Edm.String" Nullable="true" MaxLength="255" FixedLength="true" sap:creatable="true" sap:updatable="true" sap:filterable="true"/>
+                <Property Name="BusinessAttributeDescriptionLanguageCode" Type="Edm.String" Nullable="true" MaxLength="2" FixedLength="true" sap:creatable="true" sap:updatable="true" sap:filterable="false" c4c:value-help="BusinessAttributeBusinessAttributeDescriptionLanguageCodeCollection"/>
+                <Property Name="MandatoryIndicator" Type="Edm.Boolean" Nullable="true" sap:creatable="true" sap:updatable="true" sap:filterable="true"/>
+                <Property Name="MultivalueIndicator" Type="Edm.Boolean" Nullable="true" sap:creatable="true" sap:updatable="true" sap:filterable="true"/>
+                <Property Name="NegativeAllowedIndicator" Type="Edm.Boolean" Nullable="true" sap:creatable="true" sap:updatable="true" sap:filterable="true"/>
+                <Property Name="CaseSensitiveIndicator" Type="Edm.Boolean" Nullable="true" sap:creatable="true" sap:updatable="true" sap:filterable="true"/>
+                <Property Name="IntervalAllowedIndicator" Type="Edm.Boolean" Nullable="true" sap:creatable="true" sap:updatable="true" sap:filterable="true"/>
+                <Property Name="EntityLastChangedOn" Type="Edm.DateTimeOffset" Nullable="true" Precision="7" sap:creatable="false" sap:updatable="false" sap:filterable="true"/>
+                <Property Name="ETag" Type="Edm.DateTimeOffset" Nullable="true" Precision="7" ConcurrencyMode="Fixed" sap:creatable="false" sap:updatable="false" sap:filterable="false"/>
+                <NavigationProperty Name="BusinessAttributeCharacteristic" Relationship="c4codata.BusinessAttribute_BusinessAttributeCharacteristic" FromRole="BusinessAttribute" ToRole="BusinessAttributeCharacteristic"/>
+                <NavigationProperty Name="BusinessAttributeDescription" Relationship="c4codata.BusinessAttribute_BusinessAttributeDescription" FromRole="BusinessAttribute" ToRole="BusinessAttributeDescription"/>
+                <NavigationProperty Name="BusinessAttributeValueList" Relationship="c4codata.BusinessAttribute_BusinessAttributeValueList" FromRole="BusinessAttribute" ToRole="BusinessAttributeValueList"/>
+            </EntityType>
+      <EntityContainer Name="c4codata" m:IsDefaultEntityContainer="true">
+        <EntitySet Name="OpportunityCollection" EntityType="c4codata.Opportunity" sap:creatable="true" sap:updatable="true" sap:deletable="true"/>
+      </EntityContainer>
+    </Schema>
+  </edmx:DataServices>
+</edmx:Edmx>

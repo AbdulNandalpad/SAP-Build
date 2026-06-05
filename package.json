@@ -1,0 +1,25 @@
+{
+  "name": "SAP-Build",
+  "version": "1.0.0",
+  "dependencies": {
+    "@sap-cloud-sdk/connectivity": "^4",
+    "@sap-cloud-sdk/http-client": "^4.7.0",
+    "@sap-cloud-sdk/resilience": "^4.7.0",
+    "@sap/cds": "^9"
+  },
+  "devDependencies": {
+    "@cap-js/sqlite": "^2.4"
+  },
+  "scripts": {
+    "start": "cds-serve"
+  },
+  "private": true,
+  "cds": {
+    "requires": {
+      "c4codata": {
+        "kind": "odata-v2",
+        "model": "srv/external/c4c"
+      }
+    }
+  }
+}

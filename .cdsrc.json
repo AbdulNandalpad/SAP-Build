@@ -1,0 +1,8 @@
+{
+    "requires": {
+        "c4c": {
+            "kind": "odata",
+            "model": "srv/external/opportunity"
+        }
+    }
+}
