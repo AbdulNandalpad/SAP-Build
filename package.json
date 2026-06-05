@@ -5,13 +5,14 @@
     "@sap-cloud-sdk/connectivity": "^4",
     "@sap-cloud-sdk/http-client": "^4.7.0",
     "@sap-cloud-sdk/resilience": "^4.7.0",
-    "@sap/cds": "^9"
+    "@sap/cds": "^9.9.1",
+    "@sap/cds-dk": "^9.9.2"
   },
   "devDependencies": {
     "@cap-js/sqlite": "^2.4"
   },
   "scripts": {
-    "start": "cds-serve"
+    "start": "cds serve --production"
   },
   "private": true,
   "cds": {

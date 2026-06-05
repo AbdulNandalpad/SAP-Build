@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TSS CX Analytics — Sales Quotes</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#f0f2f5;--card:#fff;--border:#d9d9d9;--border2:#c2c2c2;
+  --blue:#0a6ed1;--blue2:#0854a0;--blue3:#e8f2fd;--blue4:#ebf5ff;
+  --green:#107e3e;--green2:#d7f0e3;
+  --red:#bb0000;--red2:#ffd7d7;
+  --orange:#e9730c;--orange2:#fef0de;
+  --purple:#6c32a9;--teal:#0e7e76;--gold:#c2781f;
+  --text:#1d2d3e;--muted:#6a6d70;--light:#a0a4aa;--shell:#354a5e;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;}
+.shell{background:var(--shell);height:44px;display:flex;align-items:center;padding:0 24px;gap:12px;position:sticky;top:0;z-index:100;}
+.shell-sap{background:white;border-radius:3px;padding:2px 6px;font-size:0.75rem;font-weight:700;color:var(--shell);letter-spacing:1px;}
+.shell-sep{width:1px;height:18px;background:rgba(255,255,255,0.2);}
+.shell-title{font-size:0.85rem;font-weight:500;color:white;}
+.shell-back{margin-left:auto;font-size:0.72rem;color:rgba(255,255,255,0.7);text-decoration:none;padding:4px 10px;border:1px solid rgba(255,255,255,0.2);border-radius:3px;transition:background 0.15s;}
+.shell-back:hover{background:rgba(255,255,255,0.1);color:white;}
+.page-hdr{background:white;border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;}
+.page-title{font-size:1.1rem;font-weight:600;color:var(--text);}
+.page-sub{font-size:0.72rem;color:var(--muted);margin-top:2px;}
+.page-actions{display:flex;gap:8px;}
+.sap-btn{font-size:0.78rem;padding:5px 14px;border-radius:4px;cursor:pointer;border:1px solid var(--border2);background:white;color:var(--text);font-family:'Inter',sans-serif;height:30px;display:flex;align-items:center;transition:background 0.15s;}
+.sap-btn:hover{background:var(--bg);}
+.sap-btn.emp{background:var(--green);color:white;border-color:var(--green);}
+.sap-btn.emp:hover{background:#0d6b34;}
+.filter-bar{background:white;border-bottom:1px solid var(--border);padding:8px 24px;display:flex;gap:12px;flex-wrap:wrap;align-items:center;}
+.fl{font-size:0.72rem;color:var(--muted);font-weight:500;white-space:nowrap;}
+.sap-sel,.sap-inp{background:white;color:var(--text);border:1px solid var(--border2);padding:4px 10px;border-radius:4px;font-size:0.78rem;font-family:'Inter',sans-serif;height:30px;cursor:pointer;}
+.sap-sel:focus,.sap-inp:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 2px rgba(16,126,62,0.15);}
+.fsep{width:1px;height:20px;background:var(--border);}
+.live-dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--border);border-bottom:1px solid var(--border);}
+.kpi{background:white;padding:14px 18px;position:relative;}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.kpi:nth-child(1)::before{background:var(--green);}
+.kpi:nth-child(2)::before{background:var(--blue);}
+.kpi:nth-child(3)::before{background:var(--orange);}
+.kpi:nth-child(4)::before{background:var(--red);}
+.kpi:nth-child(5)::before{background:var(--purple);}
+.kv{font-size:1.7rem;font-weight:300;line-height:1.1;margin-top:2px;}
+.kpi:nth-child(1) .kv{color:var(--green);}
+.kpi:nth-child(2) .kv{color:var(--blue);}
+.kpi:nth-child(3) .kv{color:var(--orange);}
+.kpi:nth-child(4) .kv{color:var(--red);}
+.kpi:nth-child(5) .kv{color:var(--purple);}
+.kl{font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;font-weight:500;}
+.ks{font-size:0.7rem;color:var(--light);margin-top:2px;}
+.content{padding:12px 24px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+.panel{background:var(--card);border:1px solid var(--border);border-radius:4px;overflow:hidden;}
+.panel.w2{grid-column:span 2;}
+.panel.w3{grid-column:span 3;}
+.panel-hdr{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.panel-hdr h3{font-size:0.8rem;font-weight:600;color:var(--text);}
+.ph-tag{font-size:0.62rem;color:var(--muted);background:var(--bg);padding:2px 7px;border:1px solid var(--border);border-radius:3px;}
+.ph-tag.live{background:var(--green2);color:var(--green);border-color:rgba(16,126,62,0.2);}
+.panel-body{padding:12px 14px;}
+canvas{max-height:200px;}
+.leg{display:flex;flex-wrap:wrap;gap:8px;padding:0 14px 10px;}
+.leg-i{display:flex;align-items:center;gap:4px;font-size:0.68rem;color:var(--muted);}
+.leg-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0;}
+.tbl-panel{background:white;border:1px solid var(--border);border-radius:4px;overflow:hidden;grid-column:span 3;}
+.tbl-hdr{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.tbl-hdr h3{font-size:0.8rem;font-weight:600;}
+.tbl-ct{font-size:0.68rem;color:var(--muted);background:var(--bg);padding:2px 8px;border:1px solid var(--border);border-radius:3px;}
+table{width:100%;border-collapse:collapse;font-size:0.74rem;}
+th{background:#f5f6f7;color:var(--muted);padding:7px 12px;text-align:left;font-weight:600;font-size:0.65rem;border-bottom:1px solid var(--border);text-transform:uppercase;white-space:nowrap;}
+td{padding:7px 12px;border-bottom:1px solid #f0f0f0;color:var(--text);}
+tr:hover td{background:#fafbfc;}
+.badge{padding:2px 6px;border-radius:3px;font-size:0.64rem;font-weight:600;}
+.b-open{background:var(--blue3);color:var(--blue);}
+.b-ordered{background:var(--green2);color:var(--green);}
+.b-lost{background:var(--red2);color:var(--red);}
+.b-expired{background:var(--orange2);color:var(--orange);}
+.b-other{background:var(--bg);color:var(--muted);border:1px solid var(--border);}
+.c4c-link{color:var(--blue);text-decoration:none;font-size:0.68rem;}
+.c4c-link:hover{text-decoration:underline;}
+.loading-msg{grid-column:span 3;padding:40px;text-align:center;color:var(--muted);font-size:0.85rem;}
+@media(max-width:768px){
+  .kpi-row{grid-template-columns:repeat(2,1fr);}
+  .content{grid-template-columns:1fr;}
+  .panel.w2,.panel.w3,.tbl-panel{grid-column:span 1;}
+}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <div class="shell-sap">SAP</div>
+  <div class="shell-sep"></div>
+  <span class="shell-title">TSS CX Analytics · Sales Quotes</span>
+  <a href="index.html" class="shell-back">← Home</a>
+</div>
+
+<div class="page-hdr">
+  <div>
+    <div class="page-title">Sales Quote Report</div>
+    <div class="page-sub" id="pageSub">Loading data from C4C QUA...</div>
+  </div>
+  <div class="page-actions">
+    <button class="sap-btn" onclick="window.print()">Export ↓</button>
+    <button class="sap-btn emp" onclick="location.reload()">Refresh</button>
+  </div>
+</div>
+
+<div class="filter-bar">
+  <div class="live-dot"></div>
+  <span id="lastUpdate" style="font-size:0.7rem;color:var(--muted);">Loading...</span>
+  <div class="fsep"></div>
+  <span class="fl">Sales Org</span>
+  <select class="sap-sel" id="fOrg" onchange="applyFilters()"><option value="">All</option></select>
+  <span class="fl">Status</span>
+  <select class="sap-sel" id="fStatus" onchange="applyFilters()">
+    <option value="">All</option>
+    <option value="1">Open</option>
+    <option value="3">Ordered</option>
+    <option value="4">Lost</option>
+    <option value="5">Expired</option>
+  </select>
+  <span class="fl">From Year</span>
+  <input class="sap-inp" type="number" id="fYear" value="2024" min="2024" max="2026" style="width:70px;" onchange="applyFilters()" />
+</div>
+
+<div class="kpi-row" id="kpiRow">
+  <div class="kpi"><div class="kl">Total Quotes</div><div class="kv">—</div></div>
+  <div class="kpi"><div class="kl">Total Value</div><div class="kv">—</div></div>
+  <div class="kpi"><div class="kl">Open Quotes</div><div class="kv">—</div></div>
+  <div class="kpi"><div class="kl">Lost Quotes</div><div class="kv">—</div></div>
+  <div class="kpi"><div class="kl">Ordered</div><div class="kv">—</div></div>
+</div>
+
+<div class="content" id="mainContent">
+  <div class="loading-msg">Loading Sales Quote data from C4C...</div>
+</div>
+
+<script>
+var allData=[], filtered=[], charts={};
+var C4C='https://my352500.crm.ondemand.com';
+var SAP=['#107e3e','#0a6ed1','#e9730c','#bb0000','#6c32a9','#0e7e76','#c2781f','#89919a','#1589ee','#0aaf67'];
+
+function fmt(n){n=parseFloat(n)||0;if(n>=1e6)return'$'+(n/1e6).toFixed(1)+'M';if(n>=1e3)return'$'+(n/1e3).toFixed(0)+'K';return'$'+n.toFixed(0);}
+function fmtN(n){n=parseFloat(n)||0;if(n>=1e6)return(n/1e6).toFixed(1)+'M';if(n>=1e3)return(n/1e3).toFixed(0)+'K';return n.toFixed(0);}
+function pd(v){if(!v)return'';var m=v.match?v.match(/\/Date\((\d+)\)\/$/):null;if(m)return new Date(parseInt(m[1])).toISOString().substring(0,10);return v;}
+
+async function fetchAll(){
+  try{
+    var url='/odata/v4/quotes/SalesQuotes?$top=1000', all=[];
+    while(url){
+      var r=await fetch(url);var j=await r.json();
+      if(j.error)throw new Error(j.error.message);
+      all=all.concat(j.value);
+      url=j['@odata.nextLink']?'/odata/v4/quotes/'+j['@odata.nextLink']:null;
+    }
+    return all;
+  }catch(e){throw e;}
+}
+
+function populateFilters(data){
+  var orgs=[...new Set(data.map(function(d){return d.SalesOrganisationID||d.SalesUnitPartyID;}).filter(Boolean))].sort();
+  orgs.forEach(function(o){var e=document.createElement('option');e.value=o;e.textContent=o;document.getElementById('fOrg').appendChild(e);});
+}
+
+function applyFilters(){
+  var org=document.getElementById('fOrg').value;
+  var status=document.getElementById('fStatus').value;
+  var year=document.getElementById('fYear').value||'2024';
+  filtered=allData.filter(function(d){
+    var cd=pd(d.CreationDateTime||d.CreationDate||'');
+    if(org&&(d.SalesOrganisationID||d.SalesUnitPartyID)!==org)return false;
+    if(status&&d.LifeCycleStatusCode!==status)return false;
+    if(!cd||cd.substring(0,4)<year)return false;
+    return true;
+  });
+  renderKPIs();renderContent();
+}
+
+function renderKPIs(){
+  var d=filtered;
+  var total=d.length;
+  var open=d.filter(function(x){return x.LifeCycleStatusCode==='1';}).length;
+  var ordered=d.filter(function(x){return x.LifeCycleStatusCode==='3';}).length;
+  var lost=d.filter(function(x){return x.LifeCycleStatusCode==='4';}).length;
+  var rev=d.reduce(function(s,x){return s+parseFloat(x.TotalGrossAmount||x.NetAmount||0);},0);
+  document.getElementById('kpiRow').innerHTML=
+    '<div class="kpi"><div class="kl">Total Quotes</div><div class="kv">'+total.toLocaleString()+'</div><div class="ks">filtered records</div></div>'+
+    '<div class="kpi"><div class="kl">Total Value</div><div class="kv">'+fmt(rev)+'</div><div class="ks">gross amount</div></div>'+
+    '<div class="kpi"><div class="kl">Open Quotes</div><div class="kv">'+open+'</div><div class="ks">pending decision</div></div>'+
+    '<div class="kpi"><div class="kl">Lost Quotes</div><div class="kv">'+lost+'</div><div class="ks">'+((lost/(total||1))*100).toFixed(1)+'% of total</div></div>'+
+    '<div class="kpi"><div class="kl">Ordered</div><div class="kv">'+ordered+'</div><div class="ks">converted to order</div></div>';
+}
+
+function destroyCharts(){Object.values(charts).forEach(function(c){c.destroy();});charts={};}
+
+function renderContent(){
+  destroyCharts();
+  var d=filtered;
+  var gc='#f0f0f0',tc='#89919a';
+
+  document.getElementById('mainContent').innerHTML=
+    '<div class="panel w2"><div class="panel-hdr"><h3>Quote Value by Sales Org</h3><span class="ph-tag live">LIVE</span></div><div class="panel-body"><canvas id="cOrg" role="img" aria-label="Quote value by sales org"></canvas></div></div>'+
+    '<div class="panel"><div class="panel-hdr"><h3>Status Distribution</h3><span class="ph-tag">COUNT</span></div><div class="leg" id="statusLeg"></div><div class="panel-body"><canvas id="cStatus" role="img" aria-label="Status distribution"></canvas></div></div>'+
+    '<div class="panel"><div class="panel-hdr"><h3>Quotes by Month</h3><span class="ph-tag">TREND</span></div><div class="panel-body"><canvas id="cTrend" role="img" aria-label="Monthly trend"></canvas></div></div>'+
+    '<div class="panel"><div class="panel-hdr"><h3>Top Customers by Value</h3><span class="ph-tag">TOP 8</span></div><div class="panel-body"><canvas id="cCustomer" role="img" aria-label="Top customers"></canvas></div></div>'+
+    '<div class="panel"><div class="panel-hdr"><h3>Quote Conversion Rate</h3><span class="ph-tag">BY ORG</span></div><div class="panel-body"><canvas id="cConv" role="img" aria-label="Conversion rate"></canvas></div></div>'+
+    '<div class="tbl-panel"><div class="tbl-hdr"><h3>Sales Quote List</h3><span class="tbl-ct" id="tblCt">Top 50</span></div>'+
+    '<table><thead><tr><th>ID</th><th>Quote Name</th><th>Customer</th><th>Sales Org</th><th>Value</th><th>Status</th><th>Created</th><th>Valid To</th><th></th></tr></thead>'+
+    '<tbody id="tBody"></tbody></table></div>';
+
+  // Org bar
+  var om={};d.forEach(function(x){var o=(x.SalesOrganisationID||x.SalesUnitID||'Unknown');om[o]=(om[o]||0)+parseFloat(x.TotalGrossAmount||x.NetAmount||0);});
+  var os=Object.entries(om).sort(function(a,b){return b[1]-a[1];}).slice(0,8);
+  charts.org=new Chart(document.getElementById('cOrg'),{type:'bar',data:{labels:os.map(function(e){return e[0];}),datasets:[{data:os.map(function(e){return e[1];}),backgroundColor:SAP,borderRadius:2,borderSkipped:false}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return' '+fmt(c.raw);}}}},scales:{x:{ticks:{color:tc,font:{size:9}},grid:{color:gc}},y:{ticks:{color:tc,callback:function(v){return fmtN(v);}},grid:{color:gc}}}}});
+
+  // Status donut
+  var sm={};d.forEach(function(x){
+    var k=x.LifeCycleStatusCode==='1'?'Open':x.LifeCycleStatusCode==='3'?'Ordered':x.LifeCycleStatusCode==='4'?'Lost':x.LifeCycleStatusCode==='5'?'Expired':'Other';
+    sm[k]=(sm[k]||0)+1;
+  });
+  var ss=Object.entries(sm);
+  var scColors={'Open':'#0a6ed1','Ordered':'#107e3e','Lost':'#bb0000','Expired':'#e9730c','Other':'#89919a'};
+  var rTotal=ss.reduce(function(s,e){return s+e[1];},0);
+  document.getElementById('statusLeg').innerHTML=ss.map(function(e){return '<div class="leg-i"><div class="leg-dot" style="background:'+(scColors[e[0]]||'#89919a')+'"></div>'+e[0]+' '+(e[1]/rTotal*100).toFixed(1)+'%</div>';}).join('');
+  charts.status=new Chart(document.getElementById('cStatus'),{type:'doughnut',data:{labels:ss.map(function(e){return e[0];}),datasets:[{data:ss.map(function(e){return e[1];}),backgroundColor:ss.map(function(e){return scColors[e[0]]||'#89919a';}),borderWidth:2,borderColor:'white',hoverOffset:4}]},options:{responsive:true,cutout:'60%',plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return' '+(c.raw/rTotal*100).toFixed(1)+'%';}}}}}});
+
+  // Monthly trend
+  var tm={};d.forEach(function(x){
+    var dt=pd(x.CreationDateTime||x.CreationDate||'');
+    if(dt){var m=dt.substring(0,7);if(!tm[m])tm[m]=0;tm[m]++;}
+  });
+  var tms=Object.keys(tm).sort().slice(-12);
+  charts.trend=new Chart(document.getElementById('cTrend'),{type:'line',data:{labels:tms,datasets:[{label:'Quotes',data:tms.map(function(m){return tm[m];}),borderColor:'#107e3e',backgroundColor:'rgba(16,126,62,0.06)',tension:0.4,fill:true,pointBackgroundColor:'#107e3e',pointRadius:3}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:tc,font:{size:8}},grid:{color:gc}},y:{ticks:{color:tc},grid:{color:gc}}}}});
+
+  // Customer bar
+  var cm={};d.forEach(function(x){var c=x.BuyerName||x.ProspectPartyName||'Unknown';cm[c]=(cm[c]||0)+parseFloat(x.TotalGrossAmount||x.NetAmount||0);});
+  var cs=Object.entries(cm).sort(function(a,b){return b[1]-a[1];}).slice(0,8);
+  charts.customer=new Chart(document.getElementById('cCustomer'),{type:'bar',data:{labels:cs.map(function(e){return e[0].substring(0,18);}),datasets:[{data:cs.map(function(e){return e[1];}),backgroundColor:'rgba(10,110,209,0.7)',borderRadius:2,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return' '+fmt(c.raw);}}}},scales:{x:{ticks:{color:tc,callback:function(v){return fmtN(v);}},grid:{color:gc}},y:{ticks:{color:tc,font:{size:9}},grid:{color:gc}}}}});
+
+  // Conversion rate
+  var conv={};d.forEach(function(x){var o=x.SalesOrganisationID||x.SalesUnitID||'?';if(!conv[o])conv[o]={ordered:0,total:0};conv[o].total++;if(x.LifeCycleStatusCode==='3')conv[o].ordered++;});
+  var cvs=Object.entries(conv).filter(function(e){return e[1].total>=2;}).map(function(e){return{k:e[0],r:e[1].ordered/e[1].total*100};}).sort(function(a,b){return b.r-a.r;}).slice(0,8);
+  charts.conv=new Chart(document.getElementById('cConv'),{type:'bar',data:{labels:cvs.map(function(e){return e.k;}),datasets:[{data:cvs.map(function(e){return e.r;}),backgroundColor:cvs.map(function(e){return e.r>=30?'#107e3e':e.r>=15?'#0a6ed1':'#e9730c';}),borderRadius:2,borderSkipped:false}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return' '+c.raw.toFixed(1)+'%';}}}},scales:{x:{ticks:{color:tc,font:{size:9}},grid:{color:gc}},y:{ticks:{color:tc,callback:function(v){return v+'%';}},grid:{color:gc},max:100}}}});
+
+  // Table
+  var sc=function(s){return s==='1'?'b-open':s==='3'?'b-ordered':s==='4'?'b-lost':s==='5'?'b-expired':'b-other';};
+  var st=function(s){return s==='1'?'Open':s==='3'?'Ordered':s==='4'?'Lost':s==='5'?'Expired':'Other';};
+  document.getElementById('tblCt').textContent='Top 50 of '+d.length;
+  document.getElementById('tBody').innerHTML=d.slice(0,50).map(function(row){
+    var cd=pd(row.CreationDateTime||row.CreationDate||'');
+    var vd=pd(row.ExpirationDate||row.ValidToDate||'');
+    var val=parseFloat(row.TotalGrossAmount||row.NetAmount||0);
+    return '<tr>'+
+      '<td style="color:var(--muted);font-family:monospace;font-size:0.68rem">'+(row.ID||'—')+'</td>'+
+      '<td>'+(row.Name||'—')+'</td>'+
+      '<td style="color:var(--muted)">'+(row.BuyerName||row.ProspectPartyName||'—')+'</td>'+
+      '<td style="color:var(--muted)">'+(row.SalesOrganisationID||row.SalesUnitID||'—')+'</td>'+
+      '<td style="font-weight:500">'+fmt(val)+'</td>'+
+      '<td><span class="badge '+sc(row.LifeCycleStatusCode)+'">'+st(row.LifeCycleStatusCode)+'</span></td>'+
+      '<td style="color:var(--muted);font-size:0.7rem">'+(cd.substring(0,10)||'—')+'</td>'+
+      '<td style="color:var(--muted);font-size:0.7rem">'+(vd.substring(0,10)||'—')+'</td>'+
+      '<td><a class="c4c-link" href="'+C4C+'/sap/c4c/ui#SalesQuoteCollection&/SalesQuoteCollection/'+row.ObjectID+'" target="_blank">Open ↗</a></td>'+
+      '</tr>';
+  }).join('');
+}
+
+async function init(){
+  try{
+    allData=await fetchAll();
+    var now=new Date();
+    document.getElementById('lastUpdate').textContent='Last updated: '+now.toLocaleString('en-GB');
+    document.getElementById('pageSub').textContent='As of '+now.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})+' · C4C QUA · MY352500 · '+allData.length.toLocaleString()+' records';
+    populateFilters(allData);
+    document.getElementById('fYear').value='2024';
+    applyFilters();
+  }catch(e){
+    document.getElementById('mainContent').innerHTML='<div style="grid-column:span 3;padding:40px;color:var(--red);font-size:0.85rem;">Error loading Sales Quote data: '+e.message+'<br><br><small>Note: SalesQuote service needs to be added to CAP. See setup instructions.</small></div>';
+    document.getElementById('kpiRow').innerHTML='<div style="grid-column:span 5;padding:14px 18px;color:var(--muted);font-size:0.8rem;">No data — CAP service not yet configured for SalesQuoteCollection.</div>';
+  }
+}
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TSS Opportunity Report</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --sap-blue:#0a6ed1;--sap-blue2:#0854a0;--sap-blue3:#d1e8ff;--sap-blue4:#ebf5ff;
+  --sap-green:#107e3e;--sap-green2:#d7f0e3;
+  --sap-orange:#e9730c;--sap-orange2:#fef0de;
+  --sap-red:#bb0000;--sap-red2:#ffd7d7;
+  --sap-gold:#c2781f;--sap-gold2:#fef0cc;
+  --sap-neutral:#6a6d70;--sap-neutral2:#89919a;
+  --sap-bg:#f5f6f7;--sap-shell:#354a5e;
+  --card:#ffffff;--border:#d9d9d9;--border2:#c2c2c2;
+  --text:#1d2d3e;--muted:#6a6d70;--light:#89919a;
+  --teal:#0e7e76;--teal2:#d6f6f4;
+  --purple:#6c32a9;--purple2:#ede0f4;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--sap-bg);color:var(--text);font-family:'Inter',sans-serif;font-size:14px;}
+.shell{background:var(--sap-shell);height:44px;display:flex;align-items:center;padding:0 16px;gap:16px;position:sticky;top:0;z-index:200;}
+.shell-brand{font-size:0.95rem;font-weight:600;color:white;letter-spacing:0.5px;}
+.shell-sep{width:1px;height:20px;background:rgba(255,255,255,0.2);}
+.shell-app{font-size:0.78rem;color:rgba(255,255,255,0.7);}
+.shell-right{margin-left:auto;display:flex;align-items:center;gap:12px;}
+.shell-icon{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:0.8rem;color:rgba(255,255,255,0.8);}
+.shell-user{font-size:0.72rem;color:rgba(255,255,255,0.7);}
+.page-hdr{background:white;border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;}
+.page-title{font-size:1.1rem;font-weight:600;color:var(--text);}
+.page-sub{font-size:0.72rem;color:var(--muted);margin-top:2px;}
+.page-actions{display:flex;gap:8px;}
+.sap-btn{font-size:0.78rem;padding:5px 14px;border-radius:4px;cursor:pointer;border:1px solid var(--border2);background:white;color:var(--text);font-family:'Inter',sans-serif;height:30px;display:flex;align-items:center;gap:5px;transition:background 0.15s;}
+.sap-btn:hover{background:var(--sap-bg);}
+.sap-btn.emphasized{background:var(--sap-blue);color:white;border-color:var(--sap-blue);}
+.sap-btn.emphasized:hover{background:var(--sap-blue2);}
+.filter-bar{background:white;border-bottom:1px solid var(--border);padding:8px 24px;display:flex;gap:12px;flex-wrap:wrap;align-items:center;}
+.filter-label{font-size:0.72rem;color:var(--muted);font-weight:500;white-space:nowrap;}
+.sap-select,.sap-input{background:white;color:var(--text);border:1px solid var(--border2);padding:4px 10px;border-radius:4px;font-size:0.78rem;font-family:'Inter',sans-serif;height:30px;cursor:pointer;}
+.sap-select:focus,.sap-input:focus{outline:none;border-color:var(--sap-blue);box-shadow:0 0 0 2px rgba(10,110,209,0.15);}
+.filter-sep{width:1px;height:20px;background:var(--border);}
+.live-dot{width:8px;height:8px;border-radius:50%;background:var(--sap-green);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--border);border-bottom:1px solid var(--border);}
+.kpi-tile{background:white;padding:14px 18px;position:relative;cursor:pointer;transition:background 0.15s;}
+.kpi-tile:hover{background:#fafafa;}
+.kpi-tile::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:2px 2px 0 0;}
+.kpi-tile:nth-child(1)::before{background:var(--sap-blue);}
+.kpi-tile:nth-child(2)::before{background:var(--sap-green);}
+.kpi-tile:nth-child(3)::before{background:var(--sap-orange);}
+.kpi-tile:nth-child(4)::before{background:var(--sap-red);}
+.kpi-tile:nth-child(5)::before{background:var(--teal);}
+.kpi-tile .kv{font-size:1.7rem;font-weight:300;color:var(--text);line-height:1.1;margin-top:2px;}
+.kpi-tile:nth-child(1) .kv{color:var(--sap-blue);}
+.kpi-tile:nth-child(2) .kv{color:var(--sap-green);}
+.kpi-tile:nth-child(3) .kv{color:var(--sap-orange);}
+.kpi-tile:nth-child(4) .kv{color:var(--sap-red);}
+.kpi-tile:nth-child(5) .kv{color:var(--teal);}
+.kpi-tile .kl{font-size:0.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;font-weight:500;}
+.kpi-tile .ks{font-size:0.7rem;color:var(--light);margin-top:2px;}
+.content{padding:12px 24px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+.panel{background:var(--card);border:1px solid var(--border);border-radius:4px;overflow:hidden;}
+.panel.w2{grid-column:span 2;}
+.panel.w3{grid-column:span 3;}
+.panel-hdr{padding:10px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:white;}
+.panel-hdr h3{font-size:0.82rem;font-weight:600;color:var(--text);}
+.panel-hdr .ph-sub{font-size:0.68rem;color:var(--sap-blue);cursor:pointer;margin-top:1px;}
+.panel-body{padding:12px 14px;}
+.panel-btn{font-size:0.68rem;color:var(--muted);padding:2px 6px;border:1px solid var(--border);border-radius:3px;cursor:pointer;background:white;}
+canvas{max-height:180px;}
+.leg{display:flex;flex-wrap:wrap;gap:8px;padding:0 14px 10px;}
+.leg-i{display:flex;align-items:center;gap:4px;font-size:0.68rem;color:var(--muted);}
+.leg-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0;}
+.qb{background:white;border:1px solid var(--border);border-radius:4px;overflow:hidden;grid-column:span 3;}
+.qb-hdr{padding:10px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:background 0.15s;border-bottom:1px solid transparent;}
+.qb-hdr:hover{background:var(--sap-bg);}
+.qb-hdr.open{border-bottom-color:var(--border);}
+.qb-hdr h3{font-size:0.82rem;font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px;}
+.qb-hdr span{font-size:0.7rem;color:var(--sap-blue);}
+.qb-body{display:none;padding:14px 16px;}
+.qb-body.open{display:block;}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;}
+.chip{background:white;border:1px solid var(--border2);color:var(--text);padding:4px 10px;border-radius:4px;font-size:0.72rem;cursor:pointer;transition:all 0.12s;}
+.chip:hover{border-color:var(--sap-blue);color:var(--sap-blue);}
+.chip.active{background:var(--sap-blue4);border-color:var(--sap-blue);color:var(--sap-blue);font-weight:500;}
+.ai-row{display:flex;gap:8px;}
+.ai-inp{flex:1;background:white;color:var(--text);border:1px solid var(--border2);padding:6px 12px;border-radius:4px;font-size:0.8rem;font-family:'Inter',sans-serif;}
+.ai-inp:focus{outline:none;border-color:var(--sap-blue);}
+.ai-inp::placeholder{color:var(--light);}
+.btn-ai{background:var(--sap-blue);color:white;border:none;padding:6px 18px;border-radius:4px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;font-size:0.78rem;transition:background 0.15s;white-space:nowrap;}
+.btn-ai:hover{background:var(--sap-blue2);}
+.btn-ai:disabled{opacity:0.4;cursor:not-allowed;}
+.qb-out{margin-top:10px;padding:10px 14px;background:var(--sap-bg);border-radius:3px;font-size:0.8rem;color:var(--text);line-height:1.7;border-left:3px solid var(--sap-blue);min-height:38px;}
+.qb-out.ai{border-left-color:var(--purple);}
+.tbl-panel{background:white;border:1px solid var(--border);border-radius:4px;overflow:hidden;grid-column:span 3;}
+.tbl-hdr{padding:10px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.tbl-hdr h3{font-size:0.82rem;font-weight:600;color:var(--text);}
+.tbl-ct{font-size:0.7rem;color:var(--muted);background:var(--sap-bg);padding:2px 8px;border:1px solid var(--border);border-radius:3px;}
+table{width:100%;border-collapse:collapse;font-size:0.76rem;}
+th{background:#f5f6f7;color:var(--muted);padding:8px 14px;text-align:left;font-weight:600;font-size:0.68rem;border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:0.3px;white-space:nowrap;}
+td{padding:7px 14px;border-bottom:1px solid #f0f0f0;color:var(--text);}
+tr:hover td{background:#fafbfc;}
+.badge{padding:2px 7px;border-radius:3px;font-size:0.66rem;font-weight:600;}
+.won{background:var(--sap-green2);color:var(--sap-green);}
+.lost{background:var(--sap-red2);color:var(--sap-red);}
+.open{background:var(--sap-blue3);color:var(--sap-blue);}
+.c4c-link{color:var(--sap-blue);text-decoration:none;font-size:0.7rem;}
+.c4c-link:hover{text-decoration:underline;}
+.td-rev{font-weight:500;}
+.td-id{color:var(--muted);font-size:0.7rem;font-family:monospace;}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <div style="background:white;border-radius:3px;padding:2px 6px;"><span style="font-size:0.78rem;font-weight:700;color:var(--sap-shell);letter-spacing:1px;">SAP</span></div>
+  <div class="shell-sep"></div>
+  <span class="shell-brand">Sales Cloud</span>
+  <div class="shell-sep"></div>
+  <span class="shell-app">Opportunity Report · TSS QUA</span>
+  <div class="shell-right">
+    <div class="shell-icon">🔍</div>
+    <div class="shell-icon">🔔</div>
+    <div class="shell-icon">⚙️</div>
+    <div class="shell-sep"></div>
+    <span class="shell-user">ABDUL.NANDALPAD</span>
+    <div class="shell-icon" style="background:var(--sap-blue);color:white;font-size:0.65rem;font-weight:600;">AN</div>
+  </div>
+</div>
+
+<div class="page-hdr">
+  <div>
+    <div class="page-title">Opportunity Report</div>
+    <div class="page-sub" id="pageSub">Loading data from C4C QUA...</div>
+  </div>
+  <div class="page-actions">
+    <button class="sap-btn">Export ↓</button>
+    <button class="sap-btn">Share</button>
+    <button class="sap-btn emphasized" onclick="location.reload()">Refresh</button>
+  </div>
+</div>
+
+<div class="filter-bar">
+  <div class="live-dot"></div>
+  <span id="lastUpdate" style="font-size:0.7rem;color:var(--muted);">Loading...</span>
+  <div class="filter-sep"></div>
+  <span class="filter-label">Sales Org</span>
+  <select class="sap-select" id="fOrg" onchange="applyFilters()"><option value="">All</option></select>
+  <span class="filter-label">Status</span>
+  <select class="sap-select" id="fStatus" onchange="applyFilters()">
+    <option value="">All</option><option value="1">Open</option><option value="3">Won</option><option value="5">Lost</option>
+  </select>
+  <span class="filter-label">Phase</span>
+  <select class="sap-select" id="fPhase" onchange="applyFilters()"><option value="">All</option></select>
+  <span class="filter-label">From Year</span>
+  <input class="sap-input" type="number" id="fYear" value="2024" min="2024" max="2026" style="width:70px;" onchange="applyFilters()" />
+</div>
+
+<div class="kpi-row" id="kpiRow"></div>
+
+<div class="content" id="mainContent">
+  <div style="grid-column:span 3;padding:40px;text-align:center;color:var(--muted);font-size:0.85rem;">Loading report data...</div>
+</div>
+
+<script>
+var allData=[],filtered=[],charts={};
+var C4C='https://my352500.crm.ondemand.com';
+
+var PREDEFINED=[
+  {label:'Top 5 Orgs by Revenue',fn:function(d){var m={};d.forEach(function(x){var k=x.SalesOrganisationName||'?';m[k]=(m[k]||0)+parseFloat(x.ExpectedRevenueAmount||0);});return '<b>Top Sales Orgs:</b><br><br>'+Object.entries(m).sort(function(a,b){return b[1]-a[1];}).slice(0,5).map(function(e,i){return (i+1)+'. '+e[0]+': <b style="color:var(--sap-blue)">'+fmt(e[1])+'</b>';}).join('<br>');}},
+  {label:'Win Rate by Sales Org',fn:function(d){var m={};d.forEach(function(x){var k=x.SalesOrganisationName||'?';if(!m[k])m[k]={w:0,l:0};if(x.LifeCycleStatusCode==='3')m[k].w++;if(x.LifeCycleStatusCode==='5')m[k].l++;});return '<b>Win Rate by Org:</b><br><br>'+Object.entries(m).filter(function(e){return e[1].w+e[1].l>=3;}).map(function(e){return{k:e[0],r:e[1].w/(e[1].w+e[1].l)*100,w:e[1].w,l:e[1].l};}).sort(function(a,b){return b.r-a.r;}).slice(0,8).map(function(e,i){return (i+1)+'. '+e.k+': <b style="color:var(--sap-green)">'+e.r.toFixed(1)+'%</b> ('+e.w+'W/'+e.l+'L)';}).join('<br>');}},
+  {label:'Lost Deal Reasons',fn:function(d){var m={};d.filter(function(x){return x.LifeCycleStatusCode==='5';}).forEach(function(x){var k=x.ResultReasonCodeText||'No Reason';m[k]=(m[k]||0)+1;});return '<b>Top Loss Reasons:</b><br><br>'+Object.entries(m).sort(function(a,b){return b[1]-a[1];}).slice(0,6).map(function(e,i){return (i+1)+'. '+e[0]+': <b style="color:var(--sap-red)">'+e[1]+' deals</b>';}).join('<br>');}},
+  {label:'Top 10 by Revenue',fn:function(d){return '<b>Top 10 Opportunities:</b><br><br>'+d.slice().sort(function(a,b){return parseFloat(b.ExpectedRevenueAmount||0)-parseFloat(a.ExpectedRevenueAmount||0);}).slice(0,10).map(function(x,i){return (i+1)+'. '+(x.Name||'—')+' — <b style="color:var(--sap-blue)">'+fmt(parseFloat(x.ExpectedRevenueAmount||0))+'</b> ['+( x.LifeCycleStatusCodeText||'?')+']';}).join('<br>');}},
+  {label:'Open Pipeline by Owner',fn:function(d){var m={};d.filter(function(x){return x.LifeCycleStatusCode==='1';}).forEach(function(x){var k=x.MainEmployeeResponsiblePartyName||'?';m[k]=(m[k]||0)+parseFloat(x.ExpectedRevenueAmount||0);});return '<b>Open Pipeline by Owner:</b><br><br>'+Object.entries(m).sort(function(a,b){return b[1]-a[1];}).slice(0,8).map(function(e,i){return (i+1)+'. '+e[0]+': <b style="color:var(--sap-blue)">'+fmt(e[1])+'</b>';}).join('<br>');}},
+  {label:'Avg Deal Size by Phase',fn:function(d){var m={};d.forEach(function(x){var k=x.SalesCyclePhaseCodeText||'?';if(!m[k])m[k]={s:0,c:0};m[k].s+=parseFloat(x.ExpectedRevenueAmount||0);m[k].c++;});return '<b>Avg Deal Size by Phase:</b><br><br>'+Object.entries(m).sort(function(a,b){return(b[1].s/b[1].c)-(a[1].s/a[1].c);}).slice(0,6).map(function(e,i){return (i+1)+'. '+e[0]+': <b style="color:var(--sap-blue)">'+fmt(e[1].s/e[1].c)+'</b> avg ('+e[1].c+' deals)';}).join('<br>');}},
+  {label:'Revenue Summary',fn:function(d){var won=d.filter(function(x){return x.LifeCycleStatusCode==='3';}),lost=d.filter(function(x){return x.LifeCycleStatusCode==='5';}),open=d.filter(function(x){return x.LifeCycleStatusCode==='1';});var wr=((won.length/(won.length+lost.length||1))*100).toFixed(1);return '<b>Revenue Summary:</b><br><br>Total: <b style="color:var(--sap-blue)">'+fmt(d.reduce(function(s,x){return s+parseFloat(x.ExpectedRevenueAmount||0);},0))+'</b><br>Won: <b style="color:var(--sap-green)">'+fmt(won.reduce(function(s,x){return s+parseFloat(x.ExpectedRevenueAmount||0);},0))+'</b><br>Open: <b style="color:var(--sap-blue)">'+fmt(open.reduce(function(s,x){return s+parseFloat(x.ExpectedRevenueAmount||0);},0))+'</b><br>Win Rate: <b style="color:var(--sap-green)">'+wr+'%</b>';}},
+  {label:'New Opps This Year',fn:function(d){var yr=new Date().getFullYear().toString(),m={};d.filter(function(x){return x.CreationDate&&pd(x.CreationDate).substring(0,4)===yr;}).forEach(function(x){var mo=pd(x.CreationDate).substring(5,7);m[mo]=(m[mo]||0)+1;});var total=Object.values(m).reduce(function(s,v){return s+v;},0);return '<b>New Opps in '+yr+':</b> <b style="color:var(--sap-blue)">'+total+'</b><br><br>'+(Object.entries(m).sort().map(function(e){return 'Month '+e[0]+': <b>'+e[1]+'</b>';}).join('<br>')||'No data yet');}}
+];
+
+function pd(v){if(!v)return'';var m=v.match?v.match(/\/Date\((\d+)\)\/$/):null;if(m)return new Date(parseInt(m[1])).toISOString().substring(0,10);return v;}
+function fmt(n){n=parseFloat(n)||0;if(n>=1e6)return'$'+(n/1e6).toFixed(1)+'M';if(n>=1e3)return'$'+(n/1e3).toFixed(0)+'K';return'$'+n.toFixed(0);}
+function fmtN(n){n=parseFloat(n)||0;if(n>=1e6)return(n/1e6).toFixed(1)+'M';if(n>=1e3)return(n/1e3).toFixed(0)+'K';return n.toFixed(0);}
+
+function toggleQB(){var b=document.getElementById('qbBody'),h=document.getElementById('qbHdr');b.classList.toggle('open');h.classList.toggle('open');h.querySelector('span').textContent=b.classList.contains('open')?'▲ Collapse':'▼ Expand';}
+function buildChips(){document.getElementById('chips').innerHTML=PREDEFINED.map(function(q,i){return '<div class="chip" onclick="runChip('+i+')" id="chip'+i+'">'+q.label+'</div>';}).join('');}
+function runChip(i){document.querySelectorAll('.chip').forEach(function(c){c.classList.remove('active');});document.getElementById('chip'+i).classList.add('active');var o=document.getElementById('qbOut');o.className='qb-out';o.innerHTML=PREDEFINED[i].fn(filtered);}
+
+async function runAI(){
+  var q=document.getElementById('aiInp').value.trim();
+  if(!q) return;
+  document.querySelectorAll('.chip').forEach(function(c){c.classList.remove('active');});
+  var btn=document.getElementById('btnAI');
+  var o=document.getElementById('qbOut');
+  btn.disabled=true;
+  btn.textContent='Analyzing...';
+  o.className='qb-out ai';
+  o.innerHTML='<span style="color:var(--muted)">Connecting to Claude AI...</span>';
+  var summary=buildSummary(filtered);
+  try{
+    var r=await fetch('/odata/v4/ai/analyze',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({question:q,summary:summary})
+    });
+    var data=await r.json();
+    if(data.error) throw new Error(data.error.message);
+    o.innerHTML='<b style="color:var(--purple)">AI Analysis:</b><br><br>'+data.value;
+  } catch(e){
+    o.innerHTML='<span style="color:var(--muted)">AI unavailable — local result:</span><br><br>'+runLocal(q);
+  }
+  btn.disabled=false;
+  btn.textContent='Ask AI';
+}
+
+function buildSummary(d){var won=d.filter(function(x){return x.LifeCycleStatusCode==='3';}).length,lost=d.filter(function(x){return x.LifeCycleStatusCode==='5';}).length,open=d.filter(function(x){return x.LifeCycleStatusCode==='1';}).length;var rev=d.reduce(function(s,x){return s+parseFloat(x.ExpectedRevenueAmount||0);},0);var om={};d.forEach(function(x){var k=x.SalesOrganisationName||'?';om[k]=(om[k]||0)+parseFloat(x.ExpectedRevenueAmount||0);});return 'Total:'+d.length+' Won:'+won+' Lost:'+lost+' Open:'+open+' WinRate:'+((won/(won+lost||1))*100).toFixed(1)+'% Revenue:'+fmtN(rev)+' TopOrgs:'+Object.entries(om).sort(function(a,b){return b[1]-a[1];}).slice(0,5).map(function(e){return e[0]+':'+fmtN(e[1]);}).join(',');}
+function runLocal(q){var ql=q.toLowerCase();if(ql.indexOf('win')>=0||ql.indexOf('won')>=0)return PREDEFINED[1].fn(filtered);if(ql.indexOf('lost')>=0||ql.indexOf('reason')>=0)return PREDEFINED[2].fn(filtered);if(ql.indexOf('owner')>=0)return PREDEFINED[4].fn(filtered);return PREDEFINED[0].fn(filtered);}
+
+function populateFilters(data){
+  var orgs=[...new Set(data.map(function(d){return d.SalesOrganisationName;}).filter(Boolean))].sort();
+  var phases=[...new Set(data.map(function(d){return d.SalesCyclePhaseCodeText;}).filter(Boolean))].sort();
+  orgs.forEach(function(o){var e=document.createElement('option');e.value=o;e.textContent=o;document.getElementById('fOrg').appendChild(e);});
+  phases.forEach(function(p){var e=document.createElement('option');e.value=p;e.textContent=p;document.getElementById('fPhase').appendChild(e);});
+}
+
+function applyFilters(){
+  var org=document.getElementById('fOrg').value,status=document.getElementById('fStatus').value,phase=document.getElementById('fPhase').value,year=document.getElementById('fYear').value||'2024';
+  filtered=allData.filter(function(d){var cd=pd(d.CreationDate);if(org&&d.SalesOrganisationName!==org)return false;if(status&&d.LifeCycleStatusCode!==status)return false;if(phase&&d.SalesCyclePhaseCodeText!==phase)return false;if(!cd||cd.substring(0,4)<year)return false;return true;});
+  renderKPIs();renderContent();
+}
+
+function renderKPIs(){
+  var d=filtered,total=d.length;
+  var won=d.filter(function(x){return x.LifeCycleStatusCode==='3';}).length;
+  var lost=d.filter(function(x){return x.LifeCycleStatusCode==='5';}).length;
+  var open=d.filter(function(x){return x.LifeCycleStatusCode==='1';}).length;
+  var rev=d.reduce(function(s,x){return s+parseFloat(x.ExpectedRevenueAmount||0);},0);
+  var wr=(won+lost)>0?((won/(won+lost))*100).toFixed(1):'0.0';
+  var orgs=[...new Set(d.map(function(x){return x.SalesOrganisationID;}).filter(Boolean))].length;
+  document.getElementById('kpiRow').innerHTML=
+    '<div class="kpi-tile"><div class="kl">Total Opportunities</div><div class="kv">'+total.toLocaleString()+'</div><div class="ks">'+orgs+' sales orgs active</div></div>'+
+    '<div class="kpi-tile"><div class="kl">Expected Revenue</div><div class="kv">'+fmt(rev)+'</div><div class="ks">Total pipeline value</div></div>'+
+    '<div class="kpi-tile"><div class="kl">Win Rate</div><div class="kv">'+wr+'%</div><div class="ks">'+won+' won · '+lost+' lost</div></div>'+
+    '<div class="kpi-tile"><div class="kl">Lost Deals</div><div class="kv">'+lost+'</div><div class="ks">'+((lost/(total||1))*100).toFixed(1)+'% of total</div></div>'+
+    '<div class="kpi-tile"><div class="kl">Open Pipeline</div><div class="kv">'+open+'</div><div class="ks">Active opportunities</div></div>';
+}
+
+function destroyCharts(){Object.values(charts).forEach(function(c){c.destroy();});charts={};}
+
+function renderContent(){
+  destroyCharts();
+  var d=filtered;
+  var gc='#f0f0f0',tc='#89919a';
+  var sapColors=['#0a6ed1','#107e3e','#e9730c','#bb0000','#6c32a9','#0e7e76','#c2781f','#89919a','#1589ee','#0aaf67'];
+
+  document.getElementById('mainContent').innerHTML=
+    '<div class="panel w2" id="p1"><div class="panel-hdr"><div><h3>Expected Value (USD) Per Sales Organization</h3><div class="ph-sub">in Thousand · Top 8</div></div><button class="panel-btn">⤢</button></div><div class="panel-body"><canvas id="cOrg" role="img" aria-label="Bar chart of expected revenue by sales org"></canvas></div></div>'+
+    '<div class="panel" id="p2"><div class="panel-hdr"><div><h3>Opportunities per Lifecycle Status</h3></div></div><div class="panel-body"><canvas id="cStatus" role="img" aria-label="Horizontal bar chart of lifecycle status"></canvas></div></div>'+
+    '<div class="panel" id="p3"><div class="panel-hdr"><div><h3>Reason for Status</h3><div class="ph-sub">Top N (AUTO)</div></div></div><div class="leg" id="reasonLeg"></div><div class="panel-body"><canvas id="cReason" role="img" aria-label="Donut chart of reason for status"></canvas></div></div>'+
+    '<div class="panel" id="p4"><div class="panel-hdr"><div><h3>Opportunities per Sales Phase</h3></div></div><div class="panel-body"><canvas id="cPhase" role="img" aria-label="Bar chart by sales phase"></canvas></div></div>'+
+    '<div class="panel" id="p5"><div class="panel-hdr"><div><h3>Win Rate by Sales Org</h3></div></div><div class="panel-body"><canvas id="cWin" role="img" aria-label="Bar chart of win rate by org"></canvas></div></div>'+
+    '<div class="panel" id="p6"><div class="panel-hdr"><div><h3>Revenue Trend by Year</h3></div></div><div class="panel-body"><canvas id="cLine" role="img" aria-label="Line chart of revenue trend"></canvas></div></div>'+
+    '<div class="panel" id="p7"><div class="panel-hdr"><div><h3>Open Pipeline by Owner</h3></div></div><div class="panel-body"><canvas id="cOwner" role="img" aria-label="Horizontal bar chart of pipeline by owner"></canvas></div></div>'+
+    '<div class="qb"><div class="qb-hdr" id="qbHdr" onclick="toggleQB()"><h3>🔍 Query Builder &amp; AI Analysis</h3><span>▼ Expand</span></div><div class="qb-body" id="qbBody"><div class="chips" id="chips"></div><div class="ai-row"><input class="ai-inp" type="text" id="aiInp" placeholder="Ask anything — e.g. Which org has the best win rate?" onkeydown="if(event.key===\'Enter\')runAI()" /><button class="btn-ai" id="btnAI" onclick="runAI()">Ask AI</button></div><div class="qb-out" id="qbOut">Select a predefined query or type a question.</div></div></div>'+
+    '<div class="tbl-panel"><div class="tbl-hdr"><h3>Opportunity List</h3><span class="tbl-ct" id="tblCt">Loading...</span></div><table><thead><tr><th>ID</th><th>Opportunity</th><th>Account</th><th>Sales Org</th><th>Phase</th><th>Revenue</th><th>Status</th><th>Owner</th><th></th></tr></thead><tbody id="tBody"></tbody></table></div>';
+
+  buildChips();
+
+  var om={};d.forEach(function(x){var o=x.SalesOrganisationName||'?';om[o]=(om[o]||0)+parseFloat(x.ExpectedRevenueAmount||0);});
+  var os=Object.entries(om).sort(function(a,b){return b[1]-a[1];}).slice(0,8);
+  charts.org=new Chart(document.getElementById('cOrg'),{type:'bar',data:{labels:os.map(function(e){return e[0].replace(/TSS\s*/,'');}),datasets:[{data:os.map(function(e){return e[1]/1000;}),backgroundColor:sapColors,borderRadius:2,borderSkipped:false}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return ' '+c.raw.toFixed(0)+'K USD';}}}},scales:{x:{ticks:{color:tc,font:{size:9}},grid:{color:gc}},y:{ticks:{color:tc,callback:function(v){return v+'K';}},grid:{color:gc}}}}});
+
+  var sm={};d.forEach(function(x){var k=x.LifeCycleStatusCodeText||'?';sm[k]=(sm[k]||0)+1;});
+  var ss=Object.entries(sm).sort(function(a,b){return b[1]-a[1];});
+  var scC={'Won':'#107e3e','Lost':'#89919a','Open':'#0a6ed1','Stopped':'#c2781f','In Process':'#e9730c'};
+  charts.status=new Chart(document.getElementById('cStatus'),{type:'bar',data:{labels:ss.map(function(e){return e[0];}),datasets:[{data:ss.map(function(e){return e[1];}),backgroundColor:ss.map(function(e){return scC[e[0]]||'#b0adab';}),borderRadius:2,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:tc},grid:{color:gc}},y:{ticks:{color:tc},grid:{color:gc}}}}});
+
+  var rm={};d.filter(function(x){return x.LifeCycleStatusCode==='5';}).forEach(function(x){var k=x.ResultReasonCodeText||'(Null)';rm[k]=(rm[k]||0)+1;});
+  var rs=Object.entries(rm).sort(function(a,b){return b[1]-a[1];}).slice(0,7);
+  var rColors=['#89919a','#6c32a9','#bb0000','#0e7e76','#107e3e','#e9730c','#c2781f'];
+  var rTotal=rs.reduce(function(s,e){return s+e[1];},0);
+  document.getElementById('reasonLeg').innerHTML=rs.map(function(e,i){return '<div class="leg-i"><div class="leg-dot" style="background:'+rColors[i]+'"></div>'+e[0].substring(0,18)+' '+(e[1]/rTotal*100).toFixed(1)+'%</div>';}).join('');
+  charts.reason=new Chart(document.getElementById('cReason'),{type:'doughnut',data:{labels:rs.map(function(e){return e[0].substring(0,18);}),datasets:[{data:rs.map(function(e){return e[1];}),backgroundColor:rColors,borderWidth:2,borderColor:'white',hoverOffset:4}]},options:{responsive:true,cutout:'60%',plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return ' '+(c.raw/rTotal*100).toFixed(1)+'%';}}}}}});
+
+  var pm={};d.forEach(function(x){var p=x.SalesCyclePhaseCodeText||'?';pm[p]=(pm[p]||0)+1;});
+  var ps=Object.entries(pm).sort(function(a,b){return b[1]-a[1];});
+  charts.phase=new Chart(document.getElementById('cPhase'),{type:'bar',data:{labels:ps.map(function(e){return e[0].replace(/^\d+\s/,'').substring(0,20);}),datasets:[{data:ps.map(function(e){return e[1];}),backgroundColor:'#0a6ed1',borderRadius:2,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:tc},grid:{color:gc}},y:{ticks:{color:tc,font:{size:9}},grid:{color:gc}}}}});
+
+  var wm={};d.forEach(function(x){var k=x.SalesOrganisationName||'?';if(!wm[k])wm[k]={w:0,l:0};if(x.LifeCycleStatusCode==='3')wm[k].w++;if(x.LifeCycleStatusCode==='5')wm[k].l++;});
+  var ws=Object.entries(wm).filter(function(e){return e[1].w+e[1].l>=3;}).map(function(e){return{k:e[0].replace(/TSS\s*/,''),r:e[1].w/(e[1].w+e[1].l)*100};}).sort(function(a,b){return b.r-a.r;}).slice(0,8);
+  charts.win=new Chart(document.getElementById('cWin'),{type:'bar',data:{labels:ws.map(function(e){return e.k;}),datasets:[{data:ws.map(function(e){return e.r;}),backgroundColor:ws.map(function(e){return e.r>=30?'#107e3e':e.r>=20?'#0a6ed1':'#e9730c';}),borderRadius:2,borderSkipped:false}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return ' '+c.raw.toFixed(1)+'%';}}}},scales:{x:{ticks:{color:tc,font:{size:9}},grid:{color:gc}},y:{ticks:{color:tc,callback:function(v){return v+'%';}},grid:{color:gc},max:100}}}});
+
+  var ym={};d.forEach(function(x){var y=pd(x.CreationDate).substring(0,4)||'?';ym[y]=(ym[y]||0)+parseFloat(x.ExpectedRevenueAmount||0);});
+  var yrs=Object.keys(ym).filter(function(y){return y!=='?';}).sort();
+  charts.line=new Chart(document.getElementById('cLine'),{type:'line',data:{labels:yrs,datasets:[{label:'Revenue',data:yrs.map(function(y){return ym[y];}),borderColor:'#0a6ed1',backgroundColor:'rgba(10,110,209,0.06)',tension:0.4,fill:true,pointBackgroundColor:'#0a6ed1',pointRadius:3}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:tc},grid:{color:gc}},y:{ticks:{color:tc,callback:function(v){return fmtN(v);}},grid:{color:gc}}}}});
+
+  var oo={};d.filter(function(x){return x.LifeCycleStatusCode==='1';}).forEach(function(x){var k=x.MainEmployeeResponsiblePartyName||'?';oo[k]=(oo[k]||0)+parseFloat(x.ExpectedRevenueAmount||0);});
+  var ooe=Object.entries(oo).sort(function(a,b){return b[1]-a[1];}).slice(0,8);
+  charts.owner=new Chart(document.getElementById('cOwner'),{type:'bar',data:{labels:ooe.map(function(e){return e[0].split(' ').slice(-1)[0];}),datasets:[{data:ooe.map(function(e){return e[1];}),backgroundColor:'#6c32a9',borderRadius:2,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return ' '+fmt(c.raw);}}}},scales:{x:{ticks:{color:tc,callback:function(v){return fmtN(v);}},grid:{color:gc}},y:{ticks:{color:tc,font:{size:9}},grid:{color:gc}}}}});
+
+  var sc=function(s){return s==='3'?'won':s==='5'?'lost':'open';};
+  var st=function(s){return s==='3'?'Won':s==='5'?'Lost':'Open';};
+  document.getElementById('tblCt').textContent='Showing '+Math.min(filtered.length,50)+' of '+filtered.length;
+  document.getElementById('tBody').innerHTML=filtered.slice(0,50).map(function(row){
+    return '<tr><td class="td-id">'+row.ID+'</td><td>'+(row.Name||'—')+'</td><td style="color:var(--muted)">'+(row.ProspectPartyName||'—')+'</td><td style="color:var(--muted)">'+(row.SalesOrganisationName||'').replace(/TSS\s*/,'')+'</td><td style="color:var(--muted);font-size:0.7rem">'+(row.SalesCyclePhaseCodeText||'—')+'</td><td class="td-rev">'+fmt(parseFloat(row.ExpectedRevenueAmount||0))+'</td><td><span class="badge '+sc(row.LifeCycleStatusCode)+'">'+st(row.LifeCycleStatusCode)+'</span></td><td style="color:var(--muted);font-size:0.7rem">'+(row.MainEmployeeResponsiblePartyName||'—')+'</td><td><a class="c4c-link" href="'+C4C+'/sap/c4c/ui#OpportunityCollection&/OpportunityCollection/'+row.ObjectID+'" target="_blank">Open ↗</a></td></tr>';
+  }).join('');
+}
+
+async function fetchAll(){
+  var url='/odata/v4/opportunity/Opportunities?$top=1000',all=[];
+  while(url){
+    var res=await fetch(url);
+    var json=await res.json();
+    if(json.error)throw new Error(json.error.message);
+    all=all.concat(json.value);
+    url=json['@odata.nextLink']?'/odata/v4/opportunity/'+json['@odata.nextLink']:null;
+  }
+  return all;
+}
+
+async function init(){
+  try{
+    allData=await fetchAll();
+    var now=new Date();
+    document.getElementById('lastUpdate').textContent='Last updated: '+now.toLocaleString('en-GB');
+    document.getElementById('pageSub').textContent='As of '+now.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})+' · C4C QUA · MY352500 · '+allData.length.toLocaleString()+' records loaded';
+    populateFilters(allData);
+    document.getElementById('fYear').value='2024';
+    applyFilters();
+  } catch(e){
+    document.getElementById('mainContent').innerHTML='<div style="grid-column:span 3;padding:40px;color:var(--sap-red);">Error: '+e.message+'</div>';
+  }
+}
+
+init();
+</script>
+</body>
+</html>

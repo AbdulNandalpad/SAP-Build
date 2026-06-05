@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TSS AI Report Builder</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#f0f2f5;--card:#fff;--border:#e0e3e8;--border2:#c8cdd6;
+  --blue:#0a6ed1;--blue2:#0854a0;--blue3:#e8f2fd;
+  --green:#107e3e;--green2:#d7f0e3;
+  --red:#bb0000;--red2:#ffd7d7;
+  --orange:#e9730c;--purple:#6c32a9;--teal:#0e7e76;--gold:#c2781f;
+  --text:#1d2d3e;--muted:#6a6d70;--light:#a0a4aa;--shell:#354a5e;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;}
+.shell{background:var(--shell);height:44px;display:flex;align-items:center;padding:0 24px;gap:12px;position:sticky;top:0;z-index:100;}
+.shell-sap{background:white;border-radius:3px;padding:2px 6px;font-size:0.75rem;font-weight:700;color:var(--shell);letter-spacing:1px;}
+.shell-sep{width:1px;height:18px;background:rgba(255,255,255,0.2);}
+.shell-title{font-size:0.85rem;font-weight:500;color:white;}
+.shell-back{margin-left:auto;font-size:0.72rem;color:rgba(255,255,255,0.7);text-decoration:none;padding:4px 10px;border:1px solid rgba(255,255,255,0.2);border-radius:3px;}
+.shell-back:hover{background:rgba(255,255,255,0.1);color:white;}
+.stepper{background:white;border-bottom:1px solid var(--border);padding:14px 0;display:flex;justify-content:center;}
+.step{display:flex;align-items:center;gap:8px;padding:0 16px;}
+.step-num{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:600;border:1.5px solid var(--border2);color:var(--light);transition:all 0.3s;}
+.step-label{font-size:0.72rem;font-weight:500;color:var(--light);letter-spacing:1px;text-transform:uppercase;transition:color 0.3s;}
+.step-line{width:50px;height:1px;background:var(--border2);transition:background 0.3s;}
+.step.active .step-num{border-color:var(--blue);color:var(--blue);background:var(--blue3);}
+.step.active .step-label{color:var(--blue);}
+.step.done .step-num{border-color:var(--green);background:var(--green);color:white;}
+.step.done .step-label{color:var(--green);}
+.page{display:none;min-height:calc(100vh - 88px);}
+.page.active{display:flex;}
+
+/* DEFINE */
+#page1{flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;}
+.define-badge{font-size:0.65rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;display:flex;align-items:center;gap:6px;margin-bottom:20px;}
+.define-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--blue);display:inline-block;}
+.define-title{font-family:'Playfair Display',serif;font-size:2.4rem;font-weight:700;color:var(--text);text-align:center;margin-bottom:12px;}
+.define-sub{font-size:0.9rem;color:var(--muted);text-align:center;line-height:1.6;max-width:500px;margin-bottom:36px;}
+.define-box{width:100%;max-width:680px;background:white;border:1px solid var(--border2);border-radius:8px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.06);}
+.define-textarea{width:100%;min-height:120px;padding:20px;font-size:0.95rem;font-family:'Inter',sans-serif;color:var(--text);border:none;resize:none;outline:none;line-height:1.6;}
+.define-textarea::placeholder{color:var(--light);font-style:italic;}
+.define-footer{padding:12px 20px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:#fafbfc;}
+.define-hint{font-size:0.72rem;color:var(--light);}
+.define-btn{background:var(--blue);color:white;border:none;padding:8px 20px;border-radius:4px;font-size:0.82rem;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;}
+.define-btn:hover{background:var(--blue2);}
+.define-btn:disabled{opacity:0.4;cursor:not-allowed;}
+.suggestions{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px;max-width:680px;justify-content:center;}
+.sug{background:white;border:1px solid var(--border2);color:var(--muted);padding:6px 14px;border-radius:20px;font-size:0.76rem;cursor:pointer;transition:all 0.15s;}
+.sug:hover{border-color:var(--blue);color:var(--blue);background:var(--blue3);}
+
+/* CONFIRM */
+#page2{flex-direction:column;align-items:center;padding:48px 24px;}
+.confirm-card{width:100%;max-width:640px;background:white;border:1px solid var(--border);border-radius:8px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.06);}
+.confirm-hdr{background:var(--blue3);padding:20px 24px;border-bottom:1px solid var(--border);}
+.confirm-hdr h2{font-size:1rem;font-weight:600;color:var(--blue);margin-bottom:4px;}
+.confirm-hdr p{font-size:0.78rem;color:var(--muted);}
+.confirm-body{padding:24px;}
+.confirm-section{margin-bottom:20px;}
+.confirm-label{font-size:0.68rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;}
+.confirm-value{font-size:0.88rem;color:var(--text);background:var(--bg);padding:10px 14px;border-radius:4px;border-left:3px solid var(--blue);line-height:1.6;}
+.confirm-chips{display:flex;flex-wrap:wrap;gap:6px;}
+.confirm-chip{padding:4px 10px;border-radius:3px;font-size:0.72rem;font-weight:500;}
+.chip-chart{background:#e8f2fd;color:var(--blue);}
+.chip-text{background:#d7f0e3;color:var(--green);}
+.chip-data{background:#fef0de;color:var(--orange);}
+.chip-kpi{background:var(--bg);color:var(--muted);border:1px solid var(--border);}
+.confirm-understanding{background:#f8f9fa;border:1px solid var(--border);border-radius:4px;padding:14px;margin-top:12px;}
+.confirm-understanding-label{font-size:0.65rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
+.confirm-understanding-text{font-size:0.82rem;color:var(--text);line-height:1.6;}
+.confirm-actions{display:flex;gap:10px;padding:16px 24px;border-top:1px solid var(--border);background:#fafbfc;}
+.btn-sec{background:white;color:var(--text);border:1px solid var(--border2);padding:8px 18px;border-radius:4px;font-size:0.8rem;cursor:pointer;font-family:'Inter',sans-serif;}
+.btn-sec:hover{background:var(--bg);}
+.btn-pri{background:var(--blue);color:white;border:none;padding:8px 20px;border-radius:4px;font-size:0.8rem;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;}
+.btn-pri:hover{background:var(--blue2);}
+.thinking-dots{display:inline-flex;gap:3px;align-items:center;margin-left:6px;}
+.thinking-dots span{width:5px;height:5px;background:var(--blue);border-radius:50%;animation:dot 1.2s infinite;}
+.thinking-dots span:nth-child(2){animation-delay:0.2s;}
+.thinking-dots span:nth-child(3){animation-delay:0.4s;}
+@keyframes dot{0%,80%,100%{opacity:0.2;}40%{opacity:1;}}
+
+/* BUILD */
+#page3{flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;}
+.build-spinner{width:56px;height:56px;border:3px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin 0.8s linear infinite;margin-bottom:20px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.build-title{font-size:1.1rem;font-weight:600;color:var(--text);margin-bottom:6px;}
+.build-sub{font-size:0.82rem;color:var(--muted);margin-bottom:28px;}
+.build-steps{width:100%;max-width:400px;display:flex;flex-direction:column;gap:8px;}
+.build-step{display:flex;align-items:center;gap:10px;padding:10px 14px;background:white;border:1px solid var(--border);border-radius:4px;font-size:0.78rem;color:var(--light);transition:all 0.3s;}
+.build-step.active{color:var(--blue);border-color:var(--blue);background:var(--blue3);}
+.build-step.done{color:var(--green);border-color:var(--green);background:var(--green2);}
+.build-step-dot{width:8px;height:8px;border-radius:50%;border:1.5px solid currentColor;flex-shrink:0;transition:all 0.3s;}
+.build-step.done .build-step-dot{background:var(--green);}
+.build-step.active .build-step-dot{background:var(--blue);}
+.build-progress{width:100%;max-width:400px;height:3px;background:var(--border);border-radius:2px;margin-top:20px;overflow:hidden;}
+.build-progress-bar{height:100%;background:var(--blue);border-radius:2px;transition:width 0.5s ease;width:0%;}
+
+/* REPORT */
+#page4{flex-direction:column;padding:0;}
+.report-topbar{background:white;border-bottom:1px solid var(--border);padding:10px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:44px;z-index:50;}
+.report-topbar-left h2{font-size:0.95rem;font-weight:600;color:var(--text);}
+.report-topbar-left p{font-size:0.68rem;color:var(--muted);margin-top:1px;}
+.report-topbar-actions{display:flex;gap:8px;}
+.rbtn{background:white;border:1px solid var(--border2);color:var(--text);padding:5px 12px;border-radius:4px;font-size:0.74rem;cursor:pointer;font-family:'Inter',sans-serif;transition:background 0.15s;}
+.rbtn:hover{background:var(--bg);}
+.rbtn.pri{background:var(--blue);color:white;border-color:var(--blue);}
+.rbtn.pri:hover{background:var(--blue2);}
+.report-body{padding:16px 24px 48px;}
+
+/* KPI */
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:14px;}
+.kpi-tile{background:white;padding:14px 16px;position:relative;}
+.kpi-tile::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.kpi-tile:nth-child(1)::before{background:var(--blue);}
+.kpi-tile:nth-child(2)::before{background:var(--green);}
+.kpi-tile:nth-child(3)::before{background:var(--orange);}
+.kpi-tile:nth-child(4)::before{background:var(--red);}
+.kpi-tile:nth-child(5)::before{background:var(--purple);}
+.kv{font-size:1.6rem;font-weight:300;line-height:1.1;margin-top:2px;}
+.kpi-tile:nth-child(1) .kv{color:var(--blue);}
+.kpi-tile:nth-child(2) .kv{color:var(--green);}
+.kpi-tile:nth-child(3) .kv{color:var(--orange);}
+.kpi-tile:nth-child(4) .kv{color:var(--red);}
+.kpi-tile:nth-child(5) .kv{color:var(--purple);}
+.kl{font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;font-weight:500;}
+.ks{font-size:0.68rem;color:var(--light);margin-top:2px;}
+
+/* INSIGHT */
+.insight-card{background:white;border:1px solid var(--border);border-radius:6px;padding:20px 24px;margin-bottom:14px;border-left:4px solid var(--blue);}
+.insight-card.text-report{border-left-color:var(--green);}
+.insight-header{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.insight-icon{font-size:1.1rem;}
+.insight-title{font-size:0.78rem;font-weight:600;color:var(--blue);text-transform:uppercase;letter-spacing:1px;}
+.insight-card.text-report .insight-title{color:var(--green);}
+.insight-body{font-size:0.88rem;color:var(--text);line-height:1.8;}
+
+/* CHART PANELS */
+.chart-grid{display:grid;gap:12px;margin-bottom:14px;}
+.g3{grid-template-columns:1fr 1fr 1fr;}
+.g2{grid-template-columns:2fr 1fr;}
+.g21{grid-template-columns:2fr 1fr;}
+.panel{background:white;border:1px solid var(--border);border-radius:6px;overflow:hidden;}
+.panel.hero{border:2px solid var(--blue3);}
+.panel-hdr{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.panel-hdr h3{font-size:0.8rem;font-weight:600;color:var(--text);}
+.panel-hdr .ph-tag{font-size:0.62rem;color:var(--muted);background:var(--bg);padding:2px 7px;border:1px solid var(--border);border-radius:3px;}
+.panel-hdr .ph-tag.hero{background:var(--blue3);color:var(--blue);border-color:rgba(10,110,209,0.2);}
+.panel-body{padding:12px 14px;}
+canvas{max-height:220px;}
+
+/* TABLE */
+.tbl-panel{background:white;border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:14px;}
+.tbl-hdr{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.tbl-hdr h3{font-size:0.8rem;font-weight:600;}
+.tbl-ct{font-size:0.68rem;color:var(--muted);background:var(--bg);padding:2px 8px;border:1px solid var(--border);border-radius:3px;}
+table{width:100%;border-collapse:collapse;font-size:0.74rem;}
+th{background:#f5f6f7;color:var(--muted);padding:7px 12px;text-align:left;font-weight:600;font-size:0.65rem;border-bottom:1px solid var(--border);text-transform:uppercase;white-space:nowrap;}
+td{padding:7px 12px;border-bottom:1px solid #f0f0f0;color:var(--text);}
+tr:hover td{background:#fafbfc;}
+.badge{padding:2px 6px;border-radius:3px;font-size:0.64rem;font-weight:600;}
+.won{background:var(--green2);color:var(--green);}
+.lost{background:var(--red2);color:var(--red);}
+.open{background:var(--blue3);color:var(--blue);}
+.c4c-link{color:var(--blue);text-decoration:none;font-size:0.68rem;}
+.c4c-link:hover{text-decoration:underline;}
+
+/* REFINE */
+.refine-panel{background:white;border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:14px;}
+.refine-hdr{padding:10px 14px;border-bottom:1px solid var(--border);font-size:0.8rem;font-weight:600;color:var(--text);}
+.refine-row{display:flex;}
+.refine-inp{flex:1;border:none;padding:10px 14px;font-size:0.8rem;font-family:'Inter',sans-serif;color:var(--text);outline:none;}
+.refine-inp::placeholder{color:var(--light);}
+.refine-btn{background:var(--blue);color:white;border:none;padding:10px 20px;font-size:0.78rem;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;}
+.refine-btn:hover{background:var(--blue2);}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <div class="shell-sap">SAP</div>
+  <div class="shell-sep"></div>
+  <span class="shell-title">AI Report Builder · TSS Opportunity Intelligence</span>
+  <a href="index.html" class="shell-back">← Dashboard</a>
+</div>
+
+<div class="stepper">
+  <div class="step active" id="step1"><div class="step-num">1</div><div class="step-label">Define</div></div>
+  <div class="step-line" id="line1"></div>
+  <div class="step" id="step2"><div class="step-num">2</div><div class="step-label">Confirm</div></div>
+  <div class="step-line" id="line2"></div>
+  <div class="step" id="step3"><div class="step-num">3</div><div class="step-label">Build</div></div>
+  <div class="step-line" id="line3"></div>
+  <div class="step" id="step4"><div class="step-num">4</div><div class="step-label">Report</div></div>
+</div>
+
+<!-- PAGE 1: DEFINE -->
+<div class="page active" id="page1">
+  <div class="define-badge">AI Report Builder</div>
+  <div class="define-title">What do you want to know?</div>
+  <div class="define-sub">Describe your report in plain English. AI reads your question, decides what charts and analysis to build, then generates a full report from live C4C data.</div>
+  <div class="define-box">
+    <textarea class="define-textarea" id="defineInput" placeholder='"Show me an executive summary of our pipeline performance in 2024"'></textarea>
+    <div class="define-footer">
+      <span class="define-hint">Ctrl + Enter to continue</span>
+      <button class="define-btn" id="defineBtn" onclick="goToConfirm()">CONTINUE →</button>
+    </div>
+  </div>
+  <div class="suggestions">
+    <div class="sug" onclick="setSug(this)">Executive summary of 2024 pipeline</div>
+    <div class="sug" onclick="setSug(this)">Win rate analysis by sales org</div>
+    <div class="sug" onclick="setSug(this)">Why are we losing deals?</div>
+    <div class="sug" onclick="setSug(this)">Open pipeline health by owner</div>
+    <div class="sug" onclick="setSug(this)">Revenue breakdown by sales phase</div>
+    <div class="sug" onclick="setSug(this)">Top 10 opportunities by value</div>
+    <div class="sug" onclick="setSug(this)">Sales org performance scorecard</div>
+    <div class="sug" onclick="setSug(this)">Monthly pipeline trend for 2024</div>
+  </div>
+</div>
+
+<!-- PAGE 2: CONFIRM -->
+<div class="page" id="page2">
+  <div class="confirm-card">
+    <div class="confirm-hdr">
+      <h2 id="confirmHeadline">AI is understanding your request<span class="thinking-dots"><span></span><span></span><span></span></span></h2>
+      <p>Reviewing the plan before building. Go back to refine if needed.</p>
+    </div>
+    <div class="confirm-body">
+      <div class="confirm-section">
+        <div class="confirm-label">Your Request</div>
+        <div class="confirm-value" id="confirmRequest">—</div>
+      </div>
+      <div class="confirm-section">
+        <div class="confirm-label">AI Understanding</div>
+        <div class="confirm-understanding">
+          <div class="confirm-understanding-text" id="confirmUnderstanding">Analyzing your request...</div>
+        </div>
+      </div>
+      <div class="confirm-section">
+        <div class="confirm-label">Report Will Include</div>
+        <div class="confirm-chips" id="confirmChips">
+          <span class="confirm-chip chip-kpi">Loading...</span>
+        </div>
+      </div>
+      <div class="confirm-section">
+        <div class="confirm-label">Data Source</div>
+        <div class="confirm-value">C4C OpportunityCollection · MY352500 QUA · 2024+ · <span id="confirmCount">—</span> records</div>
+      </div>
+    </div>
+    <div class="confirm-actions">
+      <button class="btn-sec" onclick="goTo(1)">← Redefine</button>
+      <button class="btn-pri" id="confirmBuildBtn" onclick="goToBuild()" disabled>Confirm & Build →</button>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE 3: BUILD -->
+<div class="page" id="page3">
+  <div class="build-spinner"></div>
+  <div class="build-title" id="buildTitle">Building your report...</div>
+  <div class="build-sub" id="buildSub">AI is analyzing C4C data</div>
+  <div class="build-steps">
+    <div class="build-step" id="bs1"><div class="build-step-dot"></div><span>Reading C4C opportunity data</span></div>
+    <div class="build-step" id="bs2"><div class="build-step-dot"></div><span>Processing aggregations by org, phase, owner</span></div>
+    <div class="build-step" id="bs3"><div class="build-step-dot"></div><span>Claude AI selecting charts & generating config</span></div>
+    <div class="build-step" id="bs4"><div class="build-step-dot"></div><span>Rendering full report</span></div>
+  </div>
+  <div class="build-progress"><div class="build-progress-bar" id="buildBar"></div></div>
+</div>
+
+<!-- PAGE 4: REPORT -->
+<div class="page" id="page4">
+  <div class="report-topbar">
+    <div class="report-topbar-left">
+      <h2 id="rTopTitle">AI Report</h2>
+      <p id="rTopSub">C4C QUA · MY352500</p>
+    </div>
+    <div class="report-topbar-actions">
+      <button class="rbtn" onclick="goTo(1)">New Report</button>
+      <button class="rbtn" onclick="window.print()">Export</button>
+      <button class="rbtn pri" onclick="document.querySelector('.refine-inp').scrollIntoView({behavior:'smooth'});document.querySelector('.refine-inp').focus();">Refine ↓</button>
+    </div>
+  </div>
+  <div class="report-body" id="reportBody"></div>
+</div>
+
+<script>
+var allData=[], currentQ='', aiPlan=null, reportCharts={};
+var C4C='https://my352500.crm.ondemand.com';
+var SAP=['#0a6ed1','#107e3e','#e9730c','#bb0000','#6c32a9','#0e7e76','#c2781f','#89919a','#1589ee','#0aaf67'];
+
+async function fetchData(){
+  try{
+    var url='/odata/v4/opportunity/Opportunities?$top=1000',all=[];
+    while(url){var r=await fetch(url);var j=await r.json();if(j.error)throw new Error(j.error.message);all=all.concat(j.value);url=j['@odata.nextLink']?'/odata/v4/opportunity/'+j['@odata.nextLink']:null;}
+    allData=all;
+    document.getElementById('defineBtn').disabled=false;
+    document.getElementById('confirmCount').textContent=all.length.toLocaleString();
+  }catch(e){console.error(e);}
+}
+
+function setSug(el){document.getElementById('defineInput').value=el.textContent;document.getElementById('defineInput').focus();}
+document.addEventListener('keydown',function(e){if((e.metaKey||e.ctrlKey)&&e.key=='Enter'){if(document.getElementById('page1').classList.contains('active'))goToConfirm();}});
+
+function goTo(n){
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
+  document.getElementById('page'+n).classList.add('active');
+  for(var i=1;i<=4;i++){var s=document.getElementById('step'+i);s.classList.remove('active','done');if(i<n)s.classList.add('done');else if(i===n)s.classList.add('active');if(i<4)document.getElementById('line'+i).style.background=i<n?'#107e3e':'#e0e3e8';}
+  window.scrollTo(0,0);
+}
+
+async function goToConfirm(){
+  var q=document.getElementById('defineInput').value.trim();
+  if(!q)return;
+  currentQ=q;
+  document.getElementById('confirmRequest').textContent=q;
+  document.getElementById('confirmHeadline').innerHTML='AI is understanding your request<span class="thinking-dots"><span></span><span></span><span></span></span>';
+  document.getElementById('confirmBuildBtn').disabled=true;
+  document.getElementById('confirmUnderstanding').textContent='Analyzing...';
+  document.getElementById('confirmChips').innerHTML='<span class="confirm-chip chip-kpi">Loading...</span>';
+  goTo(2);
+
+  // Call AI to understand the question
+  try{
+    var summary=buildQuickSummary();
+    var r=await fetch('/odata/v4/ai/analyze',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        question:'Analyze this report request and return a JSON plan. Request: "'+q+'". Return ONLY JSON: {"understanding":"1-2 sentences explaining what you will analyze","reportType":"executive_summary|chart_report|table_report|mixed","primaryFocus":"what the main chart/analysis will be","supportingCharts":["list of 2-4 supporting chart names relevant to the question"],"willInclude":["list of 4-6 specific things the report will contain"]}. No markdown.',
+        summary:summary
+      })
+    });
+    var data=await r.json();
+    var raw=(data.value||'').replace(/```json|```/g,'').trim();
+    var plan=JSON.parse(raw);
+    aiPlan=plan;
+
+    document.getElementById('confirmHeadline').innerHTML='AI understood your request ✓';
+    document.getElementById('confirmUnderstanding').textContent=plan.understanding;
+    
+    var chipColors={'executive_summary':'chip-text','chart_report':'chip-chart','table_report':'chip-data','mixed':'chip-chart'};
+    var chips=(plan.willInclude||[]).map(function(item,i){
+      var cls=i===0?'chip-chart':i===1?'chip-text':i===2?'chip-kpi':i===3?'chip-data':'chip-kpi';
+      return '<span class="confirm-chip '+cls+'">'+item+'</span>';
+    }).join('');
+    document.getElementById('confirmChips').innerHTML=chips;
+    document.getElementById('confirmBuildBtn').disabled=false;
+  }catch(e){
+    document.getElementById('confirmHeadline').innerHTML='Plan ready';
+    document.getElementById('confirmUnderstanding').textContent='Will build a comprehensive report answering: '+q;
+    document.getElementById('confirmChips').innerHTML='<span class="confirm-chip chip-kpi">KPI tiles</span><span class="confirm-chip chip-chart">Primary chart</span><span class="confirm-chip chip-text">AI insight</span><span class="confirm-chip chip-data">Data table</span>';
+    document.getElementById('confirmBuildBtn').disabled=false;
+  }
+}
+
+function buildQuickSummary(){
+  var d=allData;
+  var won=d.filter(function(x){return x.LifeCycleStatusCode==='3';}).length;
+  var lost=d.filter(function(x){return x.LifeCycleStatusCode==='5';}).length;
+  var open=d.filter(function(x){return x.LifeCycleStatusCode==='1';}).length;
+  var rev=d.reduce(function(s,x){return s+parseFloat(x.ExpectedRevenueAmount||0);},0);
+  var om={};d.forEach(function(x){var k=(x.SalesOrganisationName||'?').replace('TSS ','');if(!om[k])om[k]={rev:0,won:0,lost:0,count:0};om[k].rev+=parseFloat(x.ExpectedRevenueAmount||0);om[k].count++;if(x.LifeCycleStatusCode==='3')om[k].won++;if(x.LifeCycleStatusCode==='5')om[k].lost++;});
+  var pm={};d.forEach(function(x){var p=(x.SalesCyclePhaseCodeText||'?').substring(0,25);pm[p]=(pm[p]||0)+1;});
+  var rm={};d.filter(function(x){return x.LifeCycleStatusCode==='5';}).forEach(function(x){var k=x.ResultReasonCodeText||'No Reason';rm[k]=(rm[k]||0)+1;});
+  var oom={};d.filter(function(x){return x.LifeCycleStatusCode==='1';}).forEach(function(x){var k=x.MainEmployeeResponsiblePartyName||'?';oom[k]=(oom[k]||0)+parseFloat(x.ExpectedRevenueAmount||0);});
+  return JSON.stringify({
+    total:d.length,won:won,lost:lost,open:open,rev:Math.round(rev),
+    winRate:won+lost>0?Math.round(won/(won+lost)*100):0,
+    topOrgs:Object.entries(om).sort(function(a,b){return b[1].rev-a[1].rev;}).slice(0,8).map(function(e){return{org:e[0],rev:Math.round(e[1].rev),won:e[1].won,lost:e[1].lost,wr:e[1].won+e[1].lost>0?Math.round(e[1].won/(e[1].won+e[1].lost)*100):0};}),
+    topPhases:Object.entries(pm).sort(function(a,b){return b[1]-a[1];}).slice(0,6).map(function(e){return{phase:e[0],count:e[1]};}),
+    topReasons:Object.entries(rm).sort(function(a,b){return b[1]-a[1];}).slice(0,6).map(function(e){return{reason:e[0],count:e[1]};}),
+    topOwners:Object.entries(oom).sort(function(a,b){return b[1]-a[1];}).slice(0,8).map(function(e){return{owner:e[0],rev:Math.round(e[1])};}),
+    months:(function(){var mm={};d.forEach(function(x){if(x.CreationDate){var m=x.CreationDate.substring(0,7);if(!mm[m])mm[m]={count:0,rev:0};mm[m].count++;mm[m].rev+=parseFloat(x.ExpectedRevenueAmount||0);}});return Object.entries(mm).sort().slice(-8).map(function(e){return{month:e[0],count:e[1].count,rev:Math.round(e[1].rev)};});}())
+  });
+}
+
+async function goToBuild(){
+  goTo(3);
+  var bar=document.getElementById('buildBar');
+  var steps=['bs1','bs2','bs3','bs4'];
+  var progresses=[15,40,70,95];
+  steps.forEach(function(id,i){
+    setTimeout(function(){
+      steps.forEach(function(s){document.getElementById(s).classList.remove('active');});
+      document.getElementById(id).classList.add('active');
+      for(var j=0;j<i;j++){document.getElementById(steps[j]).classList.remove('active');document.getElementById(steps[j]).classList.add('done');}
+      bar.style.width=progresses[i]+'%';
+    },i*900);
+  });
+  try{
+    var summary=buildQuickSummary();
+    var res=await fetch('/odata/v4/ai/buildReport',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({question:currentQ,data:summary})
+    });
+    var json=await res.json();
+    if(json.error)throw new Error(json.error.message);
+    var raw=json.value.replace(/```json|```/g,'').trim();
+    var config=JSON.parse(raw);
+    setTimeout(function(){
+      bar.style.width='100%';
+      steps.forEach(function(s){document.getElementById(s).classList.remove('active');document.getElementById(s).classList.add('done');});
+      setTimeout(function(){renderReport(config);},500);
+    },3800);
+  }catch(e){
+    setTimeout(function(){renderError(e.message);},4000);
+  }
+}
+
+function fmt(n){n=parseFloat(n)||0;if(n>=1e6)return'$'+(n/1e6).toFixed(1)+'M';if(n>=1e3)return'$'+(n/1e3).toFixed(0)+'K';return'$'+n.toFixed(0);}
+function fmtN(n){n=parseFloat(n)||0;if(n>=1e6)return(n/1e6).toFixed(1)+'M';if(n>=1e3)return(n/1e3).toFixed(0)+'K';return n.toFixed(0);}
+
+function makeChart(id,type,labels,datasets,opts){
+  var horiz=type==='horizontalBar';
+  var isDough=type==='doughnut'||type==='pie';
+  var ctype=horiz?'bar':type;
+  var gc='#f0f0f0',tc='#89919a';
+  return new Chart(document.getElementById(id),{
+    type:ctype,
+    data:{labels:labels,datasets:datasets.map(function(ds){return Object.assign({borderRadius:isDough?0:2,borderSkipped:false,borderWidth:isDough?2:0,borderColor:isDough?'white':'transparent',hoverOffset:isDough?5:0},ds);})},
+    options:{indexAxis:horiz?'y':'x',responsive:true,plugins:{legend:{display:isDough||(opts&&opts.legend),position:'right',labels:{color:tc,font:{size:10},padding:10,boxWidth:10}},tooltip:{callbacks:{label:function(c){var v=c.raw;if(typeof v==='number'){if(v>=1e6)return' $'+(v/1e6).toFixed(1)+'M';if(v>=1e3&&v>100)return' $'+(v/1e3).toFixed(0)+'K';if(v<100&&v>0)return' '+v.toFixed(1)+'%';}return' '+v;}}}},scales:isDough?{}:{x:{ticks:{color:tc,font:{size:9}},grid:{color:gc}},y:{ticks:{color:tc,font:{size:9},callback:function(v){return typeof v==='number'&&v>=1000?fmtN(v):(typeof v==='number'&&v<=100&&v>0?v+'%':v);}},grid:{color:gc}}}}
+  });
+}
+
+function renderReport(config){
+  goTo(4);
+  Object.values(reportCharts).forEach(function(c){c.destroy();});
+  reportCharts={};
+  var d=allData;
+  var won=d.filter(function(x){return x.LifeCycleStatusCode==='3';});
+  var lost=d.filter(function(x){return x.LifeCycleStatusCode==='5';});
+  var open=d.filter(function(x){return x.LifeCycleStatusCode==='1';});
+  var rev=d.reduce(function(s,x){return s+parseFloat(x.ExpectedRevenueAmount||0);},0);
+  var wr=won.length+lost.length>0?((won.length/(won.length+lost.length))*100).toFixed(1):'0.0';
+  var orgs=[...new Set(d.map(function(x){return x.SalesOrganisationID;}).filter(Boolean))].length;
+
+  document.getElementById('rTopTitle').textContent=config.reportTitle||currentQ;
+  document.getElementById('rTopSub').textContent='C4C QUA · MY352500 · '+new Date().toLocaleString('en-GB')+' · '+d.length.toLocaleString()+' records';
+
+  var isTextReport=config.reportType==='executive_summary'||!config.primaryChart||!config.primaryChart.labels||config.primaryChart.labels.length===0;
+
+  // Determine which supporting charts are relevant
+  var relevantCharts=config.supportingCharts||['winRate','revenue','phase','owners','reasons','trend'];
+
+  var chartsHTML='';
+
+  // PRIMARY — either text or chart
+  if(isTextReport){
+    chartsHTML+='<div class="insight-card text-report" style="margin-bottom:14px;"><div class="insight-header"><span class="insight-icon">📋</span><span class="insight-title" style="color:var(--green)">Executive Summary</span></div><div class="insight-body" id="execSummary">'+(config.insight||'Loading...')+'</div></div>';
+  } else {
+    var pc=config.primaryChart;
+    chartsHTML+=
+      '<div class="chart-grid g2" style="margin-bottom:14px;">'+
+        '<div class="panel hero"><div class="panel-hdr"><h3>'+(pc.title||'Primary Analysis')+'</h3><span class="ph-tag hero">AI SELECTED</span></div><div class="panel-body"><canvas id="cPrimary" role="img" aria-label="Primary chart" style="max-height:260px;"></canvas></div></div>'+
+        '<div class="panel"><div class="panel-hdr"><h3>Win / Loss / Open</h3><span class="ph-tag">STATUS</span></div><div class="panel-body"><canvas id="cDonut" role="img" aria-label="Status donut"></canvas></div></div>'+
+      '</div>';
+  }
+
+  // AI Insight
+  chartsHTML+='<div class="insight-card'+(isTextReport?' text-report':'')+'" style="margin-bottom:14px;"><div class="insight-header"><span class="insight-icon">💡</span><span class="insight-title">AI Insight</span></div><div class="insight-body">'+(config.insight||'No insight returned.')+'</div></div>';
+
+  // Supporting charts — only relevant ones
+  var supportingPanels=[];
+  var ql=currentQ.toLowerCase();
+
+  // Always show these unless it's a super specific question
+  if(relevantCharts.indexOf('revenue')>=0||ql.includes('revenue')||ql.includes('pipeline')||ql.includes('org')||ql.includes('overview')||ql.includes('summary')||ql.includes('scorecard')){
+    supportingPanels.push('<div class="panel"><div class="panel-hdr"><h3>Revenue by Sales Org</h3><span class="ph-tag">TOP 8</span></div><div class="panel-body"><canvas id="cOrg" role="img" aria-label="Revenue by org"></canvas></div></div>');
+  }
+  if(relevantCharts.indexOf('winRate')>=0||ql.includes('win')||ql.includes('rate')||ql.includes('performance')||ql.includes('scorecard')||ql.includes('overview')||ql.includes('summary')){
+    supportingPanels.push('<div class="panel"><div class="panel-hdr"><h3>Win Rate by Sales Org</h3><span class="ph-tag">% WON</span></div><div class="panel-body"><canvas id="cWin" role="img" aria-label="Win rate"></canvas></div></div>');
+  }
+  if(relevantCharts.indexOf('phase')>=0||ql.includes('phase')||ql.includes('funnel')||ql.includes('stage')||ql.includes('pipeline')||ql.includes('overview')){
+    supportingPanels.push('<div class="panel"><div class="panel-hdr"><h3>Opportunities by Phase</h3><span class="ph-tag">PIPELINE</span></div><div class="panel-body"><canvas id="cPhase" role="img" aria-label="By phase"></canvas></div></div>');
+  }
+  if(relevantCharts.indexOf('reasons')>=0||ql.includes('lost')||ql.includes('losing')||ql.includes('reason')||ql.includes('why')||ql.includes('overview')||ql.includes('summary')){
+    supportingPanels.push('<div class="panel"><div class="panel-hdr"><h3>Loss Reasons</h3><span class="ph-tag">CLOSED LOST</span></div><div class="panel-body"><canvas id="cReason" role="img" aria-label="Loss reasons"></canvas></div></div>');
+  }
+  if(relevantCharts.indexOf('owners')>=0||ql.includes('owner')||ql.includes('rep')||ql.includes('person')||ql.includes('pipeline')){
+    supportingPanels.push('<div class="panel"><div class="panel-hdr"><h3>Open Pipeline by Owner</h3><span class="ph-tag">TOP 8</span></div><div class="panel-body"><canvas id="cOwner" role="img" aria-label="Owner pipeline"></canvas></div></div>');
+  }
+  if(relevantCharts.indexOf('trend')>=0||ql.includes('trend')||ql.includes('month')||ql.includes('time')||ql.includes('over')||ql.includes('summary')){
+    supportingPanels.push('<div class="panel"><div class="panel-hdr"><h3>Monthly Trend</h3><span class="ph-tag">2024</span></div><div class="panel-body"><canvas id="cTrend" role="img" aria-label="Trend"></canvas></div></div>');
+  }
+
+  // Chunk supporting panels into rows of 3
+  for(var i=0;i<supportingPanels.length;i+=3){
+    var row=supportingPanels.slice(i,i+3);
+    chartsHTML+='<div class="chart-grid g3" style="margin-bottom:14px;">'+row.join('')+'</div>';
+  }
+
+  // Table
+  chartsHTML+=
+    '<div class="tbl-panel"><div class="tbl-hdr"><h3>Opportunity Detail</h3><span class="tbl-ct" id="tblCt">Top 50</span></div>'+
+    '<table><thead><tr><th>ID</th><th>Opportunity</th><th>Account</th><th>Sales Org</th><th>Phase</th><th>Revenue</th><th>Status</th><th>Owner</th><th></th></tr></thead>'+
+    '<tbody id="tBody"></tbody></table></div>'+
+    '<div class="refine-panel"><div class="refine-hdr">Refine this report</div><div class="refine-row">'+
+    '<input class="refine-inp" id="refineInp" type="text" placeholder="Refine your report..." onkeydown="if(event.key==String.fromCharCode(13))refineReport()" />'+
+    '<button class="refine-btn" onclick="refineReport()">Regenerate →</button></div></div>';
+
+  // KPIs at top
+  var kpiHTML=
+    '<div class="kpi-row" style="margin-bottom:14px;">'+
+    '<div class="kpi-tile"><div class="kl">Total Opportunities</div><div class="kv">'+d.length.toLocaleString()+'</div><div class="ks">'+orgs+' sales orgs</div></div>'+
+    '<div class="kpi-tile"><div class="kl">Expected Revenue</div><div class="kv">'+fmt(rev)+'</div><div class="ks">Pipeline value</div></div>'+
+    '<div class="kpi-tile"><div class="kl">Win Rate</div><div class="kv">'+wr+'%</div><div class="ks">'+won.length+' won · '+lost.length+' lost</div></div>'+
+    '<div class="kpi-tile"><div class="kl">Open Pipeline</div><div class="kv">'+open.length+'</div><div class="ks">Active deals</div></div>'+
+    '<div class="kpi-tile"><div class="kl">Lost Deals</div><div class="kv">'+lost.length+'</div><div class="ks">'+((lost.length/(d.length||1))*100).toFixed(1)+'% of total</div></div>'+
+    '</div>';
+
+  document.getElementById('reportBody').innerHTML=kpiHTML+chartsHTML;
+
+  var gc='#f0f0f0',tc='#89919a';
+
+  // Render primary chart if not text
+  if(!isTextReport&&config.primaryChart&&config.primaryChart.labels){
+    var pc=config.primaryChart;
+    var ptype=pc.chartType||'bar';
+    reportCharts.primary=makeChart('cPrimary',ptype,pc.labels,pc.datasets.map(function(ds){return{label:ds.label||'',data:ds.data,backgroundColor:ds.backgroundColor};}));
+    // Donut always shown alongside
+    reportCharts.donut=makeChart('cDonut','doughnut',['Won','Lost','Open'],[{data:[won.length,lost.length,open.length],backgroundColor:['#107e3e','#89919a','#0a6ed1']}]);
+  }
+
+  // Supporting charts
+  if(document.getElementById('cOrg')){
+    var om={};d.forEach(function(x){var o=(x.SalesOrganisationName||'?').replace('TSS ','');om[o]=(om[o]||0)+parseFloat(x.ExpectedRevenueAmount||0);});
+    var os=Object.entries(om).sort(function(a,b){return b[1]-a[1];}).slice(0,8);
+    reportCharts.org=makeChart('cOrg','bar',os.map(function(e){return e[0];}),
+      [{data:os.map(function(e){return e[1];}),backgroundColor:SAP}]);
+  }
+  if(document.getElementById('cWin')){
+    var wm={};d.forEach(function(x){var k=(x.SalesOrganisationName||'?').replace('TSS ','');if(!wm[k])wm[k]={w:0,l:0};if(x.LifeCycleStatusCode==='3')wm[k].w++;if(x.LifeCycleStatusCode==='5')wm[k].l++;});
+    var ws=Object.entries(wm).filter(function(e){return e[1].w+e[1].l>=3;}).map(function(e){return{k:e[0],r:e[1].w/(e[1].w+e[1].l)*100};}).sort(function(a,b){return b.r-a.r;}).slice(0,8);
+    reportCharts.win=makeChart('cWin','bar',ws.map(function(e){return e.k;}),
+      [{data:ws.map(function(e){return e.r;}),backgroundColor:ws.map(function(e){return e.r>=30?'#107e3e':e.r>=20?'#0a6ed1':'#e9730c';})}]);
+  }
+  if(document.getElementById('cPhase')){
+    var pm={};d.forEach(function(x){var p=(x.SalesCyclePhaseCodeText||'?').replace(/^d+s/,'').substring(0,22);pm[p]=(pm[p]||0)+1;});
+    var ps=Object.entries(pm).sort(function(a,b){return b[1]-a[1];});
+    reportCharts.phase=makeChart('cPhase','horizontalBar',ps.map(function(e){return e[0];}),
+      [{data:ps.map(function(e){return e[1];}),backgroundColor:'#0a6ed1'}]);
+  }
+  if(document.getElementById('cReason')){
+    var rm={};lost.forEach(function(x){var k=x.ResultReasonCodeText||'(Null)';rm[k]=(rm[k]||0)+1;});
+    var rs=Object.entries(rm).sort(function(a,b){return b[1]-a[1];}).slice(0,6);
+    reportCharts.reason=makeChart('cReason','doughnut',rs.map(function(e){return e[0].substring(0,18);}),
+      [{data:rs.map(function(e){return e[1];}),backgroundColor:SAP}]);
+  }
+  if(document.getElementById('cOwner')){
+    var oo={};open.forEach(function(x){var k=x.MainEmployeeResponsiblePartyName||'?';oo[k]=(oo[k]||0)+parseFloat(x.ExpectedRevenueAmount||0);});
+    var ooe=Object.entries(oo).sort(function(a,b){return b[1]-a[1];}).slice(0,8);
+    reportCharts.owner=makeChart('cOwner','horizontalBar',ooe.map(function(e){return e[0].split(' ').slice(-1)[0];}),
+      [{data:ooe.map(function(e){return e[1];}),backgroundColor:'#6c32a9'}]);
+  }
+  if(document.getElementById('cTrend')){
+    var tm={};d.forEach(function(x){if(x.CreationDate){var m=x.CreationDate.substring(0,7);if(!tm[m])tm[m]=0;tm[m]+=parseFloat(x.ExpectedRevenueAmount||0);}});
+    var tms=Object.keys(tm).sort().slice(-12);
+    reportCharts.trend=makeChart('cTrend','line',tms,[{data:tms.map(function(m){return tm[m];}),backgroundColor:'rgba(10,110,209,0.06)',borderColor:'#0a6ed1',tension:0.4,fill:true,pointBackgroundColor:'#0a6ed1',pointRadius:3}]);
+  }
+
+  // Table
+  var sc=function(s){return s==='3'?'won':s==='5'?'lost':'open';};
+  var st=function(s){return s==='3'?'Won':s==='5'?'Lost':'Open';};
+  document.getElementById('tblCt').textContent='Top 50 of '+d.length;
+  document.getElementById('tBody').innerHTML=d.slice(0,50).map(function(row){
+    return '<tr><td style="color:var(--muted);font-family:monospace;font-size:0.66rem">'+row.ID+'</td><td>'+(row.Name||'—')+'</td><td style="color:var(--muted)">'+(row.ProspectPartyName||'—')+'</td><td style="color:var(--muted)">'+(row.SalesOrganisationName||'').replace('TSS ','')+'</td><td style="color:var(--muted);font-size:0.68rem">'+(row.SalesCyclePhaseCodeText||'—')+'</td><td style="font-weight:500">'+fmt(parseFloat(row.ExpectedRevenueAmount||0))+'</td><td><span class="badge '+sc(row.LifeCycleStatusCode)+'">'+st(row.LifeCycleStatusCode)+'</span></td><td style="color:var(--muted);font-size:0.68rem">'+(row.MainEmployeeResponsiblePartyName||'—')+'</td><td><a class="c4c-link" href="'+C4C+'/sap/c4c/ui#OpportunityCollection&/OpportunityCollection/'+row.ObjectID+'" target="_blank">Open ↗</a></td></tr>';
+  }).join('');
+}
+
+function renderError(msg){
+  goTo(4);
+  document.getElementById('reportBody').innerHTML='<div style="padding:40px;"><div style="color:var(--red);font-size:0.85rem;margin-bottom:16px;">Error: '+msg+'</div><button class="btn-sec" onclick="goTo(1)">← Try Again</button></div>';
+}
+
+async function refineReport(){
+  var r=document.getElementById('refineInp').value.trim();
+  if(!r)return;
+  currentQ=currentQ+'. Refinement: '+r;
+  document.getElementById('refineInp').value='';
+  goToBuild();
+}
+
+document.getElementById('defineBtn').disabled=true;
+fetchData();
+</script>
+</body>
+</html>
