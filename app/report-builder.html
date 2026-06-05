@@ -412,7 +412,7 @@ async function fetchData(){
   }catch(e){console.error(e);document.getElementById('defineBtn').disabled=false;}
 }
 
-function setSug(el){document.getElementById('defineInput').value=el.textContent;document.getElementById('defineInput').focus();document.getElementById('defineBtn').disabled=false;}
+function setSug(el){document.getElementById('defineInput').value=el.textContent;goToConfirm();}
 document.addEventListener('keydown',function(e){if((e.metaKey||e.ctrlKey)&&e.key==='Enter'&&document.getElementById('page1').classList.contains('active'))goToConfirm();});
 
 function goTo(n){
@@ -656,7 +656,7 @@ async function refineReport(){
   goToBuild();
 }
 
-document.getElementById('defineBtn').disabled=true;
+
 fetchData();
 </script>
 </body>
