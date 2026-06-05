@@ -262,11 +262,7 @@ tbody tr:hover td{background:#f8fafc;}
       <option value="">All</option><option value="1">Open</option><option value="3">Won</option><option value="5">Lost</option>
     </select>
   </div>
-  <div class="filter-sep"></div>
-  <div class="filter-group"><span class="filter-label">Phase</span><select class="fsel" id="fPhase" onchange="applyFilters()"><option value="">All Phases</option></select></div>
-  <div class="filter-sep"></div>
-  <div class="filter-group"><span class="filter-label">From Year</span><input class="finp" type="number" id="fYear" value="2024" min="2024" max="2026" style="width:72px;" onchange="applyFilters()"/></div>
-</div>
+  div>
 
 <div class="kpi-row" id="kpiRow">
   <div class="kpi"><div class="kpi-icon" style="background:#eff6ff;"><svg viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="1.5"><path d="M3 3v18h18"/><path d="m7 16 4-4 4 4 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="kpi-val">—</div><div class="kpi-label">Total Opps</div><div class="kpi-accent" style="background:var(--blue)"></div></div>
@@ -448,8 +444,8 @@ function populateFilters(data){
 }
 
 function applyFilters(){
-  var org=document.getElementById('fOrg').value,status=document.getElementById('fStatus').value,phase=document.getElementById('fPhase').value,year=document.getElementById('fYear').value||'2024';
-  filtered=allData.filter(function(d){var cd=pd(d.CreationDate||'');if(org&&d.SalesOrganisationName!==org)return false;if(status&&d.LifeCycleStatusCode!==status)return false;if(phase&&d.SalesCyclePhaseCodeText!==phase)return false;if(!cd||cd.substring(0,4)<year)return false;return true;});
+  var org=document.getElementById('fOrg').value,status=document.getElementById('fStatus').value,phase=document.getElementById('fPhase').value;
+  filtered=allData.filter(function(d){if(org&&d.SalesOrganisationName!==org)return false;if(status&&d.LifeCycleStatusCode!==status)return false;if(phase&&d.SalesCyclePhaseCodeText!==phase)return false;return true;});
   renderKPIs();renderCharts();renderTable();
 }
 
