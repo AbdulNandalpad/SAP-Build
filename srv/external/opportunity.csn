@@ -14,6 +14,7 @@
         "SalesOrganisationName": { "type": "cds.String" },
         "SalesCyclePhaseCode": { "type": "cds.String" },
         "SalesCyclePhaseCodeText": { "type": "cds.String" },
+        "SalesCyclePhaseStartDate": { "type": "cds.Date" },
         "ExpectedRevenueAmount": { "type": "cds.Decimal" },
         "ExpectedRevenueAmountCurrencyCode": { "type": "cds.String" },
         "ExpectedProcessingEndDate": { "type": "cds.Date" },
@@ -26,7 +27,18 @@
         "ProspectPartyName": { "type": "cds.String" },
         "MainEmployeeResponsiblePartyName": { "type": "cds.String" },
         "CreationDate": { "type": "cds.Date" },
-        "LastChangeDate": { "type": "cds.Date" }
+        "LastChangeDate": { "type": "cds.Date" },
+        "ProcessingTypeCode": { "type": "cds.String" },
+        "ProcessingTypeCodeText": { "type": "cds.String" },
+        "OpportunityLevel_KUT": { "type": "cds.String" },
+        "OpportunityLevel_KUTText": { "type": "cds.String" },
+        "BUS_SEG_CDE_KUT": { "type": "cds.String" },
+        "BUS_SEG_CDE_KUTText": { "type": "cds.String" },
+        "CustomerABCClassificationCode_PSM": { "type": "cds.String" },
+        "CustomerABCClassificationCode_PSMText": { "type": "cds.String" },
+        "ZHasCompetitor_KUT": { "type": "cds.Boolean" },
+        "ZHasSummary_KUT": { "type": "cds.Boolean" },
+        "ZHasSupplier_KUT": { "type": "cds.Boolean" }
       }
     }
   },

@@ -66,15 +66,16 @@ module.exports = cds.service.impl(async function () {
     this.on('READ', 'Opportunities', async (req) => {
         const top = req.query.SELECT && req.query.SELECT.limit && req.query.SELECT.limit.rows && req.query.SELECT.limit.rows.val;
         // If browser requests a specific small top (like $top=3 for testing), honour it
+        const SEL = "ObjectID,ID,Name,SalesOrganisationID,SalesOrganisationName,SalesCyclePhaseCode,SalesCyclePhaseCodeText,SalesCyclePhaseStartDate,ExpectedRevenueAmount,ExpectedRevenueAmountCurrencyCode,ExpectedProcessingEndDate,LifeCycleStatusCode,LifeCycleStatusCodeText,ResultReasonCode,ResultReasonCodeText,ProbabilityPercent,ProspectPartyID,ProspectPartyName,MainEmployeeResponsiblePartyName,CreationDate,LastChangeDate,ProcessingTypeCode,ProcessingTypeCodeText,OpportunityLevel_KUT,OpportunityLevel_KUTText,BUS_SEG_CDE_KUT,BUS_SEG_CDE_KUTText,CustomerABCClassificationCode_PSM,CustomerABCClassificationCode_PSMText,ZHasCompetitor_KUT,ZHasSummary_KUT,ZHasSupplier_KUT";
         if (top && top <= 100) {
             const result = await c4c.send({
                 method: 'GET',
-                path: "OpportunityCollection?$filter=CreationDate ge datetime'2025-06-05T00:00:00'&$top=" + top + "&$select=ObjectID,ID,Name,SalesOrganisationID,SalesOrganisationName,SalesCyclePhaseCode,SalesCyclePhaseCodeText,ExpectedRevenueAmount,ExpectedRevenueAmountCurrencyCode,ExpectedProcessingEndDate,LifeCycleStatusCode,LifeCycleStatusCodeText,ResultReasonCode,ResultReasonCodeText,ProbabilityPercent,ProspectPartyID,ProspectPartyName,MainEmployeeResponsiblePartyName,CreationDate,LastChangeDate"
+                path: "OpportunityCollection?$filter=CreationDate ge datetime'2025-06-05T00:00:00'&$top=" + top + "&$select=" + SEL
             });
             return Array.isArray(result) ? result : (result.value || result);
         }
         // Otherwise fetch all pages
-        const basePath = "OpportunityCollection?$filter=CreationDate ge datetime'2025-06-05T00:00:00'&$top=1000&$select=ObjectID,ID,Name,SalesOrganisationID,SalesOrganisationName,SalesCyclePhaseCode,SalesCyclePhaseCodeText,ExpectedRevenueAmount,ExpectedRevenueAmountCurrencyCode,ExpectedProcessingEndDate,LifeCycleStatusCode,LifeCycleStatusCodeText,ResultReasonCode,ResultReasonCodeText,ProbabilityPercent,ProspectPartyID,ProspectPartyName,MainEmployeeResponsiblePartyName,CreationDate,LastChangeDate";
+        const basePath = "OpportunityCollection?$filter=CreationDate ge datetime'2025-06-05T00:00:00'&$top=1000&$select=" + SEL;
         return await fetchAllFromC4C(c4c, basePath);
     });
 
