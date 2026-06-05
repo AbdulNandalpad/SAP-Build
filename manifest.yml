@@ -1,0 +1,17 @@
+---
+applications:
+- name: tss-cx-analytics
+  memory: 512M
+  disk_quota: 1G
+  instances: 1
+  buildpacks:
+    - nodejs_buildpack
+  command: npm start
+  routes:
+    - route: tss-cx-analytics.cfapps.eu10.hana.ondemand.com
+  services:
+    - cx-destination
+  env:
+    NODE_ENV: production
+    ANTHROPIC_API_KEY: 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
+    CDS_SECURITY_AUTHENTICATION: dummy

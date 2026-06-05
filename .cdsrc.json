@@ -1,8 +1,15 @@
 {
-    "requires": {
-        "c4c": {
-            "kind": "odata",
-            "model": "srv/external/opportunity"
-        }
+  "requires": {
+    "c4c": {
+      "kind": "odata",
+      "model": "srv/external/opportunity"
     }
+  },
+  "[production]": {
+    "requires": {
+      "auth": {
+        "kind": "dummy"
+      }
+    }
+  }
 }
