@@ -97,10 +97,24 @@ tr:hover td{background:#f8fafc;}
 .c4c-link:hover{text-decoration:underline;}
 .c4c-link svg{width:9px;height:9px;}
 .loading-msg{grid-column:span 3;padding:48px;text-align:center;color:var(--muted);font-size:0.85rem;}
-@media(max-width:768px){
+@media(max-width:900px){
+  .kpi-row{grid-template-columns:repeat(3,1fr);}
+  .content{grid-template-columns:1fr 1fr;}
+  .panel.w2,.panel.w3{grid-column:span 2;}
+  .tbl-panel{grid-column:span 2;}
+}
+@media(max-width:640px){
   .kpi-row{grid-template-columns:repeat(2,1fr);}
   .content{grid-template-columns:1fr;}
   .panel.w2,.panel.w3,.tbl-panel{grid-column:span 1;}
+  .page-hdr{flex-direction:column;align-items:flex-start;}
+  .filter-bar{overflow-x:auto;flex-wrap:nowrap;gap:8px;}
+  .fl{flex-shrink:0;}
+  select,input[type=number]{flex-shrink:0;}
+  .filter-right{flex-shrink:0;}
+  table{min-width:700px;}
+  .tbl-panel{overflow-x:auto;}
+  .shell{padding:0 12px;}
 }
 </style>
 </head>
