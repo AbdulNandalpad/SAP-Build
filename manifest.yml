@@ -13,5 +13,4 @@ applications:
     - cx-destination
   env:
     NODE_ENV: production
-    ANTHROPIC_API_KEY: REDACTED_ANTHROPIC_KEY
     CDS_SECURITY_AUTHENTICATION: dummy
