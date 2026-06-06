@@ -8,15 +8,15 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 :root{
-  --blue:#0a6ed1;--blue2:#0854a0;--blue-light:#e8f2fd;--blue-xlight:#f0f7ff;
-  --green:#107e3e;--green-light:#dcfce7;
-  --red:#bb0000;--red-light:#fee2e2;
-  --orange:#e9730c;--orange-light:#ffedd5;
-  --purple:#6c32a9;--purple-light:#f3e8ff;
-  --teal:#0e7e76;--gold:#a39245;
+  --blue:#2563eb;--blue2:#1d4ed8;--blue-light:#dbeafe;--blue-xlight:#eff6ff;
+  --green:#059669;--green-light:#d1fae5;
+  --red:#dc2626;--red-light:#fee2e2;
+  --orange:#d97706;--orange-light:#ffedd5;
+  --purple:#7c3aed;--purple-light:#ede9fe;
+  --teal:#0d9488;--gold:#a39245;
   --text:#0f172a;--muted:#64748b;--light:#94a3b8;
   --border:#e2e8f0;--border2:#cbd5e1;
-  --bg:#f8fafc;--card:#ffffff;--shell:#1e293b;
+  --bg:#f1f5f9;--card:#ffffff;--shell:#0f172a;
   --shadow-sm:0 1px 3px rgba(0,0,0,0.05),0 1px 2px rgba(0,0,0,0.03);
   --shadow:0 4px 16px rgba(0,0,0,0.07),0 2px 4px rgba(0,0,0,0.04);
   --shadow-lg:0 12px 40px rgba(0,0,0,0.1),0 4px 12px rgba(0,0,0,0.05);
@@ -67,7 +67,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-h
 .define-hint{font-size:0.7rem;color:var(--light);display:flex;align-items:center;gap:5px;}
 .define-hint svg{width:12px;height:12px;}
 .define-btn{background:var(--blue);color:white;border:none;padding:9px 22px;border-radius:8px;font-size:0.8rem;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s;display:flex;align-items:center;gap:6px;letter-spacing:0.3px;}
-.define-btn:hover{background:var(--blue2);transform:translateY(-1px);box-shadow:0 4px 12px rgba(10,110,209,0.3);}
+.define-btn:hover{background:var(--blue2);transform:translateY(-1px);box-shadow:0 4px 12px rgba(37,99,235,0.3);}
 .define-btn:disabled{opacity:0.4;cursor:not-allowed;transform:none;box-shadow:none;}
 .define-btn svg{width:14px;height:14px;}
 .suggestions{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px;max-width:700px;justify-content:center;}
@@ -117,8 +117,8 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-h
 .build-sub{font-size:0.82rem;color:var(--muted);margin-bottom:32px;}
 .build-steps{width:100%;max-width:420px;display:flex;flex-direction:column;gap:8px;}
 .build-step{display:flex;align-items:center;gap:12px;padding:11px 16px;background:white;border:1px solid var(--border);border-radius:9px;font-size:0.78rem;color:var(--light);transition:all 0.3s;box-shadow:var(--shadow-sm);}
-.build-step.active{color:var(--blue);border-color:rgba(10,110,209,0.3);background:var(--blue-xlight);}
-.build-step.done{color:var(--green);border-color:rgba(16,126,62,0.3);background:var(--green-light);}
+.build-step.active{color:var(--blue);border-color:rgba(37,99,235,0.3);background:var(--blue-xlight);}
+.build-step.done{color:var(--green);border-color:rgba(5,150,105,0.3);background:var(--green-light);}
 .build-step-dot{width:8px;height:8px;border-radius:50%;border:1.5px solid currentColor;flex-shrink:0;transition:all 0.3s;}
 .build-step.done .build-step-dot{background:var(--green);border-color:var(--green);}
 .build-step.active .build-step-dot{background:var(--blue);border-color:var(--blue);}
@@ -174,7 +174,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-h
 .panel-sub{font-size:0.64rem;color:var(--muted);margin-top:1px;}
 .panel-tag{font-size:0.6rem;font-weight:600;padding:3px 8px;border-radius:10px;}
 .tag-ai{background:linear-gradient(90deg,var(--purple-light),var(--blue-light));color:var(--purple);}
-.tag-live{background:var(--green-light);color:#166534;}
+.tag-live{background:var(--green-light);color:#065f46;}
 .tag-default{background:var(--bg);color:var(--muted);border:1px solid var(--border);}
 .panel-body{padding:14px 16px;}
 canvas{max-height:220px;}
@@ -197,9 +197,9 @@ td{padding:9px 14px;border-bottom:1px solid #f1f5f9;color:var(--text);}
 tbody tr:last-child td{border-bottom:none;}
 tbody tr:hover td{background:#f8fafc;}
 .badge{padding:3px 8px;border-radius:10px;font-size:0.63rem;font-weight:600;}
-.b-won{background:var(--green-light);color:#166534;}
-.b-lost{background:var(--red-light);color:#991b1b;}
-.b-open{background:var(--blue-light);color:#1e40af;}
+.b-won{background:var(--green-light);color:#065f46;}
+.b-lost{background:var(--red-light);color:#7f1d1d;}
+.b-open{background:var(--blue-light);color:#1e3a8a;}
 .c4c-link{color:var(--blue);text-decoration:none;font-size:0.68rem;display:flex;align-items:center;gap:3px;font-weight:500;}
 .c4c-link:hover{text-decoration:underline;}
 .c4c-link svg{width:10px;height:10px;}
@@ -403,7 +403,7 @@ tbody tr:hover td{background:#f8fafc;}
 <script>
 var allData=[],currentQ='',aiPlan=null,reportCharts={};
 var C4C_BASE='https://my352500.crm.ondemand.com/sap/public/byd/runtime?bo_ns=http://sap.com/thingTypes&bo=COD_GENERIC&node=Root&operation=OnExtInspect&OBNRedirect=X';
-var SAP=['#0a6ed1','#107e3e','#e9730c','#bb0000','#6c32a9','#0e7e76','#c2781f','#64748b','#1589ee','#0aaf67'];
+var SAP=['#2563eb','#059669','#d97706','#dc2626','#7c3aed','#0d9488','#b45309','#64748b','#1589ee','#0aaf67'];
 
 function fmt(n){n=parseFloat(n)||0;if(n>=1e6)return'$'+(n/1e6).toFixed(1)+'M';if(n>=1e3)return'$'+(n/1e3).toFixed(0)+'K';return'$'+n.toFixed(0);}
 function fmtN(n){n=parseFloat(n)||0;if(n>=1e6)return(n/1e6).toFixed(1)+'M';if(n>=1e3)return(n/1e3).toFixed(0)+'K';return n.toFixed(0);}
