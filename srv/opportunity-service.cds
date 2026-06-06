@@ -11,5 +11,5 @@ service AIService {
 }
 
 service QuoteService {
-    @readonly entity SalesQuotes as projection on c4c.OpportunityCollection;
+    @readonly entity SalesQuotes as projection on c4c.SalesQuoteCollection;
 }

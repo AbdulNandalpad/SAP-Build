@@ -40,6 +40,37 @@
         "ZHasSummary_KUT": { "type": "cds.Boolean" },
         "ZHasSupplier_KUT": { "type": "cds.Boolean" }
       }
+    },
+    "c4c.SalesQuoteCollection": {
+      "kind": "entity",
+      "elements": {
+        "ObjectID": { "type": "cds.String", "@key": true },
+        "ID": { "type": "cds.String" },
+        "Name": { "type": "cds.String" },
+        "BuyerPartyID": { "type": "cds.String" },
+        "BuyerPartyName": { "type": "cds.String" },
+        "SalesOrganisationID": { "type": "cds.String" },
+        "SalesOrganisationName": { "type": "cds.String" },
+        "MainEmployeeResponsiblePartyID": { "type": "cds.String" },
+        "MainEmployeeResponsiblePartyName": { "type": "cds.String" },
+        "LifeCycleStatusCode": { "type": "cds.String" },
+        "LifeCycleStatusCodeText": { "type": "cds.String" },
+        "ProcessingTypeCode": { "type": "cds.String" },
+        "ProcessingTypeCodeText": { "type": "cds.String" },
+        "TotalNetAmount": { "type": "cds.Decimal" },
+        "TotalGrossAmount": { "type": "cds.Decimal" },
+        "CurrencyCode": { "type": "cds.String" },
+        "CreationDateTime": { "type": "cds.DateTime" },
+        "LastChangeDateTime": { "type": "cds.DateTime" },
+        "ExpirationDate": { "type": "cds.Date" },
+        "RequestedFulfillmentPeriodStartDate": { "type": "cds.Date" },
+        "SalesCyclePhaseCode": { "type": "cds.String" },
+        "SalesCyclePhaseCodeText": { "type": "cds.String" },
+        "ProbabilityPercent": { "type": "cds.Decimal" },
+        "ResultReasonCode": { "type": "cds.String" },
+        "ResultReasonCodeText": { "type": "cds.String" },
+        "OpportunityID": { "type": "cds.String" }
+      }
     }
   },
   "meta": { "creator": "manual" }
