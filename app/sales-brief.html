@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TSS CX Analytics — Sales Brief</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --blue:#0a6ed1;--blue2:#0854a0;--blue-light:#e8f2fd;--blue-xlight:#f0f7ff;
+  --green:#107e3e;--green-light:#dcfce7;
+  --red:#bb0000;--red-light:#fee2e2;
+  --orange:#e9730c;--orange-light:#ffedd5;
+  --purple:#6c32a9;--purple-light:#f3e8ff;
+  --teal:#0e7e76;--gold:#a39245;
+  --text:#0f172a;--muted:#64748b;--light:#94a3b8;
+  --border:#e2e8f0;--border2:#cbd5e1;
+  --bg:#f8fafc;--card:#ffffff;--shell:#1e293b;
+  --shadow-sm:0 1px 3px rgba(0,0,0,0.05),0 1px 2px rgba(0,0,0,0.03);
+  --shadow:0 4px 16px rgba(0,0,0,0.07),0 2px 4px rgba(0,0,0,0.04);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased;}
+.shell{background:var(--shell);height:52px;display:flex;align-items:center;padding:0 24px;gap:14px;position:sticky;top:0;z-index:200;}
+.shell-div{width:1px;height:20px;background:rgba(255,255,255,0.12);margin:0 14px;}
+.shell-app{font-size:0.75rem;color:rgba(255,255,255,0.45);}
+.shell-right{margin-left:auto;display:flex;align-items:center;gap:12px;}
+.shell-status{display:flex;align-items:center;gap:5px;font-size:0.7rem;color:rgba(255,255,255,0.45);}
+.live-dot{width:5px;height:5px;border-radius:50%;background:#22c55e;animation:blink 2s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.3;}}
+.shell-back{font-size:0.72rem;color:rgba(255,255,255,0.55);text-decoration:none;display:flex;align-items:center;gap:5px;padding:5px 12px;border:1px solid rgba(255,255,255,0.12);border-radius:6px;transition:all 0.15s;font-weight:500;}
+.shell-back:hover{background:rgba(255,255,255,0.08);color:white;}
+.shell-back svg{width:12px;height:12px;}
+
+/* PAGE 1 — INTENT */
+#page1{min-height:calc(100vh - 52px);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 24px;}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;background:var(--blue-light);border:1px solid rgba(10,110,209,0.2);border-radius:20px;padding:5px 14px;margin-bottom:20px;font-size:0.68rem;font-weight:600;color:var(--blue);letter-spacing:1.2px;text-transform:uppercase;}
+.eyebrow svg{width:12px;height:12px;}
+.page-title{font-family:'Playfair Display',serif;font-size:clamp(1.8rem,4vw,2.4rem);font-weight:700;color:var(--text);text-align:center;margin-bottom:10px;line-height:1.2;}
+.page-sub{font-size:0.88rem;color:var(--muted);text-align:center;max-width:480px;margin-bottom:36px;line-height:1.7;}
+.intent-card{width:100%;max-width:680px;background:white;border:1px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:var(--shadow);}
+.intent-section{padding:20px 22px;border-bottom:1px solid var(--border);}
+.intent-label{font-size:0.65rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:12px;}
+.audience-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.aud-btn{background:white;border:1.5px solid var(--border);border-radius:10px;padding:12px 10px;cursor:pointer;transition:all 0.15s;text-align:center;font-family:'Inter',sans-serif;}
+.aud-btn:hover{border-color:var(--blue);background:var(--blue-xlight);}
+.aud-btn.active{border-color:var(--blue);background:var(--blue-light);}
+.aud-icon{font-size:1.4rem;margin-bottom:5px;}
+.aud-name{font-size:0.74rem;font-weight:600;color:var(--text);}
+.aud-desc{font-size:0.62rem;color:var(--muted);margin-top:2px;line-height:1.3;}
+.intent-textarea{width:100%;min-height:90px;padding:16px;font-size:0.88rem;font-family:'Inter',sans-serif;color:var(--text);border:none;resize:none;outline:none;line-height:1.65;background:white;}
+.intent-textarea::placeholder{color:var(--light);font-style:italic;}
+.intent-footer{padding:12px 18px;display:flex;align-items:center;justify-content:space-between;background:#fafcff;}
+.intent-hint{font-size:0.7rem;color:var(--light);display:flex;align-items:center;gap:5px;}
+.intent-hint svg{width:11px;height:11px;}
+.gen-btn{background:var(--blue);color:white;border:none;padding:10px 24px;border-radius:8px;font-size:0.8rem;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s;display:flex;align-items:center;gap:7px;}
+.gen-btn:hover{background:var(--blue2);transform:translateY(-1px);box-shadow:0 4px 12px rgba(10,110,209,0.3);}
+.gen-btn:disabled{opacity:0.4;cursor:not-allowed;transform:none;box-shadow:none;}
+.gen-btn svg{width:14px;height:14px;}
+
+/* PAGE 2 — BUILDING */
+#page2{display:none;min-height:calc(100vh - 52px);flex-direction:column;align-items:center;justify-content:center;padding:48px 24px;gap:0;}
+.build-ring{width:64px;height:64px;border-radius:50%;border:3px solid var(--border);border-top-color:var(--blue);animation:spin 0.8s linear infinite;margin-bottom:22px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.build-title{font-size:1.05rem;font-weight:600;color:var(--text);margin-bottom:6px;}
+.build-sub{font-size:0.8rem;color:var(--muted);margin-bottom:28px;text-align:center;}
+.build-steps{width:100%;max-width:400px;display:flex;flex-direction:column;gap:8px;}
+.bstep{display:flex;align-items:center;gap:10px;padding:10px 14px;background:white;border:1px solid var(--border);border-radius:8px;font-size:0.76rem;color:var(--light);transition:all 0.3s;}
+.bstep.active{color:var(--blue);border-color:rgba(10,110,209,0.3);background:var(--blue-xlight);}
+.bstep.done{color:var(--green);border-color:rgba(16,126,62,0.3);background:var(--green-light);}
+.bstep-dot{width:7px;height:7px;border-radius:50%;border:1.5px solid currentColor;flex-shrink:0;}
+.bstep.done .bstep-dot{background:var(--green);border-color:var(--green);}
+.bstep.active .bstep-dot{background:var(--blue);border-color:var(--blue);}
+.build-bar{width:100%;max-width:400px;height:3px;background:var(--border);border-radius:2px;margin-top:18px;overflow:hidden;}
+.build-bar-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--teal));border-radius:2px;transition:width 0.6s ease;width:0%;}
+
+/* PAGE 3 — BRIEF DOCUMENT */
+#page3{display:none;flex-direction:column;padding:0;}
+.doc-topbar{background:white;border-bottom:1px solid var(--border);padding:10px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:52px;z-index:100;flex-wrap:wrap;gap:8px;}
+.doc-topbar-left h2{font-size:0.9rem;font-weight:600;color:var(--text);}
+.doc-topbar-left p{font-size:0.67rem;color:var(--muted);margin-top:1px;}
+.doc-actions{display:flex;gap:8px;}
+.dbtn{background:white;border:1px solid var(--border2);color:var(--text);padding:6px 14px;border-radius:7px;font-size:0.74rem;cursor:pointer;font-family:'Inter',sans-serif;font-weight:500;transition:background 0.15s;display:flex;align-items:center;gap:5px;}
+.dbtn:hover{background:var(--bg);}
+.dbtn svg{width:12px;height:12px;}
+.dbtn.pri{background:var(--blue);color:white;border-color:var(--blue);}
+.dbtn.pri:hover{background:var(--blue2);}
+
+/* BRIEF DOCUMENT BODY */
+.brief-wrap{padding:24px;max-width:960px;margin:0 auto;width:100%;}
+
+/* BRIEF HEADER */
+.brief-doc{background:white;border:1px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:var(--shadow);margin-bottom:16px;}
+.brief-header{background:linear-gradient(135deg,var(--shell) 0%,#2d3f5a 100%);padding:32px 36px;position:relative;overflow:hidden;}
+.brief-header::before{content:'';position:absolute;top:-40px;right:-40px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,0.03);}
+.brief-header::after{content:'';position:absolute;bottom:-60px;right:60px;width:300px;height:300px;border-radius:50%;background:rgba(255,255,255,0.02);}
+.brief-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;position:relative;z-index:1;}
+.brief-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);border-radius:20px;padding:4px 12px;font-size:0.65rem;font-weight:600;color:rgba(255,255,255,0.7);text-transform:uppercase;letter-spacing:1px;}
+.brief-badge svg{width:10px;height:10px;}
+.brief-date{font-size:0.68rem;color:rgba(255,255,255,0.4);}
+.brief-headline{font-family:'Playfair Display',serif;font-size:clamp(1.2rem,2.5vw,1.6rem);font-weight:700;color:white;line-height:1.35;max-width:600px;position:relative;z-index:1;margin-bottom:16px;}
+.brief-audience-row{display:flex;align-items:center;gap:12px;position:relative;z-index:1;}
+.brief-aud-tag{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);border-radius:6px;padding:4px 10px;font-size:0.68rem;color:rgba(255,255,255,0.6);}
+.brief-record-ct{font-size:0.65rem;color:rgba(255,255,255,0.35);}
+
+/* HIGHLIGHTS */
+.brief-highlights{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-bottom:1px solid var(--border);}
+.hl-tile{padding:18px 20px;border-right:1px solid var(--border);position:relative;}
+.hl-tile:last-child{border-right:none;}
+.hl-tile::before{content:'';position:absolute;top:0;left:0;right:0;height:2.5px;}
+.hl-tile:nth-child(1)::before{background:linear-gradient(90deg,var(--blue),#60a5fa);}
+.hl-tile:nth-child(2)::before{background:linear-gradient(90deg,var(--green),#34d399);}
+.hl-tile:nth-child(3)::before{background:linear-gradient(90deg,var(--orange),#fb923c);}
+.hl-tile:nth-child(4)::before{background:linear-gradient(90deg,var(--purple),#c084fc);}
+.hl-val{font-size:1.6rem;font-weight:300;color:var(--text);letter-spacing:-0.5px;line-height:1;margin-bottom:4px;}
+.hl-label{font-size:0.6rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;}
+.hl-ctx{font-size:0.65rem;color:var(--light);margin-top:4px;line-height:1.3;}
+
+/* NARRATIVE */
+.brief-narrative{padding:28px 32px;border-bottom:1px solid var(--border);}
+.brief-section-label{font-size:0.62rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:14px;display:flex;align-items:center;gap:6px;}
+.brief-section-label::after{content:'';flex:1;height:1px;background:var(--border);}
+.narrative-text{font-size:0.88rem;color:var(--text);line-height:1.85;margin-bottom:14px;}
+.narrative-text:last-child{margin-bottom:0;}
+
+/* CHARTS */
+.brief-charts{padding:24px 32px;border-bottom:1px solid var(--border);display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.bc-panel{background:var(--bg);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+.bc-panel-hdr{padding:10px 14px;border-bottom:1px solid var(--border);background:white;}
+.bc-panel-title{font-size:0.76rem;font-weight:600;color:var(--text);}
+.bc-panel-sub{font-size:0.62rem;color:var(--muted);margin-top:1px;}
+.bc-panel-body{padding:12px 14px;}
+canvas{max-height:180px;}
+
+/* TOP DEALS */
+.brief-deals{padding:24px 32px;border-bottom:1px solid var(--border);}
+table{width:100%;border-collapse:collapse;font-size:0.76rem;}
+th{background:#f8fafc;color:var(--muted);padding:8px 12px;text-align:left;font-weight:600;font-size:0.62rem;border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap;}
+td{padding:9px 12px;border-bottom:1px solid #f1f5f9;color:var(--text);}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr:hover td{background:#f8fafc;}
+.badge{padding:2px 8px;border-radius:8px;font-size:0.62rem;font-weight:600;}
+.b-open{background:var(--blue-light);color:#1e40af;}
+.b-won{background:var(--green-light);color:#166534;}
+.c4c-link{color:var(--blue);text-decoration:none;font-size:0.65rem;display:flex;align-items:center;gap:3px;}
+.c4c-link:hover{text-decoration:underline;}
+.c4c-link svg{width:9px;height:9px;}
+
+/* RECS & ALERTS */
+.brief-recs{padding:24px 32px;display:grid;grid-template-columns:2fr 1fr;gap:20px;}
+.rec-list{display:flex;flex-direction:column;gap:8px;}
+.rec-item{display:flex;align-items:flex-start;gap:10px;padding:11px 14px;background:var(--blue-xlight);border:1px solid rgba(10,110,209,0.12);border-radius:9px;font-size:0.8rem;color:var(--text);line-height:1.5;}
+.rec-num{width:20px;height:20px;border-radius:50%;background:var(--blue);color:white;font-size:0.6rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.alert-list{display:flex;flex-direction:column;gap:8px;}
+.alert-item{display:flex;align-items:flex-start;gap:8px;padding:11px 14px;background:#fff7ed;border:1px solid rgba(234,88,12,0.15);border-radius:9px;font-size:0.78rem;color:var(--text);line-height:1.5;}
+.alert-icon{width:16px;height:16px;flex-shrink:0;color:var(--orange);margin-top:1px;}
+
+/* FOOTER */
+.brief-footer{padding:16px 32px;background:#f8fafc;display:flex;align-items:center;justify-content:space-between;font-size:0.65rem;color:var(--light);}
+
+/* REFINE */
+.brief-refine{background:white;border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow-sm);margin-bottom:32px;}
+.refine-hdr{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+.refine-hdr-icon{width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,var(--purple-light),var(--blue-light));display:flex;align-items:center;justify-content:center;}
+.refine-hdr-icon svg{width:13px;height:13px;color:var(--purple);}
+.refine-hdr-title{font-size:0.8rem;font-weight:600;color:var(--text);}
+.refine-row{display:flex;}
+.refine-inp{flex:1;border:none;padding:12px 16px;font-size:0.82rem;font-family:'Inter',sans-serif;color:var(--text);outline:none;}
+.refine-inp::placeholder{color:var(--light);}
+.refine-btn{background:var(--blue);color:white;border:none;padding:12px 22px;font-size:0.78rem;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;display:flex;align-items:center;gap:6px;white-space:nowrap;}
+.refine-btn:hover{background:var(--blue2);}
+.refine-btn svg{width:13px;height:13px;}
+
+@media print{
+  .shell,.doc-topbar,.brief-refine{display:none!important;}
+  .brief-wrap{padding:0;max-width:100%;}
+  #page3{display:flex!important;}
+  body{background:white;}
+}
+@media(max-width:900px){
+  .brief-highlights{grid-template-columns:repeat(2,1fr);}
+  .hl-tile:nth-child(2){border-right:none;}
+  .hl-tile:nth-child(3){border-top:1px solid var(--border);}
+  .brief-charts{grid-template-columns:1fr;}
+  .brief-recs{grid-template-columns:1fr;}
+  .audience-grid{grid-template-columns:repeat(2,1fr);}
+}
+@media(max-width:600px){
+  #page1{padding:32px 16px;}
+  .brief-header{padding:22px 20px;}
+  .brief-narrative,.brief-deals,.brief-recs,.brief-charts{padding:18px 20px;}
+  .brief-highlights{grid-template-columns:1fr 1fr;}
+}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <div style="display:flex;align-items:center;gap:0;">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="-2.23 -2.23 183.26 78.76" height="34" style="flex-shrink:0;">
+      <path d="M15.977,47.906v3.34c-.454-.503-.484-1.025-2.022-1.025H9.492V71.773c0,1.387.215,1.553.82,2.017H5.664c.605-.464.82-.63.82-2.017V50.221H2.08C.483,50.221.454,50.743,0,51.246v-3.34H15.977" style="fill:#e8e8e8"/>
+      <path d="M21.665,61.651v10.122c0,1.387.205,1.553.81,2.017H17.832c.605-.464.815-.63.815-2.017V50.03c0-1.387-.21-1.553-.815-2.017h6.933c6.48,0,9.16,2.08,9.16,7.129,0,2.315-1.748,5.318-5.478,6.045l5.239,10.586c.933,1.523,1.079,1.582,1.597,2.017H31.338L25.522,61.651H24.302c2.26,0,6.616-.117,6.616-4.341,0-2.807-1.538-4.785-6.152-4.785h-3.101v10.126" style="fill:#e8e8e8"/>
+      <path d="M144.434,61.651v10.122c0,1.387.21,1.553.815,2.017h-4.639c.596-.464.806-.63.806-2.017V50.03c0-1.387-.21-1.553-.806-2.017h6.929c6.48,0,9.165,2.08,9.165,7.129,0,2.315-1.748,5.318-5.483,6.045l5.244,10.586c.933,1.523,1.089,1.582,1.597,2.017h-3.945l-5.82-12.139h-1.221c2.266,0,6.621-.117,6.621-4.341,0-2.807-1.543-4.785-6.152-4.785h-3.101v10.126" style="fill:#e8e8e8"/>
+      <path d="M38.003,50.011c0-1.387-.215-1.548-.815-2.007h13.774v3.359c-.298-.396-.391-1.055-2.051-1.055h-7.9v8.155l5.464.117c1.567,0,1.631-.293,1.992-.757v3.828c-.308-.391-.308-.757-1.899-.757l-5.557-.117v10.699h7.9c1.626,0,1.66-.591,2.051-1.055v3.369H37.188c.6-.464.815-.63.815-2.017V50.011" style="fill:#e8e8e8"/>
+      <path d="M54.243,49.894c0-1.382-.21-1.548-.815-2.012h4.644c-.605.464-.811.63-.811,2.012V71.476h5.952c1.621,0,1.68-.659,2.051-1.055v3.369H53.428c.605-.464.815-.63.815-2.017V49.894" style="fill:#e8e8e8"/>
+      <path d="M68.11,49.894c0-1.382-.21-1.548-.81-2.012h4.638c-.605.464-.81.63-.81,2.012V71.476h5.542c1.621,0,1.685-.659,2.061-1.055v3.369H67.3c.6-.464.81-.63.81-2.017V49.894" style="fill:#e8e8e8"/>
+      <path d="M81.733,51.617c0-2.744-.205-2.905-.81-3.364h13.774v3.364c-.303-.4-.391-1.055-2.046-1.055h-7.896v7.725l5.811.122c1.562,0,1.621-.298,1.987-.762v3.833c-.298-.4-.298-.762-1.889-.762l-5.903-.117V71.476h7.896c1.626,0,1.655-.591,2.051-1.055v3.369H80.923c.605-.464.81-.63.81-.664V51.617" style="fill:#e8e8e8"/>
+      <path d="M98.062,50.274c0-1.387-.215-1.553-.811-2.012h6.421c4.277,0,8.945.562,8.945,5.977,0,3.73-2.441,5.43-4.37,5.762v.068c2.173,0,5.757,1.831,5.757,6.621,0,6.665-6.328,7.105-10.332,7.105h-6.421c.596-.464.811-.63.811-2.017V50.274zm3.022,9.336l-.01,11.865h2.598c3.437,0,7.314-.435,7.314-4.927,0-4.355-3.418-6.064-7.212-6.064-1.177,0,0-.703,0-.703,4.644,0,5.713-2.183,5.83-5.254,0-3.857-3.193-3.96-5.933-3.96h-2.597l.01,9.043" style="fill:#e8e8e8"/>
+      <path d="M115.464,61.197c0-6.953,4.644-13.315,11.743-13.315,6.797,0,11.504,6.26,11.504,13.315,0,6.533-4.482,13.106-11.601,13.106-6.768,0-11.646-6.152-11.646-13.106zm11.675,10.498c5.229,0,8.306-5.425,8.306-10.571,0-5.732-3.433-10.635-8.276-10.635-5.2,0-8.433,5.107-8.433,10.635,0,5.288,3.174,10.571,8.403,10.571" style="fill:#e8e8e8"/>
+      <path d="M175.313,61.998l-2.822.02c-1.597,0-1.597.366-1.899.762v-3.833c.366.464.42.762,1.987.762l6.221-.015v-.112V71.832c-2.124,1.406-5.4,2.471-8.296,2.471-7.221,0-11.992-5.225-11.992-13.125,0-8,5.225-13.679,11.992-13.679,4.077,0,5.61,1.938,6.694,1.938.313,0,.489-.142.801-.386v4.966c-.313-.317-2.754-3.877-7.007-3.877-5.19,0-8.994,4.653-8.994,10.972,0,5.815,3.306,10.542,8.784,10.542,1.567,0,3.037-.356,4.531-1.094V61.998" style="fill:#e8e8e8"/>
+      <path d="M55.875,5.563v3.343h9.75v17.719h3.313V8.906h9.969V5.563H55.875z" style="fill:#a39245"/>
+      <path d="M41.742,0l25.5,40.969,6.781-9.781,6.844,10.781,6.75-9.781,6.719,10.781,6.688-9.75,6.719,10.75L133.273,0H54.273H41.742z" style="fill:#a39245"/>
+    </svg>
+  </div>
+  <div class="shell-div"></div>
+  <span class="shell-app">Sales Brief</span>
+  <div class="shell-right">
+    <div class="shell-status"><div class="live-dot"></div>C4C QUA · MY352500</div>
+    <a href="index.html" class="shell-back">
+      <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2L4 6l4 4"/></svg>
+      Home
+    </a>
+  </div>
+</div>
+
+<!-- PAGE 1: INTENT -->
+<div id="page1">
+  <div class="eyebrow">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+    AI Sales Brief Generator
+  </div>
+  <div class="page-title">Who is this brief for?</div>
+  <div class="page-sub">Select your audience, describe your intent, and AI will generate a tailored, print-ready sales brief from live C4C data.</div>
+
+  <div class="intent-card">
+    <div class="intent-section">
+      <div class="intent-label">Audience</div>
+      <div class="audience-grid" id="audienceGrid">
+        <button class="aud-btn active" onclick="selectAud(this,'Board / Executive')" data-aud="Board / Executive">
+          <div class="aud-icon">🏛️</div>
+          <div class="aud-name">Board / Executive</div>
+          <div class="aud-desc">Strategic overview, revenue focus</div>
+        </button>
+        <button class="aud-btn" onclick="selectAud(this,'Regional Manager')" data-aud="Regional Manager">
+          <div class="aud-icon">🗺️</div>
+          <div class="aud-name">Regional Manager</div>
+          <div class="aud-desc">Operational detail, owner performance</div>
+        </button>
+        <button class="aud-btn" onclick="selectAud(this,'Customer Meeting')" data-aud="Customer Meeting">
+          <div class="aud-icon">🤝</div>
+          <div class="aud-name">Customer Meeting</div>
+          <div class="aud-desc">Value-oriented, opportunity focused</div>
+        </button>
+        <button class="aud-btn" onclick="selectAud(this,'Sales Team')" data-aud="Sales Team">
+          <div class="aud-icon">🎯</div>
+          <div class="aud-name">Sales Team</div>
+          <div class="aud-desc">Win rates, pipeline health, motivation</div>
+        </button>
+        <button class="aud-btn" onclick="selectAud(this,'Territory Review')" data-aud="Territory Review">
+          <div class="aud-icon">📊</div>
+          <div class="aud-name">Territory Review</div>
+          <div class="aud-desc">Org breakdown, geographic performance</div>
+        </button>
+        <button class="aud-btn" onclick="selectAud(this,'Investor / Stakeholder')" data-aud="Investor / Stakeholder">
+          <div class="aud-icon">💼</div>
+          <div class="aud-name">Investor / Stakeholder</div>
+          <div class="aud-desc">Growth story, pipeline momentum</div>
+        </button>
+      </div>
+    </div>
+
+    <div class="intent-section" style="border-bottom:none;">
+      <div class="intent-label">What do you want to communicate? <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--light)">(optional)</span></div>
+      <textarea class="intent-textarea" id="intentInput" placeholder='e.g. "Highlight our strong Q3 pipeline and address the stale deals risk" or leave blank for a full overview'></textarea>
+    </div>
+
+    <div class="intent-footer">
+      <span class="intent-hint">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span id="dataStatus">Loading live data...</span>
+      </span>
+      <button class="gen-btn" id="genBtn" onclick="generateBrief()" disabled>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+        Generate Brief
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE 2: BUILDING -->
+<div id="page2">
+  <div class="build-ring"></div>
+  <div class="build-title" id="buildTitle">Generating your brief...</div>
+  <div class="build-sub" id="buildSub">AI is crafting a tailored sales document from live C4C data</div>
+  <div class="build-steps">
+    <div class="bstep" id="bs1"><div class="bstep-dot"></div><span>Loading live opportunity data from C4C</span></div>
+    <div class="bstep" id="bs2"><div class="bstep-dot"></div><span>Calculating pipeline metrics and health</span></div>
+    <div class="bstep" id="bs3"><div class="bstep-dot"></div><span>AI writing narrative for your audience</span></div>
+    <div class="bstep" id="bs4"><div class="bstep-dot"></div><span>Assembling brief with charts and insights</span></div>
+  </div>
+  <div class="build-bar"><div class="build-bar-fill" id="buildBar"></div></div>
+</div>
+
+<!-- PAGE 3: BRIEF -->
+<div id="page3">
+  <div class="doc-topbar">
+    <div class="doc-topbar-left">
+      <h2 id="docTitle">Sales Brief</h2>
+      <p id="docSub">C4C QUA · MY352500</p>
+    </div>
+    <div class="doc-actions">
+      <button class="dbtn" onclick="showPage(1)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 5v14M5 12l7-7 7 7"/></svg>
+        New Brief
+      </button>
+      <button class="dbtn" onclick="window.print()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        Print / PDF
+      </button>
+      <button class="dbtn pri" onclick="document.querySelector('.refine-inp').focus()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Refine
+      </button>
+    </div>
+  </div>
+  <div class="brief-wrap">
+    <div class="brief-doc" id="briefDoc"></div>
+    <div class="brief-refine">
+      <div class="refine-hdr">
+        <div class="refine-hdr-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="13" height="13"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
+        <div class="refine-hdr-title">Refine this brief</div>
+      </div>
+      <div class="refine-row">
+        <input class="refine-inp" id="refineInp" type="text" placeholder='e.g. "Focus on APAC region only" · "Emphasise won deals" · "Make it more concise" · "Add competitor analysis angle"' onkeydown="if(event.key==='Enter')refineBrief()" />
+        <button class="refine-btn" onclick="refineBrief()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          Regenerate
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+var allData=[],selectedAud='Board / Executive',currentIntent='',briefCharts={};
+var C4C_BASE='https://my352500.crm.ondemand.com/sap/public/byd/runtime?bo_ns=http://sap.com/thingTypes&bo=COD_GENERIC&node=Root&operation=OnExtInspect&OBNRedirect=X';
+var SAP=['#0a6ed1','#107e3e','#e9730c','#bb0000','#6c32a9','#0e7e76','#c2781f','#64748b'];
+
+function fmt(n){n=parseFloat(n)||0;if(n>=1e9)return'$'+(n/1e9).toFixed(1)+'B';if(n>=1e6)return'$'+(n/1e6).toFixed(1)+'M';if(n>=1e3)return'$'+(n/1e3).toFixed(0)+'K';return'$'+n.toFixed(0);}
+function fmtN(n){n=parseFloat(n)||0;if(n>=1e6)return(n/1e6).toFixed(1)+'M';if(n>=1e3)return(n/1e3).toFixed(0)+'K';return n.toFixed(0);}
+function pd(v){if(!v)return null;var m=String(v).match(/\/Date\((\d+)\)\//);if(m)return new Date(parseInt(m[1]));return v?new Date(v):null;}
+function pds(v){var d=pd(v);if(!d||isNaN(d))return'—';return d.toISOString().substring(0,10);}
+function isOpen(x){return x.LifeCycleStatusCode==='1'||x.LifeCycleStatusCode==='2';}
+
+function selectAud(el,aud){
+  document.querySelectorAll('.aud-btn').forEach(function(b){b.classList.remove('active');});
+  el.classList.add('active');
+  selectedAud=aud;
+}
+
+function showPage(n){
+  document.getElementById('page1').style.display=n===1?'flex':'none';
+  document.getElementById('page2').style.display=n===2?'flex':'none';
+  document.getElementById('page3').style.display=n===3?'flex':'none';
+  window.scrollTo(0,0);
+}
+
+async function fetchData(){
+  var url='/odata/v4/opportunity/Opportunities?$top=1000',all=[];
+  while(url){var r=await fetch(url);var j=await r.json();if(j.error)throw new Error(j.error.message);all=all.concat(j.value);url=j['@odata.nextLink']?'/odata/v4/opportunity/'+j['@odata.nextLink']:null;}
+  return all;
+}
+
+function buildPayload(d){
+  var isOp=isOpen;
+  var won=d.filter(function(x){return x.LifeCycleStatusCode==='3';});
+  var lost=d.filter(function(x){return x.LifeCycleStatusCode==='5';});
+  var open=d.filter(isOp);
+  var rev=d.reduce(function(s,x){return s+parseFloat(x.ExpectedRevenueAmount||0);},0);
+  var openRev=open.reduce(function(s,x){return s+parseFloat(x.ExpectedRevenueAmount||0);},0);
+  var wr=won.length+lost.length>0?Math.round(won.length/(won.length+lost.length)*100):0;
+  var today=new Date();today.setHours(0,0,0,0);
+  var next12=new Date(today);next12.setFullYear(next12.getFullYear()+1);
+  var sopN12=open.filter(function(x){var s=pd(x.ExpectedProcessingEndDate);return s&&s>=today&&s<=next12;}).reduce(function(s,x){return s+parseFloat(x.ExpectedRevenueAmount||0);},0);
+  var stale90=open.filter(function(x){var lc=pd(x.LastChangeDate);return!lc||Math.floor((today-lc)/86400000)>90;}).length;
+  var om={};d.forEach(function(x){var k=(x.SalesOrganisationName||'?').replace(/TSS\s*/,'').substring(0,25);if(!om[k])om[k]={rev:0,won:0,lost:0};om[k].rev+=parseFloat(x.ExpectedRevenueAmount||0);if(x.LifeCycleStatusCode==='3')om[k].won++;if(x.LifeCycleStatusCode==='5')om[k].lost++;});
+  var sm={};open.forEach(function(x){var k=x.BUS_SEG_CDE_KUTText||'(Not Set)';sm[k]=(sm[k]||0)+parseFloat(x.ExpectedRevenueAmount||0);});
+  var sopY={};open.forEach(function(x){var s=pd(x.ExpectedProcessingEndDate);if(s&&s>today){var yr=s.getFullYear();sopY[yr]=(sopY[yr]||0)+parseFloat(x.ExpectedRevenueAmount||0);}});
+  var rm={};lost.forEach(function(x){var k=x.ResultReasonCodeText||'Unknown';rm[k]=(rm[k]||0)+1;});
+  return JSON.stringify({
+    total:d.length,won:won.length,lost:lost.length,open:open.length,
+    totalRev:Math.round(rev),openRev:Math.round(openRev),winRate:wr,
+    sopNext12Months:Math.round(sopN12),stale90Days:stale90,
+    topOrgs:Object.entries(om).sort(function(a,b){return b[1].rev-a[1].rev;}).slice(0,8).map(function(e){return{org:e[0],rev:Math.round(e[1].rev),won:e[1].won,lost:e[1].lost,wr:e[1].won+e[1].lost>0?Math.round(e[1].won/(e[1].won+e[1].lost)*100):0};}),
+    topSegments:Object.entries(sm).sort(function(a,b){return b[1]-a[1];}).slice(0,6).map(function(e){return{segment:e[0],rev:Math.round(e[1])};}),
+    sopByYear:Object.entries(sopY).sort(function(a,b){return a[0]-b[0];}).map(function(e){return{year:e[0],rev:Math.round(e[1])};}),
+    lossReasons:Object.entries(rm).sort(function(a,b){return b[1]-a[1];}).slice(0,5).map(function(e){return{reason:e[0],count:e[1]};}),
+    topOpen:open.slice().sort(function(a,b){return parseFloat(b.ExpectedRevenueAmount||0)-parseFloat(a.ExpectedRevenueAmount||0);}).slice(0,5).map(function(x){return{id:x.ID,name:x.Name,account:x.ProspectPartyName,owner:x.MainEmployeeResponsiblePartyName,rev:Math.round(parseFloat(x.ExpectedRevenueAmount||0)),phase:x.SalesCyclePhaseCodeText,sop:pds(x.ExpectedProcessingEndDate)};})
+  });
+}
+
+async function generateBrief(){
+  var intent=document.getElementById('intentInput').value.trim();
+  currentIntent=(selectedAud+(intent?' — '+intent:''));
+  showPage(2);
+  var steps=['bs1','bs2','bs3','bs4'];
+  var prog=[15,35,65,90];
+  var bar=document.getElementById('buildBar');
+  steps.forEach(function(id,i){
+    setTimeout(function(){
+      steps.forEach(function(s){document.getElementById(s).classList.remove('active');});
+      document.getElementById(id).classList.add('active');
+      for(var j=0;j<i;j++){document.getElementById(steps[j]).classList.remove('active');document.getElementById(steps[j]).classList.add('done');}
+      bar.style.width=prog[i]+'%';
+    },i*900);
+  });
+  try{
+    var payload=buildPayload(allData);
+    var res=await fetch('/odata/v4/ai/generateBrief',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({audience:selectedAud,intent:intent||'Full pipeline overview',data:payload})});
+    var json=await res.json();
+    if(json.error)throw new Error(json.error.message);
+    var raw=(json.value||'').replace(/```json|```/g,'').trim();
+    var brief=JSON.parse(raw);
+    setTimeout(function(){
+      bar.style.width='100%';
+      steps.forEach(function(s){document.getElementById(s).classList.remove('active');document.getElementById(s).classList.add('done');});
+      setTimeout(function(){renderBrief(brief);},400);
+    },3800);
+  }catch(e){
+    setTimeout(function(){renderError(e.message);},4000);
+  }
+}
+
+function renderBrief(brief){
+  Object.values(briefCharts).forEach(function(c){c.destroy();});briefCharts={};
+  var d=allData;
+  var won=d.filter(function(x){return x.LifeCycleStatusCode==='3';});
+  var lost=d.filter(function(x){return x.LifeCycleStatusCode==='5';});
+  var open=d.filter(isOpen);
+  var today=new Date();today.setHours(0,0,0,0);
+
+  document.getElementById('docTitle').textContent=brief.title||'Sales Brief';
+  document.getElementById('docSub').textContent='C4C QUA · MY352500 · '+today.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})+' · '+d.length.toLocaleString()+' records · '+selectedAud;
+
+  // highlights
+  var hlItems=(brief.highlights&&brief.highlights.length?brief.highlights:[
+    {label:'Open Pipeline',value:fmt(open.reduce(function(s,x){return s+parseFloat(x.ExpectedRevenueAmount||0);},0)),context:'Active opportunities'},
+    {label:'Win Rate',value:(won.length+lost.length>0?Math.round(won.length/(won.length+lost.length)*100):0)+'%',context:won.length+' won · '+lost.length+' lost'},
+    {label:'Total Opportunities',value:d.length.toLocaleString(),context:'All statuses'},
+    {label:'Open Deals',value:open.length.toLocaleString(),context:'Active pipeline'}
+  ]).slice(0,4);
+
+  var hlHtml=hlItems.map(function(h){
+    return '<div class="hl-tile"><div class="hl-val">'+h.value+'</div><div class="hl-label">'+h.label+'</div><div class="hl-ctx">'+h.context+'</div></div>';
+  }).join('');
+
+  // narrative
+  var narrative=(brief.narrative||['No narrative generated.']).map(function(p){
+    return '<p class="narrative-text">'+p+'</p>';
+  }).join('');
+
+  // recs
+  var recs=(brief.recommendations||[]).map(function(r,i){
+    return '<div class="rec-item"><div class="rec-num">'+(i+1)+'</div><span>'+r+'</span></div>';
+  }).join('');
+
+  // alerts
+  var alerts=(brief.alerts||[]).map(function(a){
+    return '<div class="alert-item"><svg class="alert-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span>'+a+'</span></div>';
+  }).join('');
+
+  // top deals table
+  var topOpen=open.slice().sort(function(a,b){return parseFloat(b.ExpectedRevenueAmount||0)-parseFloat(a.ExpectedRevenueAmount||0);}).slice(0,8);
+  var dealsHtml=topOpen.map(function(row){
+    var link=C4C_BASE+'&param.InternalID='+row.ID+'&param.Type=COD_OPPORTUNITY_THINGTYPE';
+    return '<tr>'+
+      '<td style="font-weight:600;color:var(--blue)">'+fmt(parseFloat(row.ExpectedRevenueAmount||0))+'</td>'+
+      '<td style="font-weight:500;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(row.Name||'—')+'</td>'+
+      '<td style="color:var(--muted)">'+(row.ProspectPartyName||'—')+'</td>'+
+      '<td style="color:var(--muted);font-size:0.7rem">'+(row.MainEmployeeResponsiblePartyName||'—')+'</td>'+
+      '<td style="color:var(--muted);font-size:0.7rem">'+(row.SalesCyclePhaseCodeText||'—')+'</td>'+
+      '<td style="color:var(--muted);font-size:0.7rem">'+pds(row.ExpectedProcessingEndDate)+'</td>'+
+      '<td><a class="c4c-link" href="'+link+'" target="_blank">Open <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 2h3v3M10 2 5 7M4 3H2v7h7V8"/></svg></a></td>'+
+      '</tr>';
+  }).join('');
+
+  document.getElementById('briefDoc').innerHTML=
+    '<div class="brief-header">'+
+      '<div class="brief-meta">'+
+        '<div class="brief-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="10" height="10"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg> TSS Sales Brief</div>'+
+        '<div class="brief-date">'+today.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})+'</div>'+
+      '</div>'+
+      '<div class="brief-headline">'+(brief.headline||brief.title||'Sales Pipeline Overview')+'</div>'+
+      '<div class="brief-audience-row">'+
+        '<div class="brief-aud-tag">'+
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="10" height="10"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>'+
+          selectedAud+
+        '</div>'+
+        '<div class="brief-record-ct">'+d.length.toLocaleString()+' opportunities · C4C QUA MY352500</div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="brief-highlights">'+hlHtml+'</div>'+
+    '<div class="brief-narrative">'+
+      '<div class="brief-section-label">Executive Narrative</div>'+
+      narrative+
+    '</div>'+
+    '<div class="brief-charts">'+
+      '<div class="bc-panel"><div class="bc-panel-hdr"><div class="bc-panel-title">Pipeline by Sales Organisation</div><div class="bc-panel-sub">Top 8 · Expected revenue USD</div></div><div class="bc-panel-body"><canvas id="cOrg"></canvas></div></div>'+
+      '<div class="bc-panel"><div class="bc-panel-hdr"><div class="bc-panel-title">SOP Forecast by Year</div><div class="bc-panel-sub">Open pipeline closing schedule</div></div><div class="bc-panel-body"><canvas id="cSop"></canvas></div></div>'+
+    '</div>'+
+    '<div class="brief-deals">'+
+      '<div class="brief-section-label">Top Open Opportunities</div>'+
+      '<table><thead><tr><th>Value</th><th>Opportunity</th><th>Account</th><th>Owner</th><th>Phase</th><th>SOP Date</th><th></th></tr></thead><tbody>'+dealsHtml+'</tbody></table>'+
+    '</div>'+
+    '<div class="brief-recs">'+
+      '<div>'+
+        '<div class="brief-section-label">Recommendations</div>'+
+        '<div class="rec-list">'+recs+'</div>'+
+      '</div>'+
+      '<div>'+
+        '<div class="brief-section-label">Attention Required</div>'+
+        '<div class="alert-list">'+alerts+'</div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="brief-footer">'+
+      '<span>Trelleborg Sealing Solutions · TSS CX Analytics · C4C QUA MY352500</span>'+
+      '<span>Generated '+today.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})+' · AI-assisted, verify before distribution</span>'+
+    '</div>';
+
+  // Charts
+  var gc='#f1f5f9',tc='#94a3b8';
+  var om={};d.forEach(function(x){var k=(x.SalesOrganisationName||'?').replace(/TSS\s*/,'').substring(0,22);om[k]=(om[k]||0)+parseFloat(x.ExpectedRevenueAmount||0);});
+  var os=Object.entries(om).sort(function(a,b){return b[1]-a[1];}).slice(0,8);
+  briefCharts.org=new Chart(document.getElementById('cOrg'),{type:'bar',data:{labels:os.map(function(e){return e[0];}),datasets:[{data:os.map(function(e){return e[1];}),backgroundColor:SAP,borderRadius:3,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return' '+fmt(c.raw);}}}},scales:{x:{ticks:{color:tc,callback:function(v){return fmtN(v);}},grid:{color:gc}},y:{ticks:{color:tc,font:{size:9}},grid:{display:false}}}}});
+
+  var today2=new Date();today2.setHours(0,0,0,0);
+  var sopY={};open.forEach(function(x){var s=pd(x.ExpectedProcessingEndDate);if(s&&s>today2){var yr=s.getFullYear();sopY[yr]=(sopY[yr]||0)+parseFloat(x.ExpectedRevenueAmount||0);}});
+  var soye=Object.entries(sopY).sort(function(a,b){return a[0]-b[0];});
+  briefCharts.sop=new Chart(document.getElementById('cSop'),{type:'bar',data:{labels:soye.map(function(e){return e[0];}),datasets:[{data:soye.map(function(e){return e[1];}),backgroundColor:'rgba(108,50,169,0.75)',borderRadius:3,borderSkipped:false}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return' '+fmt(c.raw);}}}},scales:{x:{ticks:{color:tc,font:{size:10}},grid:{color:gc}},y:{ticks:{color:tc,callback:function(v){return fmtN(v);}},grid:{color:gc}}}}});
+
+  showPage(3);
+}
+
+function renderError(msg){
+  document.getElementById('briefDoc').innerHTML='<div style="padding:40px;"><div style="color:var(--red);font-size:0.85rem;margin-bottom:16px;">Error generating brief: '+msg+'</div><button onclick="showPage(1)" style="background:white;border:1px solid var(--border2);padding:8px 18px;border-radius:7px;cursor:pointer;font-family:Inter,sans-serif;font-size:0.78rem;">← Try Again</button></div>';
+  showPage(3);
+}
+
+async function refineBrief(){
+  var r=document.getElementById('refineInp').value.trim();
+  if(!r)return;
+  currentIntent=currentIntent+'. Refinement: '+r;
+  document.getElementById('intentInput').value=currentIntent;
+  document.getElementById('refineInp').value='';
+  generateBrief();
+}
+
+async function init(){
+  try{
+    allData=await fetchData();
+    document.getElementById('dataStatus').textContent=allData.length.toLocaleString()+' records loaded from C4C';
+    document.getElementById('genBtn').disabled=false;
+  }catch(e){
+    document.getElementById('dataStatus').textContent='Error loading data: '+e.message;
+  }
+}
+init();
+</script>
+</body>
+</html>

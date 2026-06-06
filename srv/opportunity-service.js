@@ -86,6 +86,14 @@ module.exports = cds.service.impl(async function () {
         return await callClaude(system, 'Data: ' + summary + '\n\nQuestion: ' + question, apiKey);
     });
 
+    this.on('generateBrief', async (req) => {
+        const { audience, intent, data } = req.data;
+        const apiKey = process.env.ANTHROPIC_API_KEY || cds.env.ANTHROPIC_API_KEY;
+        const system = 'You are a senior sales strategist for Trelleborg Sealing Solutions (TSS). Generate a polished, audience-specific sales brief from C4C opportunity data. Return ONLY valid JSON, no markdown, no code blocks. Structure: {"title":"string","headline":"one powerful sentence summarising the pipeline story","narrative":["paragraph1","paragraph2","paragraph3"],"recommendations":["actionable rec 1","rec 2","rec 3","rec 4"],"alerts":["key risk or attention item 1","item 2"],"highlights":[{"label":"string","value":"string","context":"string"}]}. Rules: Tailor tone and content strictly to the audience. Board/Executive = strategic, revenue-focused, concise. Customer Meeting = value-oriented, opportunity-focused, positive. Regional Manager = operational, owner/phase detail, action-oriented. Sales Team = motivational, win rate, pipeline health. Territory Review = geographic breakdown, org performance. highlights array = 4 key metrics with label, formatted value, and 1-line context. narrative = 3 paragraphs of flowing prose, no bullet points, use real numbers. recommendations = 4 specific, actionable items. alerts = 2 risks or things needing attention. All numbers rounded, currency formatted as $1.2M.';
+        const prompt = 'Audience: ' + audience + '\nIntent: ' + intent + '\nSales data: ' + data;
+        return await callClaude(system, prompt, apiKey);
+    });
+
     this.on('buildReport', async (req) => {
         const { question, data } = req.data;
         const apiKey = process.env.ANTHROPIC_API_KEY || cds.env.ANTHROPIC_API_KEY;
