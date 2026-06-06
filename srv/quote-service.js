@@ -21,11 +21,19 @@ module.exports = cds.service.impl(async function () {
     const c4c = await cds.connect.to('c4c');
 
     this.on('READ', 'SalesQuotes', async (req) => {
-        const top = req.query.SELECT && req.query.SELECT.limit && req.query.SELECT.limit.rows && req.query.SELECT.limit.rows.val;
-        if (top && top <= 100) {
-            const result = await c4c.send({ method: 'GET', path: 'SalesQuoteCollection?$top=' + top + '&$select=' + QUOTE_SEL });
-            return Array.isArray(result) ? result : (result.value || result);
+        try {
+            const top = req.query.SELECT && req.query.SELECT.limit && req.query.SELECT.limit.rows && req.query.SELECT.limit.rows.val;
+            // Probe with $top=1 first to verify the collection exists
+            const probe = await c4c.send({ method: 'GET', path: 'SalesQuoteCollection?$top=1&$select=ObjectID,ID,Name' });
+            console.log('[CAP] SalesQuoteCollection probe OK, records:', JSON.stringify(probe).substring(0, 200));
+            if (top && top <= 100) {
+                const result = await c4c.send({ method: 'GET', path: 'SalesQuoteCollection?$top=' + top + '&$select=' + QUOTE_SEL });
+                return Array.isArray(result) ? result : (result.value || result);
+            }
+            return await fetchAllQuotes(c4c);
+        } catch(e) {
+            console.error('[CAP] SalesQuoteCollection ERROR:', e.message, e.code, JSON.stringify(e).substring(0, 500));
+            throw e;
         }
-        return await fetchAllQuotes(c4c);
     });
 });
