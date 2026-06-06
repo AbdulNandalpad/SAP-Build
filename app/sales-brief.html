@@ -173,6 +173,15 @@ tbody tr:hover td{background:#f8fafc;}
 .refine-btn:hover{background:var(--blue2);}
 .refine-btn svg{width:13px;height:13px;}
 
+/* DATA SUMMARY */
+.ds-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.ds-tile{background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:10px 12px;}
+.ds-val{font-size:1.05rem;font-weight:600;color:var(--text);line-height:1;}
+.ds-lbl{font-size:0.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-top:3px;}
+.ds-fields{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:5px;margin-top:2px;}
+.ds-field{font-size:0.62rem;background:#e8f2fd;color:var(--blue);border-radius:4px;padding:2px 7px;font-weight:500;}
+@media(max-width:600px){.ds-grid{grid-template-columns:repeat(2,1fr);}}
+
 @media print{
   .shell,.doc-topbar,.brief-refine{display:none!important;}
   .brief-wrap{padding:0;max-width:100%;}
@@ -274,6 +283,12 @@ tbody tr:hover td{background:#f8fafc;}
     <div class="intent-section" style="border-bottom:none;">
       <div class="intent-label">What do you want to communicate? <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--light)">(optional)</span></div>
       <textarea class="intent-textarea" id="intentInput" placeholder='e.g. "Highlight our strong Q3 pipeline and address the stale deals risk" or leave blank for a full overview'></textarea>
+    </div>
+
+    <!-- DATA SUMMARY -->
+    <div class="intent-section" id="dataSummarySection" style="display:none;padding:14px 22px;">
+      <div class="intent-label" style="margin-bottom:10px;">Data included in this brief</div>
+      <div class="ds-grid" id="dataSummaryGrid"></div>
     </div>
 
     <div class="intent-footer">
@@ -557,11 +572,49 @@ async function refineBrief(){
   generateBrief();
 }
 
+function buildDataSummary(d){
+  var won=d.filter(function(x){return x.LifeCycleStatusCode==='3';});
+  var lost=d.filter(function(x){return x.LifeCycleStatusCode==='5';});
+  var open=d.filter(isOpen);
+  var today=new Date();today.setHours(0,0,0,0);
+  var next12=new Date(today);next12.setFullYear(next12.getFullYear()+1);
+  var sopN12=open.filter(function(x){var s=pd(x.ExpectedProcessingEndDate);return s&&s>=today&&s<=next12;}).reduce(function(s,x){return s+parseFloat(x.ExpectedRevenueAmount||0);},0);
+  var openRev=open.reduce(function(s,x){return s+parseFloat(x.ExpectedRevenueAmount||0);},0);
+  var wr=won.length+lost.length>0?Math.round(won.length/(won.length+lost.length)*100):0;
+  var stale90=open.filter(function(x){var lc=pd(x.LastChangeDate);return!lc||Math.floor((today-lc)/86400000)>90;}).length;
+  var segs=new Set(d.map(function(x){return x.BUS_SEG_CDE_KUTText;}).filter(Boolean)).size;
+  var orgs=new Set(d.map(function(x){return x.SalesOrganisationName;}).filter(Boolean)).size;
+  var owners=new Set(d.map(function(x){return x.MainEmployeeResponsiblePartyName;}).filter(Boolean)).size;
+
+  document.getElementById('dataSummaryGrid').innerHTML=
+    '<div class="ds-tile"><div class="ds-val">'+d.length.toLocaleString()+'</div><div class="ds-lbl">Total Opportunities</div></div>'+
+    '<div class="ds-tile"><div class="ds-val">'+fmt(openRev)+'</div><div class="ds-lbl">Open Pipeline</div></div>'+
+    '<div class="ds-tile"><div class="ds-val">'+wr+'%</div><div class="ds-lbl">Win Rate</div></div>'+
+    '<div class="ds-tile"><div class="ds-val">'+fmt(sopN12)+'</div><div class="ds-lbl">SOP Next 12 Months</div></div>'+
+    '<div class="ds-tile"><div class="ds-val">'+open.length+'</div><div class="ds-lbl">Open Deals</div></div>'+
+    '<div class="ds-tile"><div class="ds-val">'+won.length+'</div><div class="ds-lbl">Won</div></div>'+
+    '<div class="ds-tile"><div class="ds-val">'+stale90+'</div><div class="ds-lbl">Stale >90 Days</div></div>'+
+    '<div class="ds-tile"><div class="ds-val">'+orgs+' orgs · '+owners+' owners</div><div class="ds-lbl">Coverage</div></div>'+
+    '<div class="ds-fields">'+
+      '<span class="ds-field">Revenue</span>'+
+      '<span class="ds-field">Win/Loss</span>'+
+      '<span class="ds-field">Sales Phase</span>'+
+      '<span class="ds-field">SOP Dates</span>'+
+      (segs>0?'<span class="ds-field">'+segs+' Business Segments</span>':'')+
+      '<span class="ds-field">Pipeline Health</span>'+
+      '<span class="ds-field">Top Open Deals</span>'+
+      '<span class="ds-field">Loss Reasons</span>'+
+      '<span class="ds-field">By Sales Org</span>'+
+    '</div>';
+  document.getElementById('dataSummarySection').style.display='block';
+}
+
 async function init(){
   try{
     allData=await fetchData();
     document.getElementById('dataStatus').textContent=allData.length.toLocaleString()+' records loaded from C4C';
     document.getElementById('genBtn').disabled=false;
+    buildDataSummary(allData);
   }catch(e){
     document.getElementById('dataStatus').textContent='Error loading data: '+e.message;
   }

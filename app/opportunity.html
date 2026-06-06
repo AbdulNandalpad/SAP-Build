@@ -389,7 +389,7 @@ tbody tr:hover td{background:#f8fafc;}
         </div>
         <div>
           <div class="qb-hdr-title">Query Builder &amp; AI Analysis</div>
-          <div class="qb-hdr-sub">Predefined analytics + Claude AI natural language</div>
+          <div class="qb-hdr-sub">Predefined analytics + AI natural language</div>
         </div>
       </div>
       <span class="qb-toggle" id="qbToggle">Expand ↓</span>
@@ -472,7 +472,7 @@ async function runAI(){
   document.querySelectorAll('.chip').forEach(function(c){c.classList.remove('active');});
   var btn=document.getElementById('btnAI'),o=document.getElementById('qbResult');
   btn.disabled=true;btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Thinking...';
-  o.className='qb-result ai-r';o.innerHTML='<span style="color:var(--muted)">Connecting to Claude AI...</span>';
+  o.className='qb-result ai-r';o.innerHTML='<span style="color:var(--muted)">Connecting to AI...</span>';
   var summary=buildSummary(filtered);
   try{
     var r=await fetch('/odata/v4/ai/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:q,summary:summary})});
