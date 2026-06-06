@@ -82,6 +82,7 @@ module.exports = cds.service.impl(async function () {
     this.on('analyze', async (req) => {
         const { question, summary } = req.data;
         const apiKey = process.env.ANTHROPIC_API_KEY || cds.env.ANTHROPIC_API_KEY;
+        console.log('[AI] key prefix:', apiKey ? apiKey.substring(0,20)+'...' : 'MISSING');
         const system = 'You are a senior sales analyst for Trelleborg Sealing Solutions (TSS). Answer concisely with sharp insight. Use <b> for numbers, <br> for line breaks. No markdown.';
         return await callClaude(system, 'Data: ' + summary + '\n\nQuestion: ' + question, apiKey);
     });
