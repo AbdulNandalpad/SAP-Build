@@ -1,0 +1,1142 @@
+import ABSL;
+import AP.PC.IdentityManagement.Global;
+import AP.FO.BusinessPartner.Global;
+import AP.FO.PriceAndTax.Global;
+import AP.CRM.Global;
+import AP.Common.GDT;
+import AP.PDI.Utilities;
+import AP.FO.Product.Global;
+import CommunicationServicesManagement.Global;
+import DocumentServices.Global;
+
+var Body;
+var originOD;
+var countryCode;
+var custcurrency;
+var salesunit;
+
+foreach (var res in this)
+{
+	var item = res.Item;
+	var BP = res.BuyerParty;
+	var CustomerID;
+	var CustomerPriceGroup;
+	var originOfData;
+	var classCode;
+	var SegmentCode;
+	var MarSegmentgrpCode;
+	var MarSegCode;
+	var requestorID;
+	var currency;
+	var Terr;
+	var pt = res.PricingTerms;
+	var countrycdeJson;
+	var classcdeJson;
+
+	if (pt.IsSet()) { currency = pt.CurrencyCode; }
+
+	requestorID = "\"requestorId\":\"X_WSO2_READ\",";
+
+	// ============================================================
+	// SECTION 1: COLLECT CUSTOMER INFO
+	// ============================================================
+	if (BP.IsSet() && BP.Customer.IsSet())
+	{
+		var cust = BP.Customer;
+		var doim = cust.DefaultObjectIdentifierMapping;
+
+		// --- Customer ID ---
+		if (doim.IsSet())
+		{
+			CustomerID = "\"customerId\":\"" + doim.RemoteObjectID.content + "\",";
+		}
+		else
+		{
+			CustomerID = "\"customerId\":\"" + cust.InternalID.RemoveLeadingZeros() + "\",";
+		}
+
+		// --- Customer Price Group ---
+		if (cust.SalesArrangement.Count() > 0)
+		{
+			var sa = cust.SalesArrangement.GetFirst();
+			if (sa.IsSet() && sa.PricingTerms.IsSet())
+			{
+				var priceGroup = sa.PricingTerms.PriceSpecificationCustomerGroupCode;
+				if (!priceGroup.IsInitial())
+				{
+					CustomerPriceGroup = "\"priceGroup\":\"" + priceGroup.content + "\",";
+				}
+			}
+		}
+
+		// --- Origin of Data (from DOIM) ---
+		if (doim.IsSet())
+		{
+			originOD = doim.CommunicationSystemParticipatingBusinessSystem.ID.content;
+			if (!originOD.IsInitial())
+			{
+				originOfData = "\"originOfData\":\"" + originOD + "\",";
+			}
+		}
+
+		// --- Sales Unit ---
+		if (this.SalesUnitParty.Count() > 0)
+		{
+			var unit = this.SalesUnitParty.GetFirst();
+			if (unit.IsSet() && !unit.PartyKey.IsInitial())
+			{
+				salesunit = unit.PartyKey.PartyID.content;
+			}
+		}
+
+		// --- Origin of Data fallback (via SalesUnitParty BP routing) ---
+		if (originOD.IsInitial() && this.SalesUnitParty.Count() > 0)
+		{
+			var unit2 = this.SalesUnitParty.GetFirst();
+			if (unit2.IsSet())
+			{
+				if (unit2.BusinessPartner.IsSet() &&
+					!unit2.BusinessPartner.CurrentCommon.OOD_Routing.IsInitial())
+				{
+					originOD = unit2.BusinessPartner.CurrentCommon.OOD_Routing;
+					if (originOD == "SME") { originOD = "SAP"; }
+				}
+
+				if (!originOD.IsInitial())
+				{
+					originOfData = "\"originOfData\":\"" + originOD + "\",";
+				}
+			}
+		}
+
+		// ============================================================
+		// REGION: HUNGARY - Force origin to SAP
+		// ============================================================
+		if (salesunit == "TSSHUNGARY")
+		{
+			originOD = "SAP";
+			originOfData = "\"originOfData\":\"SAP\",";
+		}
+
+		// --- Customer Country Code ---
+		var addr = cust.CurrentDefaultAddressInformation;
+		if (addr.IsSet() && addr.Address.DefaultPostalAddressRepresentation.IsSet())
+		{
+			countrycdeJson = "\"countryCode\":\"" + addr.Address.DefaultPostalAddressRepresentation.CountryCode + "\",";
+			countryCode = addr.Address.DefaultPostalAddressRepresentation.CountryCode;
+		}
+
+		// --- Business Segment, Territory, Currency ---
+		if (cust.CurrentCommon.IsSet())
+		{
+			var c = cust.CurrentCommon;
+			custcurrency  = "\"custcurrency\":\"" + c.CURRENCY + "\",";
+			Terr          = "\"salesTerritory\":\"" + c.SALESTERRITORYDETCODE + "\",";
+			SegmentCode   = c.BUS_SEG_CDE;
+			MarSegmentgrpCode = c.MKT_SEG_GRP_CDE;
+			MarSegCode    = c.MKT_SEG_CODE;
+		}
+
+		// --- ABC Classification ---
+		var abc = cust.ABCClassifications;
+		if (abc.IsSet())
+		{
+			classCode   = abc.CustomerABCClassificationCode.content;
+			classcdeJson = "\"classCode\":\"" + classCode + "\"";
+		}
+		else
+		{
+			classcdeJson = "\"classCode\":\" \"";
+			classCode    = "";
+		}
+	}
+	// ============================================================
+	// END SECTION 1
+	// ============================================================
+
+
+	// ============================================================
+	// SECTION 2: COLLECT ITEM INFO & BUILD PAYLOAD
+	// ============================================================
+	var itemProcessing = "";
+	var itemData;
+
+	foreach (var it in item)
+	{
+		var c4c_pick_cnt  = it.ZNumberOfPicks;
+		var RFQSupp       = it.Fcast_Supplier.content;
+		var pt1           = it.PriceDocumentPriceAndTaxCalculationItem;
+		var price         = pt1.ItemMainPrice;
+		var Quan          = it.FirstRequestedItemScheduleLine;
+		var itDB          = it.GetFromDB();
+		var priceDB       = pt1.ItemMainPrice.GetFromDB();
+		var QuanDB        = Quan.GetFromDB();
+		var unitPrice     = "";
+		var unitPricecurr = "";
+		var MultiplyAmnt  = "";
+		var MultiplyAmntDB = "";
+		var unitCostCalc;
+
+		// --------------------------------------------------------
+		// REGION: WAREHOUSE DEFAULTING (CN / IN / Global)
+		// --------------------------------------------------------
+		var wareh = it.WarehouseID.RemoveLeadingZeros();
+
+		if (wareh == "1030")
+		{
+			wareh = "1020";
+		}
+
+		if (wareh.IsInitial())
+		{
+			// REGION: CHINA warehouse
+			if (countryCode == "CN")
+			{
+				wareh = "CNSHF1";
+			}
+			// REGION: INDIA warehouse
+			else if (countryCode == "IN")
+			{
+				wareh = "LCI";
+			}
+			// REGION: ALL OTHERS (global default)
+			else
+			{
+				wareh = "1020";
+			}
+		}
+		// --------------------------------------------------------
+		// END WAREHOUSE DEFAULTING
+		// --------------------------------------------------------
+
+		// --- Price change / cost unit detection ---
+		if (pt1.IsSet())
+		{
+			if (price.IsSet())
+			{
+				unitPrice     = price.Rate.DecimalValue.ToString().Trim();
+				unitPricecurr = price.Rate.CurrencyCode;
+				MultiplyAmnt  = price.Rate.BaseDecimalValue.ToString().Trim();
+			}
+
+			if (!priceDB.IsInitial())
+			{
+				MultiplyAmntDB = priceDB.Rate.BaseDecimalValue.ToString().Trim();
+				var Prod = it.ItemProduct.ProductKey.ProductID.content;
+
+				// Price/cost unit changed - recalculate cost and price proportionally
+				if (!MultiplyAmntDB.IsInitial() && !MultiplyAmnt.IsInitial() &&
+					(MultiplyAmntDB != MultiplyAmnt) &&
+					(!QuanDB.IsInitial() && QuanDB.Quantity.content == Quan.Quantity.content) &&
+					(!priceDB.Rate.DecimalValue.IsInitial() && priceDB.Rate.DecimalValue == price.Rate.DecimalValue) &&
+					(itDB.CostAmount.content == it.CostAmount.content) &&
+					(it.ZMarginBI == itDB.ZMarginBI) &&
+					!it.CostAmount.content.IsInitial())
+				{
+					var mul     = Numeric.ParseFromString(MultiplyAmnt);
+					var baseMul = Numeric.ParseFromString(MultiplyAmntDB);
+					if (baseMul != 0)
+					{
+						var tcos = it.CostAmount.content;
+						var bb   = (tcos / baseMul) * mul;
+						it.CostAmount.content = Numeric.ParseFromString(bb.RoundToString(2));
+
+						var cc = price.Rate.DecimalValue / baseMul;
+						var dd = cc * mul;
+						price.Rate.DecimalValue = Numeric.ParseFromString(dd.RoundToString(2));
+						unitPrice = price.Rate.DecimalValue.ToString().Trim();
+						continue;
+					}
+				}
+
+				// Clear cost/price if quantity changed (except CUSTOM_PROD)
+				if (!QuanDB.IsInitial() && (QuanDB.Quantity.content != Quan.Quantity.content) && Prod != "CUSTOM_PROD")
+				{
+					it.CostAmount.Clear();
+					price.Rate.DecimalValue.Clear();
+					unitPrice = "";
+				}
+			}
+
+			if (!priceDB.Rate.DecimalValue.IsInitial() || !itDB.ZMarginBI.IsInitial())
+			{
+				if ((!priceDB.Rate.DecimalValue.IsInitial() && (priceDB.Rate.DecimalValue != price.Rate.DecimalValue) &&
+					  (it.CostAmount.content != itDB.CostAmount.content)) ||
+					((it.ZMarginBI != itDB.ZMarginBI) && (it.CostAmount.content != itDB.CostAmount.content)))
+				{
+					it.ZMarginBI.Clear();
+					price.Rate.DecimalValue.Clear();
+					unitPrice = "";
+				}
+				else if ((!priceDB.Rate.DecimalValue.IsInitial() && priceDB.Rate.DecimalValue != price.Rate.DecimalValue) ||
+						  (it.CostAmount.content != itDB.CostAmount.content))
+				{
+					it.ZMarginBI.Clear();
+				}
+				else if (it.ZMarginBI != itDB.ZMarginBI)
+				{
+					price.Rate.DecimalValue.Clear();
+					unitPrice = "";
+				}
+			}
+
+			if (!priceDB.IsInitial() && !MultiplyAmntDB.IsInitial() && !QuanDB.IsInitial() && !itDB.IsInitial())
+			{
+				if ((MultiplyAmntDB != MultiplyAmnt ||
+					 it.ZMarginBI != itDB.ZMarginBI ||
+					 priceDB.Rate.DecimalValue != price.Rate.DecimalValue ||
+					 Quan.Quantity.content != QuanDB.Quantity.content ||
+					 itDB.CostAmount.content != it.CostAmount.content) &&
+					 it.ZIsPriceFetch_KUT == true)
+				{
+					it.ZIsPriceFetch_KUT = false;
+				}
+			}
+
+			if (it.ZRecommendMargin_KUT.IsInitial())
+			{
+				it.ZRecommendMargin_KUT = it.ZMarginBI;
+			}
+
+			if (it.ZRecommendPrice_KUT.content.IsInitial())
+			{
+				it.ZRecommendPrice_KUT.content   = price.Rate.DecimalValue;
+				it.ZRecommendPrice_KUT.currencyCode = price.Rate.CurrencyCode;
+			}
+		}
+
+		// ============================================================
+		// SECTION 3: SUPPLIER & ORIGIN OF DATA RESOLUTION (per item)
+		// supp1 is declared here (item-scoped) to prevent country bleed-over
+		// ============================================================
+		if (it.ZIsPriceFetch_KUT == false)
+		{
+			var supplierMainGroupCode = "";
+			var supplierExternalID    = "";
+			var suppliercurrcode;
+			var supplierCountry;
+			var stockClassGroupCode;
+			var supp1        = "";
+			var mts;
+			var whmts;
+			var prodID       = it.ItemProduct.ProductKey.ProductID.content;
+			var odId         = it.OriginOfDataID.RemoveLeadingZeros();
+			var originalOdId = odId;
+			var smaNoCostFetch    = false;
+			var smaStockClass     = "";
+			var sapStockClass     = "";
+			var smaOdNodeMissing  = false;
+
+			// --------------------------------------------------------
+			// OriginOfData lookup
+			// --------------------------------------------------------
+			var queryOD  = OriginOfData.QueryByElements;
+			var selOD    = queryOD.CreateSelectionParams();
+			selOD.Add(queryOD.MaterialID.content, "I", "EQ", prodID);
+			var odResult    = queryOD.Execute(selOD).GetFirst();
+			var odCNNotExist = false;
+
+			if (odResult.IsSet())
+			{
+				// Detect missing SMA node early (used for external ID fallback)
+				if (originalOdId == "SMA")
+				{
+					var smaCheck = odResult.OriginOfData.Where(n => n.OriginOfDataID.content == "SMA").GetFirst();
+					smaOdNodeMissing = !smaCheck.IsSet();
+				}
+
+				var dataIn = odResult.OriginOfData.Where(n => n.OriginOfDataID.content == odId).GetFirst();
+
+				if (!dataIn.IsSet())
+				{
+					odCNNotExist = true;
+					odId   = "SAP";
+					dataIn = odResult.OriginOfData.Where(n => n.OriginOfDataID.content == odId).GetFirst();
+				}
+
+				if (dataIn.IsSet())
+				{
+					whmts = dataIn.Warehouse.Where(n => n.PreferredWarehouse);
+					if (whmts.Count() == 0)
+					{
+						whmts = dataIn.Warehouse.Where(n => n.StockClass == "MTS");
+					}
+					mts = whmts.Where(n => n.StockClass == "MTS");
+
+					// ------------------------------------------------
+					// Supplier resolution
+					// ------------------------------------------------
+					var supp = dataIn.Supplier.Where(n => n.OriginOfDataID.content == dataIn.OriginOfDataID.content).GetFirst();
+					if (supp.IsSet())
+					{
+						supplierMainGroupCode = supp.GlobalSupplierCode.RemoveLeadingZeros();
+
+						// --------------------------------------------------------
+						// REGION: CHINA / INDIA - reroute L_LCE with no MTS to SAP
+						// --------------------------------------------------------
+						if ((odId == "CN" || odId == "IN") && (supplierMainGroupCode == "L_LCE" && mts.Count() == 0))
+						{
+							odId   = "SAP";
+							dataIn = odResult.OriginOfData.Where(n => n.OriginOfDataID.content == odId).GetFirst();
+							supp   = dataIn.Supplier.Where(n => n.OriginOfDataID.content == dataIn.OriginOfDataID.content).GetFirst();
+						}
+
+						// --------------------------------------------------------
+						// REGION: SMA - rerouting logic based on stock class
+						// --------------------------------------------------------
+						if (originalOdId == "SMA" && supplierMainGroupCode == "L_LCE")
+						{
+							var smaDataIn = odResult.OriginOfData.Where(n => n.OriginOfDataID.content == "SMA").GetFirst();
+							if (smaDataIn.IsSet())
+							{
+								var smaWhColl = smaDataIn.Warehouse.Where(m => m.PreferredWarehouse);
+								var smaWh;
+								if (smaWhColl.Count() == 0)
+								{
+									smaWh = smaDataIn.Warehouse.Where(n => n.StockClass == "MTS" || n.StockClass == "MTC" || n.StockClass == "MTO").GetFirst();
+								}
+								else
+								{
+									smaWh = smaWhColl.GetFirst();
+								}
+								if (smaWh.IsSet()) { smaStockClass = smaWh.StockClass; }
+							}
+
+							// SMA MTS: use SMA weighted avg cost
+							if (smaStockClass == "MTS")
+							{
+								odId   = "SMA";
+								dataIn = odResult.OriginOfData.Where(n => n.OriginOfDataID.content == "SMA").GetFirst();
+								if (dataIn.IsSet())
+								{
+									supp = dataIn.Supplier.Where(n => n.OriginOfDataID.content == dataIn.OriginOfDataID.content).GetFirst();
+								}
+							}
+							// SMA MTO/MTC: check SAP classification and decide
+							else if (smaStockClass == "MTO" || smaStockClass == "MTC")
+							{
+								var sapDataIn = odResult.OriginOfData.Where(n => n.OriginOfDataID.content == "SAP").GetFirst();
+								if (sapDataIn.IsSet())
+								{
+									var sapWhColl = sapDataIn.Warehouse.Where(m => m.PreferredWarehouse);
+									var sapWh;
+									if (sapWhColl.Count() == 0)
+									{
+										sapWh = sapDataIn.Warehouse.Where(n => n.StockClass == "MTS" || n.StockClass == "MTC" || n.StockClass == "MTO").GetFirst();
+									}
+									else
+									{
+										sapWh = sapWhColl.GetFirst();
+									}
+									if (sapWh.IsSet()) { sapStockClass = sapWh.StockClass; }
+
+									if (sapStockClass == "MTS")
+									{
+										odId   = "SAP";
+										dataIn = smaDataIn;
+										supp   = dataIn.Supplier.Where(n => n.OriginOfDataID.content == dataIn.OriginOfDataID.content).GetFirst();
+										wareh  = "1020";
+									}
+									else
+									{
+										smaNoCostFetch = true;
+									}
+								}
+								else
+								{
+									smaNoCostFetch = true;
+								}
+								supplierExternalID = supp.ExternalID.content;
+							}
+						}
+						// --------------------------------------------------------
+						// END REGION: SMA
+						// --------------------------------------------------------
+
+						// Final supplier fields after all rerouting is resolved
+						if (supp.IsSet())
+						{
+							supplierMainGroupCode = supp.GlobalSupplierCode.RemoveLeadingZeros();
+							supplierExternalID    = supp.ExternalID.content;
+							suppliercurrcode      = supp.Currency;
+							supp1                 = supplierMainGroupCode;
+						}
+					}
+
+					// ------------------------------------------------
+					// Stock class resolution
+					// ------------------------------------------------
+					var mtsOrMtcColl;
+					var mtsOrMtc;
+					mtsOrMtcColl = dataIn.Warehouse.Where(m => m.PreferredWarehouse);
+					if (mtsOrMtcColl.Count() == 0)
+					{
+						mtsOrMtc = dataIn.Warehouse.Where(n => n.StockClass == "MTS" || n.StockClass == "MTC" || n.StockClass == "MTO").GetFirst();
+					}
+					else
+					{
+						mtsOrMtc = mtsOrMtcColl.GetFirst();
+					}
+
+					// SAP OD resolves to MTS or MTO only; other ODs use warehouse stock class directly
+					if (odId == "SAP")
+					{
+						if (mtsOrMtc.IsSet() && mtsOrMtc.StockClass == "MTS")
+						{
+							stockClassGroupCode = "MTS";
+						}
+						else
+						{
+							stockClassGroupCode = "MTO";
+						}
+					}
+					else
+					{
+						if (mtsOrMtc.IsSet())
+						{
+							stockClassGroupCode = mtsOrMtc.StockClass;
+						}
+					}
+				}
+			}
+
+			// SMA MTO/MTC where SAP is not MTS: skip cost fetch for this item
+			if (smaNoCostFetch)
+			{
+				it.CostAmount.Clear();
+				it.ZMarginBI.Clear();
+				price.Rate.DecimalValue.Clear();
+				unitPrice = "";
+				continue;
+			}
+
+			// --------------------------------------------------------
+			// RFQ fallback: use item-level RFQ supplier if OD gave none
+			// --------------------------------------------------------
+			if (supp1.IsInitial() && !RFQSupp.IsInitial())
+			{
+				supp1 = RFQSupp;
+			}
+
+			// Truncate to 5 chars (supplier account IDs are max 5 chars)
+			var accountID = supp1;
+			if (accountID.Length() > 5)
+			{
+				accountID = supp1.Substring(0, 5);
+			}
+
+			// --------------------------------------------------------
+			// Supplier BP lookup: resolves country and SMA external ID
+			// --------------------------------------------------------
+			if (!accountID.IsInitial())
+			{
+				var custQ  = Customer.QueryByIdentification;
+				var selC   = custQ.CreateSelectionParams();
+				selC.Add(custQ.InternalID, "I", "EQ", accountID);
+				var custRs = custQ.Execute(selC);
+
+				if (custRs.Count() > 0)
+				{
+					var custSupp = custRs.GetFirst();
+
+					// REGION: SMA - external ID via BP ObjectIdentifierMapping (scheme 918)
+					// Fires only when item OD is SMA and no SMA node exists in OriginOfData
+					if (originalOdId == "SMA" && smaOdNodeMissing && custSupp.ObjectIdentifierMapping.Count() > 0)
+					{
+						var CSQry = CommunicationSystem.ParticipatingBusinessSystem.QueryByElements;
+						var CSPrm = CSQry.CreateSelectionParams();
+						CSPrm.Add(CSQry.ID.content, "I", "EQ", "SMA");
+						var CSRst = CSQry.ExecuteDataOnly(CSPrm);
+						if (!CSRst.Count().IsInitial())
+						{
+							var OoDUUID = CSRst.GetFirst().UUID;
+							var map918  = custSupp.ObjectIdentifierMapping
+								.Where(n => n.RemoteBusinessSystemUUID.content == OoDUUID.content
+										 && n.RemoteIdentifierDefiningSchemeCode == "918")
+								.GetFirst();
+							if (map918.IsSet())
+							{
+								supplierExternalID = map918.RemoteObjectID.content;
+							}
+						}
+					}
+
+					// Supplier country from BP default postal address (all regions)
+					if (custSupp.CurrentDefaultAddressInformation.IsSet())
+					{
+						var addrInfo = custSupp.CurrentDefaultAddressInformation;
+						if (addrInfo.Address.IsSet())
+						{
+							var addrSupp = addrInfo.Address;
+							if (addrSupp.DefaultPostalAddressRepresentation.IsSet())
+							{
+								var post = addrSupp.DefaultPostalAddressRepresentation;
+								if (!post.CountryCode.IsInitial())
+								{
+									supplierCountry             = post.CountryCode;
+									it.ZManufacturingLocation   = post.CountryCode + "-" + post.CountryCode.GetDescription();
+								}
+							}
+						}
+					}
+				}
+			}
+
+			// External ID last fallback: use item-stored SuppExtID
+			if (supplierExternalID.IsInitial() && !it.SuppExtID.IsInitial())
+			{
+				supplierExternalID = it.SuppExtID;
+			}
+
+			// RFQ / CUSTOM_PROD override for supplier group code
+			var originOfDataLine;
+			if ((prodID == "CUSTOM_PROD" && !RFQSupp.IsInitial()) || supplierMainGroupCode.IsInitial())
+			{
+				supplierMainGroupCode = RFQSupp;
+			}
+
+			// --------------------------------------------------------
+			// REGION: CHINA / INDIA - write OD and warehouse back to item
+			// Combined: (CN or IN) + (SAP OD or L_LCE supplier) + no MTS
+			// --------------------------------------------------------
+			if (((countryCode == "CN" || countryCode == "IN") && (odId == "SAP" || supplierMainGroupCode == "L_LCE")
+				&& mts.Count() == 0) || odCNNotExist)
+			{
+				originOfDataLine = "SAP";
+				wareh            = "1020";
+
+				if (!originOfDataLine.IsInitial())
+				{
+					it.OriginOfDataID = originOfDataLine;
+				}
+				it.WarehouseID = wareh;
+			}
+
+			// Landed cost indicator
+			var useCostPlusFlag = it.ZAddCost;
+
+			// Processing type overrides (Service / Toll)
+			if (it.ProcessingTypeCode == "ZSRV" || it.ProcessingTypeCode == "ZTOL")
+			{
+				c4c_pick_cnt    = 0;
+				useCostPlusFlag = "0";
+			}
+
+			var CostUnitnew     = it.ZCostUnit_KUT.content.ToString();
+			var CostUnitcodenew = it.ZCostUnit_KUT.unitCode;
+			var CalMargin       = it.ZMarginBI;
+			var PrdCat          = it.ItemProduct.ProductCategoryHierarchyProductCategoryIDKey.ProductCategoryInternalID.RemoveLeadingZeros();
+			var PrdCatDesc      = "";
+
+			if (!PrdCat.IsInitial())
+			{
+				var catQuery     = ProductCategoryHierarchy.ProductCategory.QueryByElements;
+				var catSelection = catQuery.CreateSelectionParams();
+				catSelection.Add(catQuery.InternalID, "I", "EQ", PrdCat);
+				var catResult = catQuery.Execute(catSelection).GetFirst();
+				if (catResult.IsSet())
+				{
+					var desc = catResult.ProductCategoryDescription.GetFirst();
+					if (desc.IsSet())
+					{
+						PrdCatDesc = desc.Description.content;
+					}
+				}
+			}
+
+			// ============================================================
+			// SECTION 4: DEFAULT MARGIN BY REGION
+			// Only applied when CalMargin is not already set
+			// ============================================================
+			if (CalMargin.IsInitial())
+			{
+				// --------------------------------------------------------
+				// REGION: CHINA - default margin by business segment
+				// --------------------------------------------------------
+				if (salesunit == "TSSCHINA")
+				{
+					if (SegmentCode == "AUT")
+					{
+						CalMargin = 35;
+					}
+					else if (SegmentCode == "IND")
+					{
+						CalMargin = 65;
+					}
+				}
+
+				// --------------------------------------------------------
+				// REGION: INDIA - default margin by product category (Class C customers)
+				// --------------------------------------------------------
+				if (salesunit == "TSSINDIA" && classCode == "C")
+				{
+					var isA1    = (MarSegCode == "A1");
+					var matched = false;
+
+					if (!PrdCatDesc.IsInitial())
+					{
+						if (PrdCatDesc.Contains("Backup Ring"))
+						{
+							CalMargin = isA1 ? 97 : 101;
+							matched = true;
+						}
+						else if (PrdCatDesc.Contains("Oil Seal"))
+						{
+							CalMargin = isA1 ? 77 : 76;
+							matched = true;
+						}
+						else if (PrdCatDesc.Contains("PDR"))
+						{
+							CalMargin = isA1 ? 89 : 94;
+							matched = true;
+						}
+						else if (PrdCatDesc.Contains("Glydring") || PrdCatDesc.Contains("Stepseal") || PrdCatDesc.Contains("Excluder"))
+						{
+							CalMargin = isA1 ? 94 : 95;
+							matched = true;
+						}
+						else if (PrdCatDesc.Contains("Slydring"))
+						{
+							CalMargin = isA1 ? 91 : 97;
+							matched = true;
+						}
+						else if (PrdCatDesc.Contains("V-Ring"))
+						{
+							CalMargin = isA1 ? 86 : 96;
+							matched = true;
+						}
+						else if (PrdCatDesc.Contains("O-Ring"))
+						{
+							CalMargin = isA1 ? 85 : 81;
+							matched = true;
+						}
+					}
+
+					if (!matched)
+					{
+						CalMargin = 80;
+					}
+				}
+			}
+			// ============================================================
+			// END SECTION 4: DEFAULT MARGIN BY REGION
+			// ============================================================
+
+			var cstamt       = it.CostAmount.content;
+			var mulamt       = Numeric.ParseFromString(MultiplyAmnt);
+			unitCostCalc     = cstamt / mulamt;
+			var unitCostcurr = it.CostAmount.currencyCode;
+
+			var extid        = it.ItemProduct.Material_V1.ObjectIdentifierMapping.GetFirst();
+			var getProdShort = "";
+			if (extid.IsSet())
+			{
+				getProdShort = extid.RemoteObjectID.content;
+			}
+			var getProdLong = it.ItemProduct.ProductKey.ProductID.content;
+
+			// Normalise unit price to price/piece (not price/cost unit)
+			if (!unitPrice.IsInitial())
+			{
+				var intunitprice = Numeric.ParseFromString(unitPrice);
+				var test         = intunitprice.ToString();
+				if (test != "0E-14")
+				{
+					if (!mulamt.IsInitial() && mulamt != 0)
+					{
+						var tUnitprice = intunitprice / mulamt;
+						unitPrice = tUnitprice.ToString().Replace(",", ".");
+					}
+				}
+			}
+
+			var sq;
+			var UUID = Context.GetCurrentIdentityUUID();
+			sq = Numeric.ParseFromString(it.FirstRequestedItemScheduleLine.Quantity.content.RoundToString(0));
+
+			// Truncate supplierMainGroupCode to 5 chars before payload
+			var TruncSMG = supplierMainGroupCode;
+			if (!TruncSMG.IsInitial() && !TruncSMG.Contains("?"))
+			{
+				supplierMainGroupCode = TruncSMG.Substring(0, 5);
+			}
+
+			if (it.ZAddCost == "3")
+			{
+				useCostPlusFlag = "0";
+				c4c_pick_cnt    = 0;
+			}
+
+			itemProcessing = itemProcessing + "{" +
+				"\"warehouseCode\":\"" + wareh + "\"," +
+				"\"buNumber\":\"" + wareh + "\"," +
+				"\"lineId\":\"" + it.ID.RemoveLeadingZeros() + "\"," +
+				"\"itemLongNumber\":\"" + getProdLong + "\"," +
+				"\"salesQuantity\":\"" + sq.ToString() + "\"," +
+				"\"unitCode\":\"" + it.FirstRequestedItemScheduleLine.Quantity.unitCode + "\"," +
+				"\"itemTypeDesc\":\"" + it.ProcessingTypeCode + "\"," +
+				"\"itemShortNumber\":\"" + getProdShort + "\"," +
+				"\"c4cUnitPriceAmt\":\"" + unitPrice + "\"," +
+				"\"priceCurrencyCode\":\"" + unitPricecurr + "\"," +
+				"\"c4cUnitCostAmt\":\"" + unitCostCalc.ToString() + "\"," +
+				"\"costCurrencyCode\":\"" + unitCostcurr + "\"," +
+				"\"c4cGPAmt\":\"" + CalMargin.ToString() + "\"," +
+				"\"c4cPickCount\":" + c4c_pick_cnt.ToString() + "," +
+				"\"useCostPlusFlag\":\"" + useCostPlusFlag + "\"," +
+				"\"c4cMultiplyAmnt\":\"" + MultiplyAmnt + "\"," +
+				"\"custItemNbr\":\"" + it.ItemID + "\"," +
+				"\"itemCategoryCode\":\"" + it.ItemProduct.ProductCategoryHierarchyProductCategoryIDKey.ProductCategoryInternalID.RemoveLeadingZeros() + "\"," +
+				"\"stockClassGroupCode\":\"" + stockClassGroupCode + "\"," +
+				"\"supplierCurrencyCode\":\"" + suppliercurrcode + "\"," +
+				"\"supplierCountryCode\":\"" + supplierCountry + "\"," +
+				"\"supplierExternalID\":\"" + supplierExternalID + "\"," +
+				"\"supplierMainGroupCode\":\"" + supplierMainGroupCode + "\"" + "},";
+		}
+	}
+
+	itemData = itemProcessing.Substring(0, itemProcessing.Length() - 1);
+	itemData = "\"item\":[" + itemData + "]";
+
+	var custData = "\"customer\": {" + CustomerID + Terr + originOfData + countrycdeJson + custcurrency + CustomerPriceGroup + classcdeJson + "},";
+	var payload  = "{" + requestorID + custData + itemData + "}";
+	Body = payload;
+}
+// ============================================================
+// END SECTION 2 & 3
+// ============================================================
+
+
+// ============================================================
+// SECTION 5: WEB SERVICE CALL
+// ============================================================
+var http;
+var url = Context.GetSystemURL();
+
+// REGION: PRODUCTION
+if (url.Contains("my332854"))
+{
+	http = "http/PROD/priceRest/V1/getCustomerPriceList";
+}
+// REGION: QUALITY / TEST
+else if (url.Contains("my324496") || url.Contains("my331182") || url.Contains("my352500"))
+{
+	http = "http/QUA/priceRest/V1/getCustomerPriceList";
+}
+
+var ScenarioName    = "ZBI_Price_EWI_CS";
+var ServiceName     = "ZBI_Price_EWI";
+var HttpMethod      = "POST";
+var HttpResource    = http;
+var ContentType     = "";
+var HeaderParameter : collectionof NameAndValue;
+var headpar         : NameAndValue;
+var URLParameter    : collectionof NameAndValue;
+
+var ws_result = WebServiceUtilities.ExecuteRESTService(ScenarioName, ServiceName, HttpMethod, HttpResource, URLParameter, HeaderParameter, ContentType, Body);
+
+var my_item = this.GetFirst().Item;
+
+
+// ============================================================
+// SECTION 6: RESPONSE PROCESSING
+// ============================================================
+if (ws_result.Code.Contains("200") && ws_result.Content.Contains("SUCCESS"))
+{
+	var Result : JsonArrayLength;
+	var keys   : collectionof LANGUAGEINDEPENDENT_Text;
+	var key;
+	key = "calculatedPriceList";
+	keys.Add(key);
+	Result = Json.GetArrayLength(keys, ws_result.Content);
+	keys.Clear();
+	key.Clear();
+
+	var i       = Result.Arraylength.GetFirst().Length;
+	var arr_len = 1;
+
+	while (arr_len <= i)
+	{
+		key = "calculatedPriceList[" + arr_len.ToString() + "].lineId";               keys.Add(key);
+		key = "calculatedPriceList[" + arr_len.ToString() + "].itemLongNbr";          keys.Add(key);
+		key = "calculatedPriceList[" + arr_len.ToString() + "].costPlusUnitAmt";      keys.Add(key);
+		key = "calculatedPriceList[" + arr_len.ToString() + "].c4cUnitPriceAmt";      keys.Add(key);
+		key = "calculatedPriceList[" + arr_len.ToString() + "].explainDesc";          keys.Add(key);
+		key = "calculatedPriceList[" + arr_len.ToString() + "].explainCostDesc";      keys.Add(key);
+		key = "calculatedPriceList[" + arr_len.ToString() + "].explainPriceDesc";     keys.Add(key);
+		key = "calculatedPriceList[" + arr_len.ToString() + "].explainGPDesc";        keys.Add(key);
+		key = "calculatedPriceList[" + arr_len.ToString() + "].isAgreedPriceExist";   keys.Add(key);
+		key = "calculatedPriceList[" + arr_len.ToString() + "].gpamt";                keys.Add(key);
+		key = "calculatedPriceList[" + arr_len.ToString() + "].salesQuantity";        keys.Add(key);
+		key = "calculatedPriceList[" + arr_len.ToString() + "].c4cPriceMultipliedAmt"; keys.Add(key);
+		key = "calculatedPriceList[" + arr_len.ToString() + "].fromQty";              keys.Add(key);
+		key = "calculatedPriceList[" + arr_len.ToString() + "].costAvailableFromQty"; keys.Add(key);
+		key = "calculatedPriceList[" + arr_len.ToString() + "].costCurrencyCode";     keys.Add(key);
+		key = "calculatedPriceList[" + arr_len.ToString() + "].priceCurrencyCode";    keys.Add(key);
+		key = "calculatedPriceList[" + arr_len.ToString() + "].costFechedFrom";       keys.Add(key);
+		key = "calculatedPriceList[" + arr_len.ToString() + "].messageCode";          keys.Add(key);
+
+		var Result1 : JsonResult = Json.ParseKeyValues(keys, ws_result.Content);
+
+		var itemLongNbr;
+		var costPlusAmt;
+		var tempcostplus;
+		var c4cPriceMultipliedAmt;
+		var unitCostAmt;
+		var discountPct;
+		var explainDesc;
+		var costdesc;
+		var pricedesc;
+		var margindesc;
+		var priceUnitAmt;
+		var c4cItemLineId;
+		var isAgreedPriceExist;
+		var margin;
+		var fromQty;
+		var referenceMarginAmt;
+		var costcurrbi;
+		var messageCode;
+		var pricecurrbi;
+		var refmargdesc;
+		var sourcedesc;
+		var salesQuantity;
+		var costAvailableFromQty;
+
+		var prefix = "calculatedPriceList[" + arr_len.ToString() + "].";
+
+		foreach (var res in Result1.KeyValue)
+		{
+			key = res.Key;
+			var val = res.Value;
+
+			if      (key == prefix + "lineId")              { c4cItemLineId = val; }
+			else if (key == prefix + "itemLongNbr")         { itemLongNbr   = val; }
+			else if (key == prefix + "costCurrencyCode")    { costcurrbi    = val; }
+			else if (key == prefix + "salesQuantity")       { salesQuantity = val; }
+			else if (key == prefix + "priceCurrencyCode")   { pricecurrbi   = val; }
+			else if (key == prefix + "messageCode")         { messageCode   = val; }
+			else if (key == prefix + "explainDesc")         { explainDesc   = val.Substring(0, 100); }
+			else if (key == prefix + "explainCostDesc")     { costdesc      = val; }
+			else if (key == prefix + "explainPriceDesc")    { pricedesc     = val; }
+			else if (key == prefix + "explainGPDesc")       { margindesc    = val; }
+			else if (key == prefix + "costFechedFrom")      { sourcedesc    = val; }
+			else if (key == prefix + "c4cPriceMultipliedAmt")
+			{
+				c4cPriceMultipliedAmt = (val != "null") ? Numeric.ParseFromString(val).RoundToString(2) : "0.0";
+			}
+			else if (key == prefix + "costPlusUnitAmt")
+			{
+				tempcostplus = (val != "null") ? Numeric.ParseFromString(val).RoundToString(5) : "0.0";
+			}
+			else if (key == prefix + "c4cUnitPriceAmt")
+			{
+				priceUnitAmt = (val != "null") ? Numeric.ParseFromString(val).RoundToString(2) : "0.0";
+			}
+			else if (key == prefix + "fromQty")
+			{
+				fromQty = (val != "null") ? val : "0";
+			}
+			else if (key == prefix + "costAvailableFromQty")
+			{
+				costAvailableFromQty = (val != "null") ? val : "0";
+			}
+			else if (key == prefix + "gpamt")
+			{
+				margin = (val != "null") ? val : "0.0";
+			}
+			else if (key == prefix + "referenceMarginAmt")
+			{
+				referenceMarginAmt = (val != "null") ? val : "0.0";
+			}
+			else if (key == prefix + "isAgreedPriceExist")
+			{
+				isAgreedPriceExist = (val != "null");
+			}
+		}
+
+		var item_pro = this.Item.Where(n => n.ID.RemoveLeadingZeros() == c4cItemLineId).GetFirst();
+		if (!item_pro.IsSet()) { return; }
+
+		var Item    = item_pro;
+		var Quan    = item_pro.FirstRequestedItemScheduleLine;
+		var QuanDB  = Quan.GetFromDB();
+
+		var srccurr = Item.CostAmount.currencyCode;
+
+		// --------------------------------------------------------
+		// REGION: TSSSEGCHETRAOPER - force cost currency to USD
+		// --------------------------------------------------------
+		if (salesunit == "TSSSEGCHETRAOPER")
+		{
+			srccurr = "USD";
+		}
+
+		var tempprsrccurr = Item.PriceDocumentPriceAndTaxCalculationItem;
+		var prsrccurr     = "";
+		var targetPrice;
+		if (tempprsrccurr.IsSet())
+		{
+			prsrccurr = tempprsrccurr.ItemMainPrice.Rate.CurrencyCode;
+		}
+
+		var CdecFirst = Item.Cdesc;
+
+		Item.ZIsPriceFetch_KUT  = true;
+		Item.Zpricechange_KUT   = false;
+		Item.ZAddCost           = "0";
+		Item.ZPCalled_KUT       = true;
+		Item.ZMarginChange_KUT  = false;
+		Item.ZPriceChange_KUT   = false;
+		Item.ZCostChange_KUT    = false;
+		Item.PriceDetails       = explainDesc;
+		Item.ZMarginBI          = Numeric.ParseFromString(margin) * 100;
+		Item.ZAvgCustomerMargin_KUT = referenceMarginAmt;
+
+		if (!Item.ZMarginBI.IsInitial() && Item.ZMarginBI <= 30)
+		{
+			raise Msg.Create("W", "Line" + Item.ID.RemoveLeadingZeros() + ": Attention Proposed Margin needs to be validated Manually");
+		}
+
+		if (Item.ZRecommendMargin_KUT.IsInitial())
+		{
+			Item.ZRecommendMargin_KUT = margin;
+		}
+
+		if (Item.PriceAndTaxCalculationItem.IsSet() && Item.PriceAndTaxCalculationItem.ItemMainPrice.IsSet())
+		{
+			var mainPrice = Item.PriceAndTaxCalculationItem.ItemMainPrice;
+			var basePrice = mainPrice.Rate.BaseDecimalValue;
+
+			// Price currency conversion if BI currency differs from C4C price currency
+			if (prsrccurr != pricecurrbi)
+			{
+				var prAmt : Amount;
+				prAmt.content      = Numeric.ParseFromString(c4cPriceMultipliedAmt);
+				prAmt.currencyCode = pricecurrbi;
+				targetPrice = CurrencyConversion.ConvertCurrency(prAmt, prsrccurr);
+				mainPrice.Rate.DecimalValue = targetPrice.content;
+			}
+			else
+			{
+				mainPrice.Rate.DecimalValue = Numeric.ParseFromString(c4cPriceMultipliedAmt);
+			}
+
+			var recommended = mainPrice.Rate.DecimalValue / basePrice;
+			if (!Item.ZRecommendPrice_KUT.content.IsInitial() && (Quan.Quantity.content != QuanDB.Quantity.content))
+			{
+				Item.ZRecommendPrice_KUT.content   = Numeric.ParseFromString(recommended.RoundToString(2));
+				Item.ZRecommendMargin_KUT          = margin;
+			}
+
+			if (Item.ZRecommendPrice_KUT.content.IsInitial())
+			{
+				Item.ZRecommendPrice_KUT.content      = Numeric.ParseFromString(recommended.RoundToString(2));
+				Item.ZRecommendPrice_KUT.currencyCode = mainPrice.Rate.CurrencyCode;
+			}
+
+			if (Numeric.ParseFromString(tempcostplus) != 0)
+			{
+				var price_Value = mainPrice.Rate.BaseDecimalValue;
+				var calcCost;
+
+				// Cost currency conversion if BI currency differs from C4C cost currency
+				if (srccurr != costcurrbi)
+				{
+					var myAmnt : Amount;
+					myAmnt.content      = Numeric.ParseFromString(tempcostplus) * price_Value;
+					myAmnt.currencyCode = costcurrbi;
+					var targetcurr = CurrencyConversion.ConvertCurrency(myAmnt, srccurr);
+					calcCost = targetcurr.content;
+				}
+				else
+				{
+					calcCost = Numeric.ParseFromString(tempcostplus) * price_Value;
+				}
+
+				Item.CostAmount.content = Numeric.ParseFromString(calcCost.RoundToString(2));
+
+				// REGION: TSSSEGCHETRAOPER - set cost currency to USD
+				if (salesunit == "TSSSEGCHETRAOPER")
+				{
+					Item.CostAmount.currencyCode = "USD";
+				}
+			}
+			else
+			{
+				if (Numeric.ParseFromString(costAvailableFromQty) != 0)
+				{
+					raise Msg.Create("W", "Cost not available for line item " + Item.ID.RemoveLeadingZeros() + "----->  Cost available from quantity " + costAvailableFromQty);
+					Item.ZAddCost = "1";
+				}
+				else
+				{
+					raise Msg.Create("W", "Cost not available for line item " + Item.ID.RemoveLeadingZeros());
+					Item.QuoteRFQ = true;
+				}
+			}
+
+			if (messageCode == "M1")
+			{
+				raise Msg.Create("W", "Line" + Item.ID.RemoveLeadingZeros() + ": Cost retrived from CCD (supplier cost)");
+			}
+
+			if (Numeric.ParseFromString(c4cPriceMultipliedAmt) == 0 && Numeric.ParseFromString(fromQty) != 0)
+			{
+				raise Msg.Create("W", "Price not available for line item " + Item.ID.RemoveLeadingZeros() + "----->  Price available from quantity " + fromQty);
+			}
+		}
+
+		if (c4cItemLineId == Item.ID.RemoveLeadingZeros())
+		{
+			Item.Cdesc = costdesc;
+			Item.Pdesc = pricedesc;
+			Item.Mdesc = margindesc;
+			Item.sDesc = sourcedesc;
+
+			if (!salesQuantity.IsInitial())
+			{
+				Item.FirstRequestedItemScheduleLine.Quantity.content = salesQuantity;
+			}
+
+			if (!explainDesc.IsInitial())
+			{
+				Item.Overview = explainDesc;
+			}
+
+			if (CdecFirst.IsInitial() || CdecFirst == "Cost was neither handed over nor found in price list.")
+			{
+				Item.Intcost = costdesc;
+			}
+		}
+
+		arr_len = arr_len + 1;
+		keys.Clear();
+		key.Clear();
+	}
+}
+// ============================================================
+// ERROR HANDLING
+// ============================================================
+else if (ws_result.Content.Contains("timeout"))
+{
+	raise Msg.Create("E", "Service Interface is down, contact C4C team");
+}
+else if (ws_result.Content.Contains("statusCode::502"))
+{
+	raise Msg.Create("E", "Interface error, contact C4C team");
+}
+else if (ws_result.Content.Contains("Article not found") || ws_result.Content.Contains("Invalid Article"))
+{
+	raise Msg.Create("E", "Check the article if it doesnt exist in ERP use Custom PROD");
+}
+else if (ws_result.Code.Contains("401") || ws_result.Code.Contains("400"))
+{
+	raise Msg.Create("E", "Service Interface Authentication Error, contact C4C team");
+}
+else if (ws_result.Content.Contains("Service Exception while processing the CustomerRelation request"))
+{
+	raise Msg.Create("E", "Service Interface is down, contact C4C team");
+}
+else
+{
+	raise Msg.Create("E", "Price/Cost not available in ERP/CCD");
+}
