@@ -23,10 +23,12 @@ function callClaude(system, prompt, apiKey) {
                 'Content-Length': Buffer.byteLength(body)
             }
         };
+        console.log('[Azure] key prefix:', apiKey ? apiKey.substring(0, 8) + '...' : 'MISSING');
         const r = https.request(options, res => {
             let data = '';
             res.on('data', chunk => data += chunk);
             res.on('end', () => {
+                console.log('[Azure] status:', res.statusCode, 'body:', data.substring(0, 300));
                 try {
                     const json = JSON.parse(data);
                     if (json.error) reject(new Error(json.error.message));
