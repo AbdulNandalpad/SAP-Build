@@ -1,5 +1,9 @@
 const https = require('https');
 
+// Azure AI Foundry endpoint — Anthropic-native format
+const AZURE_HOST = 'azr-fou-sc-cx.services.ai.azure.com';
+const AZURE_PATH = '/anthropic/v1/messages';
+
 function callClaude(system, prompt, apiKey) {
     return new Promise((resolve, reject) => {
         const body = JSON.stringify({
@@ -9,12 +13,12 @@ function callClaude(system, prompt, apiKey) {
             messages: [{ role: 'user', content: prompt }]
         });
         const options = {
-            hostname: 'api.anthropic.com',
-            path: '/v1/messages',
+            hostname: AZURE_HOST,
+            path: AZURE_PATH,
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'x-api-key': apiKey,
+                'api-key': apiKey,
                 'anthropic-version': '2023-06-01',
                 'Content-Length': Buffer.byteLength(body)
             }
