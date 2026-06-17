@@ -1,5 +1,6 @@
 const cds = require('@sap/cds');
-const { callClaude } = require('./lib/claude');
+const path = require('path');
+const { callClaude } = require(path.join(__dirname, 'lib', 'claude'));
 
 module.exports = cds.service.impl(async function () {
 
