@@ -17,6 +17,7 @@
         "SalesCyclePhaseStartDate": { "type": "cds.Date" },
         "ExpectedRevenueAmount": { "type": "cds.Decimal" },
         "ExpectedRevenueAmountCurrencyCode": { "type": "cds.String" },
+        "BaseCurrencyAmount": { "type": "cds.Decimal" },
         "ExpectedProcessingEndDate": { "type": "cds.Date" },
         "LifeCycleStatusCode": { "type": "cds.String" },
         "LifeCycleStatusCodeText": { "type": "cds.String" },

@@ -406,16 +406,16 @@ function buildPayload(d){
   var won=d.filter(function(x){return x.LifeCycleStatusCode==='3';});
   var lost=d.filter(function(x){return x.LifeCycleStatusCode==='5';});
   var open=d.filter(isOp);
-  var rev=d.reduce(function(s,x){return s+parseFloat(x.ExpectedRevenueAmount||0);},0);
-  var openRev=open.reduce(function(s,x){return s+parseFloat(x.ExpectedRevenueAmount||0);},0);
+  var rev=d.reduce(function(s,x){return s+parseFloat(x.BaseCurrencyAmount||0);},0);
+  var openRev=open.reduce(function(s,x){return s+parseFloat(x.BaseCurrencyAmount||0);},0);
   var wr=won.length+lost.length>0?Math.round(won.length/(won.length+lost.length)*100):0;
   var today=new Date();today.setHours(0,0,0,0);
   var next12=new Date(today);next12.setFullYear(next12.getFullYear()+1);
-  var sopN12=open.filter(function(x){var s=pd(x.ExpectedProcessingEndDate);return s&&s>=today&&s<=next12;}).reduce(function(s,x){return s+parseFloat(x.ExpectedRevenueAmount||0);},0);
+  var sopN12=open.filter(function(x){var s=pd(x.ExpectedProcessingEndDate);return s&&s>=today&&s<=next12;}).reduce(function(s,x){return s+parseFloat(x.BaseCurrencyAmount||0);},0);
   var stale90=open.filter(function(x){var lc=pd(x.LastChangeDate);return!lc||Math.floor((today-lc)/86400000)>90;}).length;
-  var om={};d.forEach(function(x){var k=(x.SalesOrganisationName||'?').replace(/TSS\s*/,'').substring(0,25);if(!om[k])om[k]={rev:0,won:0,lost:0};om[k].rev+=parseFloat(x.ExpectedRevenueAmount||0);if(x.LifeCycleStatusCode==='3')om[k].won++;if(x.LifeCycleStatusCode==='5')om[k].lost++;});
-  var sm={};open.forEach(function(x){var k=x.BUS_SEG_CDE_KUTText||'(Not Set)';sm[k]=(sm[k]||0)+parseFloat(x.ExpectedRevenueAmount||0);});
-  var sopY={};open.forEach(function(x){var s=pd(x.ExpectedProcessingEndDate);if(s&&s>today){var yr=s.getFullYear();sopY[yr]=(sopY[yr]||0)+parseFloat(x.ExpectedRevenueAmount||0);}});
+  var om={};d.forEach(function(x){var k=(x.SalesOrganisationName||'?').replace(/TSS\s*/,'').substring(0,25);if(!om[k])om[k]={rev:0,won:0,lost:0};om[k].rev+=parseFloat(x.BaseCurrencyAmount||0);if(x.LifeCycleStatusCode==='3')om[k].won++;if(x.LifeCycleStatusCode==='5')om[k].lost++;});
+  var sm={};open.forEach(function(x){var k=x.BUS_SEG_CDE_KUTText||'(Not Set)';sm[k]=(sm[k]||0)+parseFloat(x.BaseCurrencyAmount||0);});
+  var sopY={};open.forEach(function(x){var s=pd(x.ExpectedProcessingEndDate);if(s&&s>today){var yr=s.getFullYear();sopY[yr]=(sopY[yr]||0)+parseFloat(x.BaseCurrencyAmount||0);}});
   var rm={};lost.forEach(function(x){var k=x.ResultReasonCodeText||'Unknown';rm[k]=(rm[k]||0)+1;});
   return JSON.stringify({
     total:d.length,won:won.length,lost:lost.length,open:open.length,
@@ -425,7 +425,7 @@ function buildPayload(d){
     topSegments:Object.entries(sm).sort(function(a,b){return b[1]-a[1];}).slice(0,6).map(function(e){return{segment:e[0],rev:Math.round(e[1])};}),
     sopByYear:Object.entries(sopY).sort(function(a,b){return a[0]-b[0];}).map(function(e){return{year:e[0],rev:Math.round(e[1])};}),
     lossReasons:Object.entries(rm).sort(function(a,b){return b[1]-a[1];}).slice(0,5).map(function(e){return{reason:e[0],count:e[1]};}),
-    topOpen:open.slice().sort(function(a,b){return parseFloat(b.ExpectedRevenueAmount||0)-parseFloat(a.ExpectedRevenueAmount||0);}).slice(0,5).map(function(x){return{id:x.ID,name:x.Name,account:x.ProspectPartyName,owner:x.MainEmployeeResponsiblePartyName,rev:Math.round(parseFloat(x.ExpectedRevenueAmount||0)),phase:x.SalesCyclePhaseCodeText,sop:pds(x.ExpectedProcessingEndDate)};})
+    topOpen:open.slice().sort(function(a,b){return parseFloat(b.BaseCurrencyAmount||0)-parseFloat(a.BaseCurrencyAmount||0);}).slice(0,5).map(function(x){return{id:x.ID,name:x.Name,account:x.ProspectPartyName,owner:x.MainEmployeeResponsiblePartyName,rev:Math.round(parseFloat(x.BaseCurrencyAmount||0)),phase:x.SalesCyclePhaseCodeText,sop:pds(x.ExpectedProcessingEndDate)};})
   });
 }
 
@@ -474,7 +474,7 @@ function renderBrief(brief){
 
   // highlights
   var hlItems=(brief.highlights&&brief.highlights.length?brief.highlights:[
-    {label:'Open Pipeline',value:fmt(open.reduce(function(s,x){return s+parseFloat(x.ExpectedRevenueAmount||0);},0)),context:'Active opportunities'},
+    {label:'Open Pipeline',value:fmt(open.reduce(function(s,x){return s+parseFloat(x.BaseCurrencyAmount||0);},0)),context:'Active opportunities'},
     {label:'Win Rate',value:(won.length+lost.length>0?Math.round(won.length/(won.length+lost.length)*100):0)+'%',context:won.length+' won · '+lost.length+' lost'},
     {label:'Total Opportunities',value:d.length.toLocaleString(),context:'All statuses'},
     {label:'Open Deals',value:open.length.toLocaleString(),context:'Active pipeline'}
@@ -500,11 +500,11 @@ function renderBrief(brief){
   }).join('');
 
   // top deals table
-  var topOpen=open.slice().sort(function(a,b){return parseFloat(b.ExpectedRevenueAmount||0)-parseFloat(a.ExpectedRevenueAmount||0);}).slice(0,8);
+  var topOpen=open.slice().sort(function(a,b){return parseFloat(b.BaseCurrencyAmount||0)-parseFloat(a.BaseCurrencyAmount||0);}).slice(0,8);
   var dealsHtml=topOpen.map(function(row){
     var link=C4C_BASE+'&param.InternalID='+row.ID+'&param.Type=COD_OPPORTUNITY_THINGTYPE';
     return '<tr>'+
-      '<td style="font-weight:600;color:var(--blue)">'+fmt(parseFloat(row.ExpectedRevenueAmount||0))+'</td>'+
+      '<td style="font-weight:600;color:var(--blue)">'+fmt(parseFloat(row.BaseCurrencyAmount||0))+'</td>'+
       '<td style="font-weight:500;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(row.Name||'—')+'</td>'+
       '<td style="color:var(--muted)">'+(row.ProspectPartyName||'—')+'</td>'+
       '<td style="color:var(--muted);font-size:0.7rem">'+(row.MainEmployeeResponsiblePartyName||'—')+'</td>'+
@@ -559,12 +559,12 @@ function renderBrief(brief){
 
   // Charts
   var gc='#f1f5f9',tc='#94a3b8';
-  var om={};d.forEach(function(x){var k=(x.SalesOrganisationName||'?').replace(/TSS\s*/,'').substring(0,22);om[k]=(om[k]||0)+parseFloat(x.ExpectedRevenueAmount||0);});
+  var om={};d.forEach(function(x){var k=(x.SalesOrganisationName||'?').replace(/TSS\s*/,'').substring(0,22);om[k]=(om[k]||0)+parseFloat(x.BaseCurrencyAmount||0);});
   var os=Object.entries(om).sort(function(a,b){return b[1]-a[1];}).slice(0,8);
   briefCharts.org=new Chart(document.getElementById('cOrg'),{type:'bar',data:{labels:os.map(function(e){return e[0];}),datasets:[{data:os.map(function(e){return e[1];}),backgroundColor:SAP,borderRadius:3,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return' '+fmt(c.raw);}}}},scales:{x:{ticks:{color:tc,callback:function(v){return fmtN(v);}},grid:{color:gc}},y:{ticks:{color:tc,font:{size:9}},grid:{display:false}}}}});
 
   var today2=new Date();today2.setHours(0,0,0,0);
-  var sopY={};open.forEach(function(x){var s=pd(x.ExpectedProcessingEndDate);if(s&&s>today2){var yr=s.getFullYear();sopY[yr]=(sopY[yr]||0)+parseFloat(x.ExpectedRevenueAmount||0);}});
+  var sopY={};open.forEach(function(x){var s=pd(x.ExpectedProcessingEndDate);if(s&&s>today2){var yr=s.getFullYear();sopY[yr]=(sopY[yr]||0)+parseFloat(x.BaseCurrencyAmount||0);}});
   var soye=Object.entries(sopY).sort(function(a,b){return a[0]-b[0];});
   briefCharts.sop=new Chart(document.getElementById('cSop'),{type:'bar',data:{labels:soye.map(function(e){return e[0];}),datasets:[{data:soye.map(function(e){return e[1];}),backgroundColor:'rgba(108,50,169,0.75)',borderRadius:3,borderSkipped:false}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return' '+fmt(c.raw);}}}},scales:{x:{ticks:{color:tc,font:{size:10}},grid:{color:gc}},y:{ticks:{color:tc,callback:function(v){return fmtN(v);}},grid:{color:gc}}}}});
 
@@ -591,8 +591,8 @@ function buildDataSummary(d){
   var open=d.filter(isOpen);
   var today=new Date();today.setHours(0,0,0,0);
   var next12=new Date(today);next12.setFullYear(next12.getFullYear()+1);
-  var sopN12=open.filter(function(x){var s=pd(x.ExpectedProcessingEndDate);return s&&s>=today&&s<=next12;}).reduce(function(s,x){return s+parseFloat(x.ExpectedRevenueAmount||0);},0);
-  var openRev=open.reduce(function(s,x){return s+parseFloat(x.ExpectedRevenueAmount||0);},0);
+  var sopN12=open.filter(function(x){var s=pd(x.ExpectedProcessingEndDate);return s&&s>=today&&s<=next12;}).reduce(function(s,x){return s+parseFloat(x.BaseCurrencyAmount||0);},0);
+  var openRev=open.reduce(function(s,x){return s+parseFloat(x.BaseCurrencyAmount||0);},0);
   var wr=won.length+lost.length>0?Math.round(won.length/(won.length+lost.length)*100):0;
   var stale90=open.filter(function(x){var lc=pd(x.LastChangeDate);return!lc||Math.floor((today-lc)/86400000)>90;}).length;
   var segs=new Set(d.map(function(x){return x.BUS_SEG_CDE_KUTText;}).filter(Boolean)).size;
