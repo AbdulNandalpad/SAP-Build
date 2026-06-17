@@ -8,7 +8,7 @@
   "[production]": {
     "requires": {
       "auth": {
-        "kind": "dummy"
+        "kind": "xsuaa"
       }
     }
   }

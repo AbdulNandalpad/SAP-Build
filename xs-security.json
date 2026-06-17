@@ -1,0 +1,24 @@
+{
+  "xsappname": "tss-cx-analytics",
+  "tenant-mode": "dedicated",
+  "scopes": [
+    {
+      "name": "$XSAPPNAME.user",
+      "description": "Access TSS CX Analytics"
+    }
+  ],
+  "role-templates": [
+    {
+      "name": "CXAnalyticsUser",
+      "description": "TSS CX Analytics User",
+      "scope-references": ["$XSAPPNAME.user"]
+    }
+  ],
+  "role-collections": [
+    {
+      "name": "TSS CX Analytics User",
+      "description": "Access to TSS CX Analytics application",
+      "role-template-references": ["$XSAPPNAME.CXAnalyticsUser"]
+    }
+  ]
+}

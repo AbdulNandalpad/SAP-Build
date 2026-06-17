@@ -11,6 +11,6 @@ applications:
     - route: tss-cx-analytics.cfapps.eu10.hana.ondemand.com
   services:
     - cx-destination
+    - tss-cx-analytics-uaa
   env:
     NODE_ENV: production
-    CDS_SECURITY_AUTHENTICATION: dummy
