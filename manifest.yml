@@ -1,5 +1,6 @@
 ---
 applications:
+
 - name: tss-cx-analytics
   memory: 512M
   disk_quota: 1G
@@ -8,9 +9,24 @@ applications:
     - nodejs_buildpack
   command: npm start
   routes:
-    - route: tss-cx-analytics.cfapps.eu10.hana.ondemand.com
+    - route: tss-cx-analytics-backend.cfapps.eu10.hana.ondemand.com
   services:
     - cx-destination
     - tss-dev-uaa
   env:
     NODE_ENV: production
+
+- name: tss-cx-analytics-router
+  memory: 256M
+  disk_quota: 512M
+  instances: 1
+  buildpacks:
+    - nodejs_buildpack
+  path: approuter
+  routes:
+    - route: tss-cx-analytics.cfapps.eu10.hana.ondemand.com
+  services:
+    - tss-dev-uaa
+  env:
+    destinations: >
+      [{"name":"tss-backend","url":"https://tss-cx-analytics-backend.cfapps.eu10.hana.ondemand.com","forwardAuthToken":true}]

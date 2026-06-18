@@ -1,0 +1,11 @@
+{
+  "authenticationMethod": "route",
+  "sessionTimeout": 60,
+  "routes": [
+    {
+      "source": "^/(.*)",
+      "destination": "tss-backend",
+      "authenticationType": "xsuaa"
+    }
+  ]
+}
