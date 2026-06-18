@@ -3,7 +3,7 @@
   "tenant-mode": "dedicated",
   "oauth2-configuration": {
     "redirect-uris": [
-      "https://*.cfapps.eu10.hana.ondemand.com/**"
+      "https://tss-cx-analytics.cfapps.eu10.hana.ondemand.com/login/callback"
     ]
   },
   "scopes": [
