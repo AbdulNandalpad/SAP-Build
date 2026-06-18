@@ -3,10 +3,15 @@
   "sessionTimeout": 60,
   "routes": [
     {
-      "source": "^/(.*)",
+      "source": "^/odata/(.*)",
       "destination": "tss-backend",
       "authenticationType": "xsuaa",
       "csrfProtection": false
+    },
+    {
+      "source": "^/(.*)",
+      "localDir": "ui",
+      "authenticationType": "xsuaa"
     }
   ]
 }

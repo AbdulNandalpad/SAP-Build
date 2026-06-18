@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TSS CX Analytics</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#2563eb;--blue2:#1d4ed8;--blue-light:#dbeafe;
+  --green:#059669;--green-light:#d1fae5;
+  --orange:#d97706;--orange-light:#fef0de;
+  --red:#dc2626;--red-light:#ffd7d7;
+  --purple:#7c3aed;--purple-light:#ede0f4;
+  --teal:#0d9488;--teal-light:#d6f6f4;
+  --gold:#c2781f;--gold-light:#fef0cc;
+  --gray:#6a6d70;--gray-light:#f5f6f7;
+  --text:#1a1a2e;--muted:#64748b;--border:#e2e8f0;
+  --shell:#0f172a;--card:#ffffff;
+  --shadow-sm:0 1px 3px rgba(0,0,0,0.06),0 1px 2px rgba(0,0,0,0.04);
+  --shadow:0 4px 16px rgba(0,0,0,0.08),0 2px 4px rgba(0,0,0,0.04);
+  --shadow-lg:0 12px 40px rgba(0,0,0,0.12),0 4px 12px rgba(0,0,0,0.06);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:#f0f4f8;color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased;}
+
+/* SHELL */
+.shell{
+  background:var(--shell);
+  height:52px;display:flex;align-items:center;padding:0 28px;gap:14px;
+  position:sticky;top:0;z-index:200;
+  border-bottom:1px solid rgba(255,255,255,0.06);
+}
+.shell-logo{display:flex;align-items:center;gap:10px;}
+.shell-logo-box{
+  background:var(--blue);border-radius:6px;
+  width:28px;height:28px;display:flex;align-items:center;justify-content:center;
+}
+.shell-logo-box svg{width:16px;height:16px;}
+.shell-brand{font-size:0.88rem;font-weight:600;color:white;letter-spacing:0.3px;}
+.shell-divider{width:1px;height:20px;background:rgba(255,255,255,0.15);}
+.shell-app{font-size:0.78rem;color:rgba(255,255,255,0.55);font-weight:400;}
+.shell-right{margin-left:auto;display:flex;align-items:center;gap:14px;}
+.shell-status{display:flex;align-items:center;gap:6px;font-size:0.72rem;color:rgba(255,255,255,0.5);}
+.live-dot{width:6px;height:6px;border-radius:50%;background:#22c55e;animation:blink 2s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.3;}}
+.shell-user{font-size:0.72rem;color:rgba(255,255,255,0.6);}
+.shell-avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--blue),#7c3aed);color:white;display:flex;align-items:center;justify-content:center;font-size:0.62rem;font-weight:700;letter-spacing:0.5px;}
+
+/* HERO */
+.hero{
+  background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 40%,#0a6ed1 100%);
+  padding:60px 32px 72px;
+  position:relative;overflow:hidden;
+}
+.hero-grid{
+  position:absolute;top:0;left:0;right:0;bottom:0;
+  background-image:linear-gradient(rgba(255,255,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.03) 1px,transparent 1px);
+  background-size:40px 40px;
+}
+.hero-glow{
+  position:absolute;top:-100px;right:-100px;width:500px;height:500px;
+  border-radius:50%;background:radial-gradient(circle,rgba(10,110,209,0.3) 0%,transparent 70%);
+  pointer-events:none;
+}
+.hero-inner{max-width:1140px;margin:0 auto;position:relative;z-index:1;}
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);
+  border-radius:20px;padding:5px 14px;margin-bottom:20px;
+  font-size:0.7rem;font-weight:500;color:rgba(255,255,255,0.7);letter-spacing:1.5px;text-transform:uppercase;
+}
+.hero h1{
+  font-size:clamp(1.8rem,4vw,2.8rem);font-weight:300;color:white;
+  line-height:1.15;margin-bottom:14px;letter-spacing:-0.5px;
+}
+.hero h1 strong{font-weight:700;background:linear-gradient(90deg,#60a5fa,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.hero-sub{
+  font-size:0.95rem;color:rgba(255,255,255,0.65);
+  max-width:520px;line-height:1.7;margin-bottom:32px;font-weight:300;
+}
+.hero-stats{display:flex;gap:0;flex-wrap:wrap;}
+.hero-stat{
+  padding:14px 24px;border-right:1px solid rgba(255,255,255,0.1);
+  display:flex;flex-direction:column;gap:2px;
+}
+.hero-stat:first-child{padding-left:0;}
+.hero-stat:last-child{border-right:none;}
+.hero-stat-val{font-size:1.1rem;font-weight:600;color:white;}
+.hero-stat-lbl{font-size:0.65rem;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:1px;}
+
+/* MAIN */
+.main{max-width:1140px;margin:0 auto;padding:36px 24px 60px;}
+
+/* SECTION HEADER */
+.sec-hdr{display:flex;align-items:center;gap:12px;margin-bottom:18px;}
+.sec-title{font-size:0.7rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;}
+.sec-line{flex:1;height:1px;background:var(--border);}
+
+/* MODULE GRID */
+.module-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:40px;}
+
+/* MODULE CARD */
+.module-card{
+  background:var(--card);border-radius:14px;
+  border:1px solid var(--border);
+  padding:24px;cursor:pointer;
+  transition:all 0.25s cubic-bezier(0.4,0,0.2,1);
+  text-decoration:none;color:inherit;
+  display:flex;flex-direction:column;
+  position:relative;overflow:hidden;
+  box-shadow:var(--shadow-sm);
+}
+.module-card::after{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:14px 14px 0 0;
+  opacity:0;transition:opacity 0.25s;
+}
+.module-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg);border-color:transparent;}
+.module-card:hover::after{opacity:1;}
+.module-card.disabled{opacity:0.5;cursor:default;}
+.module-card.disabled:hover{transform:none;box-shadow:var(--shadow-sm);border-color:var(--border);}
+
+/* Card accent colors */
+.mc-blue::after{background:linear-gradient(90deg,var(--blue),#60a5fa);}
+.mc-green::after{background:linear-gradient(90deg,var(--green),#34d399);}
+.mc-ai::after{background:linear-gradient(90deg,var(--purple),var(--blue));}
+.mc-orange::after{background:linear(90deg,var(--orange),#fb923c);}
+.mc-teal::after{background:linear-gradient(90deg,var(--teal),#2dd4bf);}
+.mc-purple::after{background:linear-gradient(90deg,var(--purple),#c084fc);}
+.mc-red::after{background:linear-gradient(90deg,var(--red),#f87171);}
+.mc-gold::after{background:linear-gradient(90deg,var(--gold),#fbbf24);}
+
+/* Icon */
+.mc-icon{
+  width:48px;height:48px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:16px;flex-shrink:0;
+}
+.mc-icon svg{width:24px;height:24px;}
+.ic-blue{background:linear-gradient(135deg,#dbeafe,#bfdbfe);}
+.ic-blue svg{color:var(--blue);}
+.ic-green{background:linear-gradient(135deg,#dcfce7,#bbf7d0);}
+.ic-green svg{color:var(--green);}
+.ic-ai{background:linear-gradient(135deg,#ede9fe,#ddd6fe);}
+.ic-ai svg{color:var(--purple);}
+.ic-orange{background:linear-gradient(135deg,#ffedd5,#fed7aa);}
+.ic-orange svg{color:var(--orange);}
+.ic-teal{background:linear-gradient(135deg,#ccfbf1,#99f6e4);}
+.ic-teal svg{color:var(--teal);}
+.ic-purple{background:linear-gradient(135deg,#f3e8ff,#e9d5ff);}
+.ic-purple svg{color:var(--purple);}
+.ic-red{background:linear-gradient(135deg,#fee2e2,#fecaca);}
+.ic-red svg{color:var(--red);}
+.ic-gold{background:linear-gradient(135deg,#fef9c3,#fef08a);}
+.ic-gold svg{color:var(--gold);}
+.ic-add{background:var(--gray-light);border:2px dashed var(--border);}
+.ic-add svg{color:var(--muted);}
+
+.mc-title{font-size:0.95rem;font-weight:600;color:var(--text);margin-bottom:6px;}
+.mc-desc{font-size:0.78rem;color:var(--muted);line-height:1.55;flex:1;font-weight:400;}
+.mc-footer{margin-top:18px;display:flex;align-items:center;justify-content:space-between;}
+.mc-badge{font-size:0.62rem;font-weight:600;padding:3px 9px;border-radius:20px;letter-spacing:0.3px;}
+.badge-live{background:#dcfce7;color:#166534;}
+.badge-new{background:#dbeafe;color:#1e40af;}
+.badge-soon{background:#f1f5f9;color:#94a3b8;border:1px solid var(--border);}
+.badge-ai{background:linear-gradient(90deg,#ede9fe,#dbeafe);color:var(--purple);}
+.mc-arrow{
+  width:28px;height:28px;border-radius:50%;
+  background:var(--gray-light);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  transition:all 0.2s;
+}
+.mc-arrow svg{width:12px;height:12px;color:var(--muted);transition:color 0.2s;}
+.module-card:hover .mc-arrow{background:var(--blue);border-color:var(--blue);}
+.module-card:hover .mc-arrow svg{color:white;}
+.module-card.disabled .mc-arrow{display:none;}
+
+/* QUICK ACTIONS */
+.qa-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:40px;}
+.qa-card{
+  background:var(--card);border:1px solid var(--border);border-radius:10px;
+  padding:14px 16px;cursor:pointer;transition:all 0.2s;
+  text-decoration:none;color:inherit;
+  display:flex;align-items:center;gap:12px;
+  box-shadow:var(--shadow-sm);
+}
+.qa-card:hover{border-color:var(--blue);background:#fafcff;box-shadow:var(--shadow);}
+.qa-icon{
+  width:36px;height:36px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.qa-icon svg{width:18px;height:18px;}
+.qa-text{}
+.qa-label{font-size:0.8rem;font-weight:500;color:var(--text);}
+.qa-sub{font-size:0.68rem;color:var(--muted);margin-top:1px;}
+
+/* INFO ROW */
+.info-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.info-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:22px 24px;box-shadow:var(--shadow-sm);}
+.info-title{font-size:0.8rem;font-weight:600;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.info-title svg{width:16px;height:16px;color:var(--muted);}
+.info-list{display:flex;flex-direction:column;gap:10px;}
+.info-item{display:flex;align-items:center;gap:10px;font-size:0.78rem;color:var(--muted);}
+.info-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.info-item strong{color:var(--text);font-weight:500;}
+
+/* RESPONSIVE */
+@media(max-width:900px){.module-grid{grid-template-columns:1fr 1fr;}.qa-grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:600px){
+  .module-grid{grid-template-columns:1fr;}
+  .qa-grid{grid-template-columns:1fr;}
+  .info-row{grid-template-columns:1fr;}
+  .hero{padding:40px 20px 52px;}
+  .hero-stats{gap:0;}
+  .hero-stat{padding:10px 16px;}
+  .main{padding:24px 16px 48px;}
+  .shell{padding:0 16px;}
+}
+@media(max-width:400px){.hero-stats{flex-direction:column;}.hero-stat{border-right:none;border-bottom:1px solid rgba(255,255,255,0.1);padding:10px 0;}}
+</style>
+</head>
+<body>
+
+<div class="shell">
+<div class="shell-logo">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="-2.23 -2.23 183.26 78.76" height="36" style="flex-shrink:0;">
+      <path d="M15.977,47.906v3.34c-.454-.503-.484-1.025-2.022-1.025H9.492V71.773c0,1.387.215,1.553.82,2.017H5.664c.605-.464.82-.63.82-2.017V50.221H2.08C.483,50.221.454,50.743,0,51.246v-3.34H15.977" style="fill:#e8e8e8"/>
+      <path d="M21.665,61.651v10.122c0,1.387.205,1.553.81,2.017H17.832c.605-.464.815-.63.815-2.017V50.03c0-1.387-.21-1.553-.815-2.017h6.933c6.48,0,9.16,2.08,9.16,7.129,0,2.315-1.748,5.318-5.478,6.045l5.239,10.586c.933,1.523,1.079,1.582,1.597,2.017H31.338L25.522,61.651H24.302c2.26,0,6.616-.117,6.616-4.341,0-2.807-1.538-4.785-6.152-4.785h-3.101v10.126" style="fill:#e8e8e8"/>
+      <path d="M144.434,61.651v10.122c0,1.387.21,1.553.815,2.017h-4.639c.596-.464.806-.63.806-2.017V50.03c0-1.387-.21-1.553-.806-2.017h6.929c6.48,0,9.165,2.08,9.165,7.129,0,2.315-1.748,5.318-5.483,6.045l5.244,10.586c.933,1.523,1.089,1.582,1.597,2.017h-3.945l-5.82-12.139h-1.221c2.266,0,6.621-.117,6.621-4.341,0-2.807-1.543-4.785-6.152-4.785h-3.101v10.126" style="fill:#e8e8e8"/>
+      <path d="M38.003,50.011c0-1.387-.215-1.548-.815-2.007h13.774v3.359c-.298-.396-.391-1.055-2.051-1.055h-7.9v8.155l5.464.117c1.567,0,1.631-.293,1.992-.757v3.828c-.308-.391-.308-.757-1.899-.757l-5.557-.117v10.699h7.9c1.626,0,1.66-.591,2.051-1.055v3.369H37.188c.6-.464.815-.63.815-2.017V50.011" style="fill:#e8e8e8"/>
+      <path d="M54.243,49.894c0-1.382-.21-1.548-.815-2.012h4.644c-.605.464-.811.63-.811,2.012V71.476h5.952c1.621,0,1.68-.659,2.051-1.055v3.369H53.428c.605-.464.815-.63.815-2.017V49.894" style="fill:#e8e8e8"/>
+      <path d="M68.11,49.894c0-1.382-.21-1.548-.81-2.012h4.638c-.605.464-.81.63-.81,2.012V71.476h5.542c1.621,0,1.685-.659,2.061-1.055v3.369H67.3c.6-.464.81-.63.81-2.017V49.894" style="fill:#e8e8e8"/>
+      <path d="M81.733,51.617c0-2.744-.205-2.905-.81-3.364h13.774v3.364c-.303-.4-.391-1.055-2.046-1.055h-7.896v7.725l5.811.122c1.562,0,1.621-.298,1.987-.762v3.833c-.298-.4-.298-.762-1.889-.762l-5.903-.117V71.476h7.896c1.626,0,1.655-.591,2.051-1.055v3.369H80.923c.605-.464.81-.63.81-.664V51.617" style="fill:#e8e8e8"/>
+      <path d="M98.062,50.274c0-1.387-.215-1.553-.811-2.012h6.421c4.277,0,8.945.562,8.945,5.977,0,3.73-2.441,5.43-4.37,5.762v.068c2.173,0,5.757,1.831,5.757,6.621,0,6.665-6.328,7.105-10.332,7.105h-6.421c.596-.464.811-.63.811-2.017V50.274zm3.022,9.336l-.01,11.865h2.598c3.437,0,7.314-.435,7.314-4.927,0-4.355-3.418-6.064-7.212-6.064-1.177,0,0-.703,0-.703,4.644,0,5.713-2.183,5.83-5.254,0-3.857-3.193-3.96-5.933-3.96h-2.597l.01,9.043" style="fill:#e8e8e8"/>
+      <path d="M115.464,61.197c0-6.953,4.644-13.315,11.743-13.315,6.797,0,11.504,6.26,11.504,13.315,0,6.533-4.482,13.106-11.601,13.106-6.768,0-11.646-6.152-11.646-13.106zm11.675,10.498c5.229,0,8.306-5.425,8.306-10.571,0-5.732-3.433-10.635-8.276-10.635-5.2,0-8.433,5.107-8.433,10.635,0,5.288,3.174,10.571,8.403,10.571" style="fill:#e8e8e8"/>
+      <path d="M175.313,61.998l-2.822.02c-1.597,0-1.597.366-1.899.762v-3.833c.366.464.42.762,1.987.762l6.221-.015v-.112V71.832c-2.124,1.406-5.4,2.471-8.296,2.471-7.221,0-11.992-5.225-11.992-13.125,0-8,5.225-13.679,11.992-13.679,4.077,0,5.61,1.938,6.694,1.938.313,0,.489-.142.801-.386v4.966c-.313-.317-2.754-3.877-7.007-3.877-5.19,0-8.994,4.653-8.994,10.972,0,5.815,3.306,10.542,8.784,10.542,1.567,0,3.037-.356,4.531-1.094V61.998" style="fill:#e8e8e8"/>
+      <path d="M55.875,5.563v3.343h9.75v17.719h3.313V8.906h9.969V5.563H55.875z" style="fill:#a39245"/>
+      <path d="M41.742,0l25.5,40.969,6.781-9.781,6.844,10.781,6.75-9.781,6.719,10.781,6.688-9.75,6.719,10.75L133.273,0H119.836H106.398H92.773H90.93H54.273H41.742zM48.523,3.781h5.75l31.75,0L67.242,33.906,48.523,3.781zM90.43,3.781h9.219L80.867,33.906l-4.625-7.344L90.43,3.781zM104.055,3.781h9.063L94.336,33.906l-4.5-7.344L104.055,3.781zM117.492,3.781h9.063L107.742,33.906l-4.5-7.313L117.492,3.781z" style="fill:#a39245"/>
+    </svg>
+  </div>
+  <div class="shell-divider"></div>
+  <span class="shell-app">Trelleborg Sealing Solutions</span>
+  <div class="shell-right">
+    <div class="shell-status">
+      <div class="live-dot"></div>
+      C4C QUA · my352500
+    </div>
+    <div class="shell-divider"></div>
+    <span class="shell-user">ABDUL.NANDALPAD</span>
+    <div class="shell-avatar">AN</div>
+  </div>
+</div>
+
+<div class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-inner">
+    <div class="hero-eyebrow">
+      <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><circle cx="5" cy="5" r="4"/></svg>
+      Intelligence Platform
+    </div>
+    <h1>CX Analytics for<br><strong>Trelleborg Sealing Solutions</strong></h1>
+    <div class="hero-sub">AI-powered reporting across your entire SAP C4C landscape. Instant dashboards, natural language report generation, and deep business insights — all from live data.</div>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="hero-stat-val">C4C QUA</div><div class="hero-stat-lbl">Data Source</div></div>
+      <div class="hero-stat"><div class="hero-stat-val">MY352500</div><div class="hero-stat-lbl">System ID</div></div>
+      <div class="hero-stat"><div class="hero-stat-val">EU10</div><div class="hero-stat-lbl">Region</div></div>
+      <div class="hero-stat"><div class="hero-stat-val" id="heroTime">—</div><div class="hero-stat-lbl">Last Refresh</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+
+  <div class="sec-hdr"><span class="sec-title">Analytics Modules</span><div class="sec-line"></div></div>
+  <div class="module-grid">
+
+    <a href="opportunity.html" class="module-card mc-blue">
+      <div class="mc-icon ic-blue">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 3v18h18"/><path d="m7 16 4-4 4 4 4-4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="mc-title">Opportunities</div>
+      <div class="mc-desc">Pipeline analysis, win rates, revenue by sales org, phase funnel, and AI-powered insights from live opportunity data.</div>
+      <div class="mc-footer">
+        <span class="mc-badge badge-live">● Live</span>
+        <div class="mc-arrow"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 6h8M6 2l4 4-4 4"/></svg></div>
+      </div>
+    </a>
+
+    <a href="sales-quote.html" class="module-card mc-green">
+      <div class="mc-icon ic-green">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M9 12h6M9 16h6M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/>
+        </svg>
+      </div>
+      <div class="mc-title">Sales Quotes</div>
+      <div class="mc-desc">Quote pipeline, approval status, conversion rates, value by sales org and customer, with full quote detail table.</div>
+      <div class="mc-footer">
+        <span class="mc-badge badge-new">New</span>
+        <div class="mc-arrow"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 6h8M6 2l4 4-4 4"/></svg></div>
+      </div>
+    </a>
+
+    <a href="report-builder.html" class="module-card mc-ai">
+      <div class="mc-icon ic-ai">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/><path d="M22 2 12 12"/><circle cx="22" cy="2" r="2" fill="currentColor"/>
+        </svg>
+      </div>
+      <div class="mc-title">AI Report Builder</div>
+      <div class="mc-desc">Describe any report in plain English. AI selects the right data, builds charts, and generates business insights automatically.</div>
+      <div class="mc-footer">
+        <span class="mc-badge badge-ai">AI</span>
+        <div class="mc-arrow"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 6h8M6 2l4 4-4 4"/></svg></div>
+      </div>
+    </a>
+
+    <a href="sales-brief.html" class="module-card mc-teal">
+      <div class="mc-icon" style="background:linear-gradient(135deg,#d1fae5,#a7f3d0);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#065f46" stroke-width="1.5">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
+        </svg>
+      </div>
+      <div class="mc-title">Sales Brief</div>
+      <div class="mc-desc">Generate polished, audience-specific sales briefs from live pipeline data. Board reports, customer presentations, territory reviews — all in one click.</div>
+      <div class="mc-footer">
+        <span class="mc-badge badge-ai">AI</span>
+        <div class="mc-arrow"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 6h8M6 2l4 4-4 4"/></svg></div>
+      </div>
+    </a>
+
+    <div class="module-card mc-orange disabled">
+      <div class="mc-icon ic-orange">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+      </div>
+      <div class="mc-title">Service Requests</div>
+      <div class="mc-desc">Ticket volume, resolution times, category breakdown, SLA compliance, and agent performance analytics.</div>
+      <div class="mc-footer"><span class="mc-badge badge-soon">Coming Soon</span></div>
+    </div>
+
+    <div class="module-card mc-gold disabled">
+      <div class="mc-icon ic-gold">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+      </div>
+      <div class="mc-title">Leads</div>
+      <div class="mc-desc">Lead funnel, conversion rates by source and campaign, qualification status, and sales rep performance.</div>
+      <div class="mc-footer"><span class="mc-badge badge-soon">Coming Soon</span></div>
+    </div>
+
+    <div class="module-card mc-teal disabled">
+      <div class="mc-icon ic-teal">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+      </div>
+      <div class="mc-title">Accounts</div>
+      <div class="mc-desc">Account health, revenue by customer, geographic distribution, ABC classification, and relationship insights.</div>
+      <div class="mc-footer"><span class="mc-badge badge-soon">Coming Soon</span></div>
+    </div>
+
+    <div class="module-card mc-purple disabled">
+      <div class="mc-icon ic-purple">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+        </svg>
+      </div>
+      <div class="mc-title">Contacts</div>
+      <div class="mc-desc">Contact coverage, interaction history, key person mapping, and engagement analytics across accounts.</div>
+      <div class="mc-footer"><span class="mc-badge badge-soon">Coming Soon</span></div>
+    </div>
+
+    <div class="module-card mc-red disabled">
+      <div class="mc-icon ic-red">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/>
+        </svg>
+      </div>
+      <div class="mc-title">RFQ / EAR / ESR</div>
+      <div class="mc-desc">Custom TSS C4C objects — request for quotation pipeline, engineering approval requests, and sample requests.</div>
+      <div class="mc-footer"><span class="mc-badge badge-soon">Coming Soon</span></div>
+    </div>
+
+    <div class="module-card disabled" style="border-style:dashed;background:transparent;box-shadow:none;">
+      <div class="mc-icon ic-add">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 5v14M5 12h14"/></svg>
+      </div>
+      <div class="mc-title" style="color:var(--muted)">Contribute a Module</div>
+      <div class="mc-desc" style="color:#94a3b8">Clone the repo, build your analytics dashboard, and submit a pull request to extend the platform.</div>
+      <div class="mc-footer"><span class="mc-badge badge-soon">Open for Contribution</span></div>
+    </div>
+
+  </div>
+
+  <div class="sec-hdr"><span class="sec-title">Quick Actions</span><div class="sec-line"></div></div>
+  <div class="qa-grid">
+    <a href="report-builder.html" class="qa-card">
+      <div class="qa-icon ic-ai">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/><path d="M22 2 12 12"/><circle cx="22" cy="2" r="2" fill="currentColor"/>
+        </svg>
+      </div>
+      <div class="qa-text"><div class="qa-label">Build AI Report</div><div class="qa-sub">Natural language → chart</div></div>
+    </a>
+    <a href="opportunity.html" class="qa-card">
+      <div class="qa-icon ic-blue">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M3 3v18h18"/><path d="m7 16 4-4 4 4 4-4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="qa-text"><div class="qa-label">Pipeline Overview</div><div class="qa-sub">Live opportunity data</div></div>
+    </a>
+    <a href="sales-brief.html" class="qa-card">
+      <div class="qa-icon" style="background:linear-gradient(135deg,#d1fae5,#a7f3d0);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#065f46" stroke-width="1.5" width="18" height="18">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+        </svg>
+      </div>
+      <div class="qa-text"><div class="qa-label">Sales Brief</div><div class="qa-sub">AI-generated brief in 1 click</div></div>
+    </a>
+    <a href="report-builder.html" class="qa-card">
+      <div class="qa-icon" style="background:linear-gradient(135deg,#fef3c7,#fde68a);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#92400e" stroke-width="1.5" width="18" height="18">
+          <circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/>
+        </svg>
+      </div>
+      <div class="qa-text"><div class="qa-label">Ask AI Anything</div><div class="qa-sub">About your C4C data</div></div>
+    </a>
+  </div>
+
+  <div class="sec-hdr"><span class="sec-title">Platform</span><div class="sec-line"></div></div>
+  <div class="info-row">
+    <div class="info-card">
+      <div class="info-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        Connected Data Sources
+      </div>
+      <div class="info-list">
+        <div class="info-item"><div class="info-dot" style="background:#22c55e"></div><strong>C4C QUA</strong> — my352500.crm.ondemand.com</div>
+        <div class="info-item"><div class="info-dot" style="background:var(--blue)"></div><strong>OpportunityCollection</strong> — Live · Last 12 months</div>
+        <div class="info-item"><div class="info-dot" style="background:var(--green)"></div><strong>SalesQuoteCollection</strong> — Live · Last 12 months</div>
+        <div class="info-item"><div class="info-dot" style="background:#94a3b8"></div><strong>ServiceRequestCollection</strong> — Planned</div>
+        <div class="info-item"><div class="info-dot" style="background:#94a3b8"></div><strong>LeadCollection</strong> — Planned</div>
+      </div>
+    </div>
+    <div class="info-card">
+      <div class="info-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/><path d="M22 2 12 12"/><circle cx="22" cy="2" r="2" fill="currentColor"/></svg>
+        AI Capabilities
+      </div>
+      <div class="info-list">
+        <div class="info-item"><div class="info-dot" style="background:var(--purple)"></div><strong>Claude Sonnet</strong> — Natural language report generation</div>
+        <div class="info-item"><div class="info-dot" style="background:var(--purple)"></div><strong>AI Analysis</strong> — Business insights from live data</div>
+        <div class="info-item"><div class="info-dot" style="background:var(--purple)"></div><strong>Smart Confirm</strong> — AI understands request before building</div>
+        <div class="info-item"><div class="info-dot" style="background:var(--purple)"></div><strong>Refine Loop</strong> — Iteratively improve reports</div>
+        <div class="info-item"><div class="info-dot" style="background:var(--blue)"></div><strong>Deployed</strong> — BTP CF · EU10 · tss-cx-analytics.cfapps.eu10</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+document.getElementById('heroTime').textContent = new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+</script>
+</body>
+</html>

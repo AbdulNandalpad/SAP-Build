@@ -9,7 +9,7 @@ applications:
     - nodejs_buildpack
   command: npm start
   routes:
-    - route: tss-cx-analytics-backend.apps.internal
+    - route: tss-cx-analytics-backend.cfapps.eu10.hana.ondemand.com
   services:
     - cx-destination
     - tss-dev-uaa
@@ -29,4 +29,4 @@ applications:
     - tss-dev-uaa
   env:
     destinations: >
-      [{"name":"tss-backend","url":"http://tss-cx-analytics-backend.apps.internal:8080","forwardAuthToken":true}]
+      [{"name":"tss-backend","url":"https://tss-cx-analytics-backend.cfapps.eu10.hana.ondemand.com","forwardAuthToken":true}]

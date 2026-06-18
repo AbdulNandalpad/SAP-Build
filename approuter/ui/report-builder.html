@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TSS CX Analytics — AI Report Builder</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --blue:#2563eb;--blue2:#1d4ed8;--blue-light:#dbeafe;--blue-xlight:#eff6ff;
+  --green:#059669;--green-light:#d1fae5;
+  --red:#dc2626;--red-light:#fee2e2;
+  --orange:#d97706;--orange-light:#ffedd5;
+  --purple:#7c3aed;--purple-light:#ede9fe;
+  --teal:#0d9488;--gold:#a39245;
+  --text:#0f172a;--muted:#64748b;--light:#94a3b8;
+  --border:#e2e8f0;--border2:#cbd5e1;
+  --bg:#f1f5f9;--card:#ffffff;--shell:#0f172a;
+  --shadow-sm:0 1px 3px rgba(0,0,0,0.05),0 1px 2px rgba(0,0,0,0.03);
+  --shadow:0 4px 16px rgba(0,0,0,0.07),0 2px 4px rgba(0,0,0,0.04);
+  --shadow-lg:0 12px 40px rgba(0,0,0,0.1),0 4px 12px rgba(0,0,0,0.05);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased;}
+
+/* SHELL */
+.shell{background:var(--shell);height:52px;display:flex;align-items:center;padding:0 24px;gap:14px;position:sticky;top:0;z-index:200;border-bottom:1px solid rgba(255,255,255,0.05);}
+.shell-logo{display:flex;align-items:center;gap:0;}
+.shell-div{width:1px;height:20px;background:rgba(255,255,255,0.12);margin:0 14px;}
+.shell-app{font-size:0.75rem;color:rgba(255,255,255,0.45);font-weight:400;}
+.shell-right{margin-left:auto;display:flex;align-items:center;gap:12px;}
+.shell-status{display:flex;align-items:center;gap:5px;font-size:0.7rem;color:rgba(255,255,255,0.45);}
+.live-dot{width:5px;height:5px;border-radius:50%;background:#22c55e;animation:blink 2s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.3;}}
+.shell-back{font-size:0.72rem;color:rgba(255,255,255,0.55);text-decoration:none;display:flex;align-items:center;gap:5px;padding:5px 12px;border:1px solid rgba(255,255,255,0.12);border-radius:6px;transition:all 0.15s;font-weight:500;}
+.shell-back:hover{background:rgba(255,255,255,0.08);color:white;}
+.shell-back svg{width:12px;height:12px;}
+
+/* STEPPER */
+.stepper{background:white;border-bottom:1px solid var(--border);padding:0;display:flex;justify-content:center;align-items:stretch;}
+.step-wrap{display:flex;align-items:center;}
+.step{display:flex;align-items:center;gap:10px;padding:14px 20px;position:relative;cursor:default;}
+.step-num{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:600;border:1.5px solid var(--border2);color:var(--light);transition:all 0.3s;background:white;}
+.step-label{font-size:0.72rem;font-weight:500;color:var(--light);letter-spacing:0.8px;text-transform:uppercase;transition:color 0.3s;}
+.step-line{width:48px;height:1px;background:var(--border);transition:background 0.4s;}
+.step.active .step-num{border-color:var(--blue);color:var(--blue);background:var(--blue-light);}
+.step.active .step-label{color:var(--blue);}
+.step.done .step-num{border-color:var(--green);background:var(--green);color:white;}
+.step.done .step-label{color:var(--green);}
+
+/* PAGES */
+.page{display:none;min-height:calc(100vh - 104px);}
+.page.active{display:flex;}
+
+/* ===== PAGE 1: DEFINE ===== */
+#page1{flex-direction:column;align-items:center;justify-content:center;padding:48px 24px;}
+.define-eyebrow{display:inline-flex;align-items:center;gap:8px;background:var(--purple-light);border:1px solid rgba(108,50,169,0.15);border-radius:20px;padding:5px 14px;margin-bottom:20px;font-size:0.68rem;font-weight:600;color:var(--purple);letter-spacing:1.2px;text-transform:uppercase;}
+.define-eyebrow svg{width:12px;height:12px;}
+.define-title{font-family:'Playfair Display',serif;font-size:clamp(1.8rem,4vw,2.6rem);font-weight:700;color:var(--text);text-align:center;margin-bottom:12px;line-height:1.2;}
+.define-sub{font-size:0.9rem;color:var(--muted);text-align:center;line-height:1.7;max-width:500px;margin-bottom:36px;font-weight:400;}
+.define-box{width:100%;max-width:700px;background:white;border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);}
+.define-textarea{width:100%;min-height:120px;padding:22px;font-size:0.95rem;font-family:'Inter',sans-serif;color:var(--text);border:none;resize:none;outline:none;line-height:1.65;background:white;}
+.define-textarea::placeholder{color:var(--light);font-style:italic;}
+.define-footer{padding:12px 18px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:#fafcff;}
+.define-hint{font-size:0.7rem;color:var(--light);display:flex;align-items:center;gap:5px;}
+.define-hint svg{width:12px;height:12px;}
+.define-btn{background:var(--blue);color:white;border:none;padding:9px 22px;border-radius:8px;font-size:0.8rem;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s;display:flex;align-items:center;gap:6px;letter-spacing:0.3px;}
+.define-btn:hover{background:var(--blue2);transform:translateY(-1px);box-shadow:0 4px 12px rgba(37,99,235,0.3);}
+.define-btn:disabled{opacity:0.4;cursor:not-allowed;transform:none;box-shadow:none;}
+.define-btn svg{width:14px;height:14px;}
+.suggestions{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px;max-width:700px;justify-content:center;}
+.sug{background:white;border:1px solid var(--border);color:var(--muted);padding:7px 15px;border-radius:20px;font-size:0.74rem;cursor:pointer;transition:all 0.2s;font-weight:400;}
+.sug:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-light);transform:translateY(-1px);}
+
+/* ===== PAGE 2: CONFIRM ===== */
+#page2{flex-direction:column;align-items:center;padding:48px 24px;}
+.confirm-card{width:100%;max-width:640px;background:white;border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);}
+.confirm-hdr{background:linear-gradient(135deg,var(--blue-xlight),var(--purple-light));padding:22px 26px;border-bottom:1px solid var(--border);}
+.confirm-hdr-top{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+.confirm-hdr-icon{width:32px;height:32px;border-radius:8px;background:white;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-sm);}
+.confirm-hdr-icon svg{width:16px;height:16px;color:var(--blue);}
+.confirm-hdr h2{font-size:0.95rem;font-weight:600;color:var(--text);}
+.confirm-hdr p{font-size:0.75rem;color:var(--muted);}
+.confirm-body{padding:24px 26px;}
+.confirm-section{margin-bottom:20px;}
+.confirm-label{font-size:0.64rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:8px;}
+.confirm-value{font-size:0.86rem;color:var(--text);background:var(--bg);padding:11px 15px;border-radius:8px;border-left:3px solid var(--blue);line-height:1.6;}
+.confirm-understanding{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px 15px;margin-top:8px;}
+.confirm-understanding-text{font-size:0.82rem;color:var(--text);line-height:1.65;}
+.confirm-chips{display:flex;flex-wrap:wrap;gap:7px;}
+.confirm-chip{padding:4px 11px;border-radius:20px;font-size:0.7rem;font-weight:500;}
+.chip-chart{background:var(--blue-light);color:var(--blue);}
+.chip-text{background:var(--green-light);color:var(--green);}
+.chip-data{background:var(--orange-light);color:var(--orange);}
+.chip-kpi{background:var(--bg);color:var(--muted);border:1px solid var(--border);}
+.confirm-actions{display:flex;gap:10px;padding:16px 26px;border-top:1px solid var(--border);background:#fafcff;}
+.btn-sec{background:white;color:var(--text);border:1px solid var(--border2);padding:9px 20px;border-radius:8px;font-size:0.8rem;cursor:pointer;font-family:'Inter',sans-serif;font-weight:500;transition:background 0.15s;display:flex;align-items:center;gap:6px;}
+.btn-sec:hover{background:var(--bg);}
+.btn-sec svg{width:13px;height:13px;}
+.btn-pri{background:var(--blue);color:white;border:none;padding:9px 22px;border-radius:8px;font-size:0.8rem;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s;display:flex;align-items:center;gap:6px;}
+.btn-pri:hover{background:var(--blue2);}
+.btn-pri:disabled{opacity:0.4;cursor:not-allowed;}
+.btn-pri svg{width:13px;height:13px;}
+.thinking-dots{display:inline-flex;gap:3px;align-items:center;margin-left:4px;}
+.thinking-dots span{width:4px;height:4px;background:var(--blue);border-radius:50%;animation:dot 1.2s infinite;}
+.thinking-dots span:nth-child(2){animation-delay:0.2s;}
+.thinking-dots span:nth-child(3){animation-delay:0.4s;}
+@keyframes dot{0%,80%,100%{opacity:0.2;}40%{opacity:1;}}
+
+/* ===== PAGE 3: BUILD ===== */
+#page3{flex-direction:column;align-items:center;justify-content:center;padding:48px 24px;gap:0;}
+.build-ring{width:72px;height:72px;border-radius:50%;border:3px solid var(--border);border-top-color:var(--blue);animation:spin 0.8s linear infinite;margin-bottom:24px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.build-title{font-size:1.1rem;font-weight:600;color:var(--text);margin-bottom:6px;}
+.build-sub{font-size:0.82rem;color:var(--muted);margin-bottom:32px;}
+.build-steps{width:100%;max-width:420px;display:flex;flex-direction:column;gap:8px;}
+.build-step{display:flex;align-items:center;gap:12px;padding:11px 16px;background:white;border:1px solid var(--border);border-radius:9px;font-size:0.78rem;color:var(--light);transition:all 0.3s;box-shadow:var(--shadow-sm);}
+.build-step.active{color:var(--blue);border-color:rgba(37,99,235,0.3);background:var(--blue-xlight);}
+.build-step.done{color:var(--green);border-color:rgba(5,150,105,0.3);background:var(--green-light);}
+.build-step-dot{width:8px;height:8px;border-radius:50%;border:1.5px solid currentColor;flex-shrink:0;transition:all 0.3s;}
+.build-step.done .build-step-dot{background:var(--green);border-color:var(--green);}
+.build-step.active .build-step-dot{background:var(--blue);border-color:var(--blue);}
+.build-progress{width:100%;max-width:420px;height:3px;background:var(--border);border-radius:2px;margin-top:20px;overflow:hidden;}
+.build-progress-bar{height:100%;background:linear-gradient(90deg,var(--blue),var(--purple));border-radius:2px;transition:width 0.5s ease;width:0%;}
+
+/* ===== PAGE 4: REPORT ===== */
+#page4{flex-direction:column;padding:0;}
+.report-topbar{background:white;border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:52px;z-index:100;flex-wrap:wrap;gap:10px;}
+.report-topbar-left h2{font-size:0.95rem;font-weight:600;color:var(--text);}
+.report-topbar-left p{font-size:0.68rem;color:var(--muted);margin-top:2px;}
+.report-topbar-actions{display:flex;gap:8px;}
+.rbtn{background:white;border:1px solid var(--border2);color:var(--text);padding:6px 14px;border-radius:7px;font-size:0.74rem;cursor:pointer;font-family:'Inter',sans-serif;font-weight:500;transition:background 0.15s;display:flex;align-items:center;gap:5px;}
+.rbtn:hover{background:var(--bg);}
+.rbtn svg{width:12px;height:12px;}
+.rbtn.pri{background:var(--blue);color:white;border-color:var(--blue);}
+.rbtn.pri:hover{background:var(--blue2);}
+.report-body{padding:18px 24px 52px;}
+
+/* KPI */
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px;}
+.kpi-tile{background:white;border:1px solid var(--border);border-radius:10px;padding:16px 18px;position:relative;overflow:hidden;box-shadow:var(--shadow-sm);}
+.kpi-tile::before{content:'';position:absolute;top:0;left:0;right:0;height:2.5px;}
+.kpi-tile:nth-child(1)::before{background:linear-gradient(90deg,var(--blue),#60a5fa);}
+.kpi-tile:nth-child(2)::before{background:linear-gradient(90deg,var(--green),#34d399);}
+.kpi-tile:nth-child(3)::before{background:linear-gradient(90deg,var(--orange),#fb923c);}
+.kpi-tile:nth-child(4)::before{background:linear-gradient(90deg,var(--red),#f87171);}
+.kpi-tile:nth-child(5)::before{background:linear-gradient(90deg,var(--purple),#c084fc);}
+.kv{font-size:1.6rem;font-weight:300;line-height:1;color:var(--text);letter-spacing:-0.5px;margin-top:8px;}
+.kl{font-size:0.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;font-weight:600;}
+.ks{font-size:0.67rem;color:var(--light);margin-top:4px;}
+
+/* INSIGHT */
+.insight-card{background:white;border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin-bottom:14px;box-shadow:var(--shadow-sm);display:flex;gap:14px;align-items:flex-start;}
+.insight-card.text-report{border-left:3px solid var(--green);}
+.insight-card.ai-insight{border-left:3px solid var(--blue);}
+.insight-icon-wrap{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.insight-icon-wrap svg{width:18px;height:18px;}
+.insight-label{font-size:0.63rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
+.insight-text{font-size:0.85rem;color:var(--text);line-height:1.8;}
+
+/* CHART GRID */
+.chart-grid{display:grid;gap:12px;margin-bottom:14px;}
+.cg-hero{grid-template-columns:2fr 1fr;}
+.cg-3{grid-template-columns:1fr 1fr 1fr;}
+.panel{background:white;border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow-sm);}
+.panel.hero-panel{border:1.5px solid rgba(10,110,209,0.2);}
+.panel-hdr{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:white;}
+.panel-hdr-left{display:flex;align-items:center;gap:8px;}
+.panel-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;}
+.panel-icon svg{width:13px;height:13px;}
+.panel-title{font-size:0.8rem;font-weight:600;color:var(--text);}
+.panel-sub{font-size:0.64rem;color:var(--muted);margin-top:1px;}
+.panel-tag{font-size:0.6rem;font-weight:600;padding:3px 8px;border-radius:10px;}
+.tag-ai{background:linear-gradient(90deg,var(--purple-light),var(--blue-light));color:var(--purple);}
+.tag-live{background:var(--green-light);color:#065f46;}
+.tag-default{background:var(--bg);color:var(--muted);border:1px solid var(--border);}
+.panel-body{padding:14px 16px;}
+canvas{max-height:220px;}
+.leg{display:flex;flex-wrap:wrap;gap:8px;padding:6px 16px 10px;}
+.leg-item{display:flex;align-items:center;gap:5px;font-size:0.67rem;color:var(--muted);}
+.leg-dot{width:8px;height:8px;border-radius:3px;flex-shrink:0;}
+
+/* TABLE */
+.tbl-panel{background:white;border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:14px;box-shadow:var(--shadow-sm);}
+.tbl-hdr{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.tbl-hdr-left{display:flex;align-items:center;gap:8px;}
+.tbl-icon{width:28px;height:28px;border-radius:7px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;}
+.tbl-icon svg{width:13px;height:13px;color:var(--muted);}
+.tbl-title{font-size:0.8rem;font-weight:600;color:var(--text);}
+.tbl-ct{font-size:0.67rem;color:var(--muted);background:var(--bg);padding:3px 9px;border:1px solid var(--border);border-radius:10px;}
+.tbl-scroll{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:0.75rem;}
+th{background:#f8fafc;color:var(--muted);padding:9px 14px;text-align:left;font-weight:600;font-size:0.63rem;border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap;}
+td{padding:9px 14px;border-bottom:1px solid #f1f5f9;color:var(--text);}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr:hover td{background:#f8fafc;}
+.badge{padding:3px 8px;border-radius:10px;font-size:0.63rem;font-weight:600;}
+.b-won{background:var(--green-light);color:#065f46;}
+.b-lost{background:var(--red-light);color:#7f1d1d;}
+.b-open{background:var(--blue-light);color:#1e3a8a;}
+.c4c-link{color:var(--blue);text-decoration:none;font-size:0.68rem;display:flex;align-items:center;gap:3px;font-weight:500;}
+.c4c-link:hover{text-decoration:underline;}
+.c4c-link svg{width:10px;height:10px;}
+
+/* REFINE */
+.refine-panel{background:white;border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:14px;box-shadow:var(--shadow-sm);}
+.refine-hdr{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+.refine-hdr-icon{width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,var(--purple-light),var(--blue-light));display:flex;align-items:center;justify-content:center;}
+.refine-hdr-icon svg{width:13px;height:13px;color:var(--purple);}
+.refine-hdr-title{font-size:0.8rem;font-weight:600;color:var(--text);}
+.refine-row{display:flex;}
+.refine-inp{flex:1;border:none;padding:12px 16px;font-size:0.82rem;font-family:'Inter',sans-serif;color:var(--text);outline:none;background:white;}
+.refine-inp::placeholder{color:var(--light);}
+.refine-btn{background:var(--blue);color:white;border:none;padding:12px 22px;font-size:0.78rem;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:background 0.15s;display:flex;align-items:center;gap:6px;white-space:nowrap;}
+.refine-btn:hover{background:var(--blue2);}
+.refine-btn svg{width:13px;height:13px;}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .kpi-row{grid-template-columns:repeat(2,1fr);}
+  .cg-hero,.cg-3{grid-template-columns:1fr;}
+}
+@media(max-width:600px){
+  #page1{padding:32px 16px;}
+  .define-title{font-size:1.6rem;}
+  .report-body{padding:14px 16px 40px;}
+  .report-topbar{padding:10px 16px;}
+  .kpi-row{grid-template-columns:1fr 1fr;}
+  .shell{padding:0 16px;}
+}
+</style>
+</head>
+<body>
+
+<!-- SHELL -->
+<div class="shell">
+  <div class="shell-logo">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="-2.23 -2.23 183.26 78.76" height="34" style="flex-shrink:0;">
+      <path d="M15.977,47.906v3.34c-.454-.503-.484-1.025-2.022-1.025H9.492V71.773c0,1.387.215,1.553.82,2.017H5.664c.605-.464.82-.63.82-2.017V50.221H2.08C.483,50.221.454,50.743,0,51.246v-3.34H15.977" style="fill:#e8e8e8"/>
+      <path d="M21.665,61.651v10.122c0,1.387.205,1.553.81,2.017H17.832c.605-.464.815-.63.815-2.017V50.03c0-1.387-.21-1.553-.815-2.017h6.933c6.48,0,9.16,2.08,9.16,7.129,0,2.315-1.748,5.318-5.478,6.045l5.239,10.586c.933,1.523,1.079,1.582,1.597,2.017H31.338L25.522,61.651H24.302c2.26,0,6.616-.117,6.616-4.341,0-2.807-1.538-4.785-6.152-4.785h-3.101v10.126" style="fill:#e8e8e8"/>
+      <path d="M144.434,61.651v10.122c0,1.387.21,1.553.815,2.017h-4.639c.596-.464.806-.63.806-2.017V50.03c0-1.387-.21-1.553-.806-2.017h6.929c6.48,0,9.165,2.08,9.165,7.129,0,2.315-1.748,5.318-5.483,6.045l5.244,10.586c.933,1.523,1.089,1.582,1.597,2.017h-3.945l-5.82-12.139h-1.221c2.266,0,6.621-.117,6.621-4.341,0-2.807-1.543-4.785-6.152-4.785h-3.101v10.126" style="fill:#e8e8e8"/>
+      <path d="M38.003,50.011c0-1.387-.215-1.548-.815-2.007h13.774v3.359c-.298-.396-.391-1.055-2.051-1.055h-7.9v8.155l5.464.117c1.567,0,1.631-.293,1.992-.757v3.828c-.308-.391-.308-.757-1.899-.757l-5.557-.117v10.699h7.9c1.626,0,1.66-.591,2.051-1.055v3.369H37.188c.6-.464.815-.63.815-2.017V50.011" style="fill:#e8e8e8"/>
+      <path d="M54.243,49.894c0-1.382-.21-1.548-.815-2.012h4.644c-.605.464-.811.63-.811,2.012V71.476h5.952c1.621,0,1.68-.659,2.051-1.055v3.369H53.428c.605-.464.815-.63.815-2.017V49.894" style="fill:#e8e8e8"/>
+      <path d="M68.11,49.894c0-1.382-.21-1.548-.81-2.012h4.638c-.605.464-.81.63-.81,2.012V71.476h5.542c1.621,0,1.685-.659,2.061-1.055v3.369H67.3c.6-.464.81-.63.81-2.017V49.894" style="fill:#e8e8e8"/>
+      <path d="M81.733,51.617c0-2.744-.205-2.905-.81-3.364h13.774v3.364c-.303-.4-.391-1.055-2.046-1.055h-7.896v7.725l5.811.122c1.562,0,1.621-.298,1.987-.762v3.833c-.298-.4-.298-.762-1.889-.762l-5.903-.117V71.476h7.896c1.626,0,1.655-.591,2.051-1.055v3.369H80.923c.605-.464.81-.63.81-.664V51.617" style="fill:#e8e8e8"/>
+      <path d="M98.062,50.274c0-1.387-.215-1.553-.811-2.012h6.421c4.277,0,8.945.562,8.945,5.977,0,3.73-2.441,5.43-4.37,5.762v.068c2.173,0,5.757,1.831,5.757,6.621,0,6.665-6.328,7.105-10.332,7.105h-6.421c.596-.464.811-.63.811-2.017V50.274zm3.022,9.336l-.01,11.865h2.598c3.437,0,7.314-.435,7.314-4.927,0-4.355-3.418-6.064-7.212-6.064-1.177,0,0-.703,0-.703,4.644,0,5.713-2.183,5.83-5.254,0-3.857-3.193-3.96-5.933-3.96h-2.597l.01,9.043" style="fill:#e8e8e8"/>
+      <path d="M115.464,61.197c0-6.953,4.644-13.315,11.743-13.315,6.797,0,11.504,6.26,11.504,13.315,0,6.533-4.482,13.106-11.601,13.106-6.768,0-11.646-6.152-11.646-13.106zm11.675,10.498c5.229,0,8.306-5.425,8.306-10.571,0-5.732-3.433-10.635-8.276-10.635-5.2,0-8.433,5.107-8.433,10.635,0,5.288,3.174,10.571,8.403,10.571" style="fill:#e8e8e8"/>
+      <path d="M175.313,61.998l-2.822.02c-1.597,0-1.597.366-1.899.762v-3.833c.366.464.42.762,1.987.762l6.221-.015v-.112V71.832c-2.124,1.406-5.4,2.471-8.296,2.471-7.221,0-11.992-5.225-11.992-13.125,0-8,5.225-13.679,11.992-13.679,4.077,0,5.61,1.938,6.694,1.938.313,0,.489-.142.801-.386v4.966c-.313-.317-2.754-3.877-7.007-3.877-5.19,0-8.994,4.653-8.994,10.972,0,5.815,3.306,10.542,8.784,10.542,1.567,0,3.037-.356,4.531-1.094V61.998" style="fill:#e8e8e8"/>
+      <path d="M55.875,5.563v3.343h9.75v17.719h3.313V8.906h9.969V5.563H55.875z" style="fill:#a39245"/>
+      <path d="M41.742,0l25.5,40.969,6.781-9.781,6.844,10.781,6.75-9.781,6.719,10.781,6.688-9.75,6.719,10.75L133.273,0H54.273H41.742zM48.523,3.781h5.75l31.75,0L67.242,33.906,48.523,3.781zM90.43,3.781h9.219L80.867,33.906l-4.625-7.344L90.43,3.781zM104.055,3.781h9.063L94.336,33.906l-4.5-7.344L104.055,3.781zM117.492,3.781h9.063L107.742,33.906l-4.5-7.313L117.492,3.781z" style="fill:#a39245"/>
+    </svg>
+  </div>
+  <div class="shell-div"></div>
+  <span class="shell-app">AI Report Builder</span>
+  <div class="shell-right">
+    <div class="shell-status"><div class="live-dot"></div>C4C QUA · MY352500</div>
+    <a href="index.html" class="shell-back">
+      <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2L4 6l4 4"/></svg>
+      Home
+    </a>
+  </div>
+</div>
+
+<!-- STEPPER -->
+<div class="stepper">
+  <div class="step-wrap">
+    <div class="step active" id="step1"><div class="step-num">1</div><div class="step-label">Define</div></div>
+    <div class="step-line" id="line1"></div>
+    <div class="step" id="step2"><div class="step-num">2</div><div class="step-label">Confirm</div></div>
+    <div class="step-line" id="line2"></div>
+    <div class="step" id="step3"><div class="step-num">3</div><div class="step-label">Build</div></div>
+    <div class="step-line" id="line3"></div>
+    <div class="step" id="step4"><div class="step-num">4</div><div class="step-label">Report</div></div>
+  </div>
+</div>
+
+<!-- PAGE 1: DEFINE -->
+<div class="page active" id="page1">
+  <div class="define-eyebrow">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/><path d="M22 2 12 12"/><circle cx="22" cy="2" r="2" fill="currentColor"/></svg>
+    AI Report Builder
+  </div>
+  <div class="define-title">What do you want to know?</div>
+  <div class="define-sub">Describe your report in plain English. AI reads your question, selects the right data and charts, then builds a full report from live C4C data.</div>
+  <div class="define-box">
+    <textarea class="define-textarea" id="defineInput" placeholder='"Show me an executive summary of our pipeline performance across all sales orgs"'></textarea>
+    <div class="define-footer">
+      <span class="define-hint">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+        Ctrl + Enter to continue
+      </span>
+      <button class="define-btn" id="defineBtn" onclick="goToConfirm()">
+        Continue
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="suggestions">
+    <div class="sug" onclick="setSug(this)">Executive summary of last 12 months pipeline</div>
+    <div class="sug" onclick="setSug(this)">Win rate analysis by sales org</div>
+    <div class="sug" onclick="setSug(this)">Why are we losing deals?</div>
+    <div class="sug" onclick="setSug(this)">Open pipeline health by owner</div>
+    <div class="sug" onclick="setSug(this)">Revenue breakdown by phase</div>
+    <div class="sug" onclick="setSug(this)">Top 10 opportunities by value</div>
+    <div class="sug" onclick="setSug(this)">Sales org performance scorecard</div>
+    <div class="sug" onclick="setSug(this)">Monthly pipeline trend — last 12 months</div>
+    <div class="sug" onclick="setSug(this)">Pipeline by business segment</div>
+    <div class="sug" onclick="setSug(this)">Opportunity level distribution and value</div>
+    <div class="sug" onclick="setSug(this)">SOP closing schedule — next 12 months by year</div>
+    <div class="sug" onclick="setSug(this)">Pipeline health — stale deals, missing data, overdue SOP</div>
+    <div class="sug" onclick="setSug(this)">Customer ABC classification breakdown</div>
+    <div class="sug" onclick="setSug(this)">Probability distribution of open pipeline</div>
+    <div class="sug" onclick="setSug(this)">Top customers by open pipeline value</div>
+  </div>
+</div>
+
+<!-- PAGE 2: CONFIRM -->
+<div class="page" id="page2">
+  <div class="confirm-card">
+    <div class="confirm-hdr">
+      <div class="confirm-hdr-top">
+        <div class="confirm-hdr-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/><path d="M22 2 12 12"/><circle cx="22" cy="2" r="2" fill="currentColor"/></svg>
+        </div>
+        <h2 id="confirmHeadline">AI is understanding your request<span class="thinking-dots"><span></span><span></span><span></span></span></h2>
+      </div>
+      <p>Review the plan before building. Go back to refine if needed.</p>
+    </div>
+    <div class="confirm-body">
+      <div class="confirm-section">
+        <div class="confirm-label">Your Request</div>
+        <div class="confirm-value" id="confirmRequest">—</div>
+      </div>
+      <div class="confirm-section">
+        <div class="confirm-label">AI Understanding</div>
+        <div class="confirm-understanding">
+          <div class="confirm-understanding-text" id="confirmUnderstanding">Analyzing your request...</div>
+        </div>
+      </div>
+      <div class="confirm-section">
+        <div class="confirm-label">Report Will Include</div>
+        <div class="confirm-chips" id="confirmChips"><span class="confirm-chip chip-kpi">Loading...</span></div>
+      </div>
+      <div class="confirm-section">
+        <div class="confirm-label">Data Source</div>
+        <div class="confirm-value">C4C OpportunityCollection · my352500 QUA · Last 12 months · <span id="confirmCount">—</span> records loaded</div>
+      </div>
+    </div>
+    <div class="confirm-actions">
+      <button class="btn-sec" onclick="goTo(1)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Redefine
+      </button>
+      <button class="btn-pri" id="confirmBuildBtn" onclick="goToBuild()" disabled>
+        Confirm &amp; Build
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE 3: BUILD -->
+<div class="page" id="page3">
+  <div class="build-ring"></div>
+  <div class="build-title" id="buildTitle">Building your report...</div>
+  <div class="build-sub">AI is analyzing your C4C data and generating the visualization</div>
+  <div class="build-steps">
+    <div class="build-step" id="bs1"><div class="build-step-dot"></div><span>Reading live data from C4C QUA</span></div>
+    <div class="build-step" id="bs2"><div class="build-step-dot"></div><span>Processing aggregations by org, phase, owner</span></div>
+    <div class="build-step" id="bs3"><div class="build-step-dot"></div><span>AI selecting charts and generating config</span></div>
+    <div class="build-step" id="bs4"><div class="build-step-dot"></div><span>Rendering full report with insights</span></div>
+  </div>
+  <div class="build-progress"><div class="build-progress-bar" id="buildBar"></div></div>
+</div>
+
+<!-- PAGE 4: REPORT -->
+<div class="page" id="page4">
+  <div class="report-topbar">
+    <div class="report-topbar-left">
+      <h2 id="rTopTitle">AI Generated Report</h2>
+      <p id="rTopSub">C4C QUA · MY352500</p>
+    </div>
+    <div class="report-topbar-actions">
+      <button class="rbtn" onclick="goTo(1)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 5v14M5 12l7-7 7 7"/></svg>
+        New Report
+      </button>
+      <button class="rbtn" onclick="window.print()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export
+      </button>
+      <button class="rbtn pri" onclick="document.querySelector('.refine-inp').scrollIntoView({behavior:'smooth'});document.querySelector('.refine-inp').focus();">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Refine
+      </button>
+    </div>
+  </div>
+  <div class="report-body" id="reportBody"></div>
+</div>
+
+<script>
+var allData=[],currentQ='',aiPlan=null,reportCharts={};
+var C4C_BASE='https://my352500.crm.ondemand.com/sap/public/byd/runtime?bo_ns=http://sap.com/thingTypes&bo=COD_GENERIC&node=Root&operation=OnExtInspect&OBNRedirect=X';
+var SAP=['#2563eb','#059669','#d97706','#dc2626','#7c3aed','#0d9488','#b45309','#64748b','#1589ee','#0aaf67'];
+
+function fmt(n){n=parseFloat(n)||0;if(n>=1e6)return'$'+(n/1e6).toFixed(1)+'M';if(n>=1e3)return'$'+(n/1e3).toFixed(0)+'K';return'$'+n.toFixed(0);}
+function fmtN(n){n=parseFloat(n)||0;if(n>=1e6)return(n/1e6).toFixed(1)+'M';if(n>=1e3)return(n/1e3).toFixed(0)+'K';return n.toFixed(0);}
+function pd(v){if(!v)return'';var m=v.match?v.match(/\/Date\((\d+)\)\/$/):null;if(m)return new Date(parseInt(m[1])).toISOString().substring(0,10);return v;}
+
+async function fetchData(){
+  try{
+    var url='/odata/v4/opportunity/Opportunities?$top=1000',all=[];
+    while(url){var r=await fetch(url);var j=await r.json();if(j.error)throw new Error(j.error.message);all=all.concat(j.value);url=j['@odata.nextLink']?'/odata/v4/opportunity/'+j['@odata.nextLink']:null;}
+    allData=all;
+    document.getElementById('defineBtn').disabled=false;
+    document.getElementById('confirmCount').textContent=all.length.toLocaleString();
+  }catch(e){console.error(e);document.getElementById('defineBtn').disabled=false;}
+}
+
+function setSug(el){document.getElementById('defineInput').value=el.textContent;goToConfirm();}
+document.addEventListener('keydown',function(e){if((e.metaKey||e.ctrlKey)&&e.key==='Enter'&&document.getElementById('page1').classList.contains('active'))goToConfirm();});
+
+function goTo(n){
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
+  document.getElementById('page'+n).classList.add('active');
+  for(var i=1;i<=4;i++){
+    var s=document.getElementById('step'+i);s.classList.remove('active','done');
+    if(i<n){s.classList.add('done');if(i<4)document.getElementById('line'+i).style.background='#107e3e';}
+    else if(i===n){s.classList.add('active');if(i<4)document.getElementById('line'+i).style.background='#e2e8f0';}
+    else{if(i<4)document.getElementById('line'+i).style.background='#e2e8f0';}
+  }
+  window.scrollTo(0,0);
+}
+
+function buildQuickSummary(){
+  var d=allData;
+  var isOpen=function(x){return x.LifeCycleStatusCode==='1'||x.LifeCycleStatusCode==='2';};
+  var won=d.filter(function(x){return x.LifeCycleStatusCode==='3';}).length;
+  var lost=d.filter(function(x){return x.LifeCycleStatusCode==='5';}).length;
+  var open=d.filter(isOpen).length;
+  var rev=d.reduce(function(s,x){return s+parseFloat(x.BaseCurrencyAmount||0);},0);
+  var om={};d.forEach(function(x){var k=(x.SalesOrganisationName||'?').replace(/TSS\s*/,'');if(!om[k])om[k]={rev:0,won:0,lost:0,count:0};om[k].rev+=parseFloat(x.BaseCurrencyAmount||0);om[k].count++;if(x.LifeCycleStatusCode==='3')om[k].won++;if(x.LifeCycleStatusCode==='5')om[k].lost++;});
+  var pm={};d.forEach(function(x){var p=(x.SalesCyclePhaseCodeText||'?').substring(0,25);pm[p]=(pm[p]||0)+1;});
+  var rm={};d.filter(function(x){return x.LifeCycleStatusCode==='5';}).forEach(function(x){var k=x.ResultReasonCodeText||'No Reason';rm[k]=(rm[k]||0)+1;});
+  var oom={};d.filter(isOpen).forEach(function(x){var k=x.MainEmployeeResponsiblePartyName||'?';oom[k]=(oom[k]||0)+parseFloat(x.BaseCurrencyAmount||0);});
+  var sm={};d.filter(isOpen).forEach(function(x){var k=x.BUS_SEG_CDE_KUTText||'(Not Set)';sm[k]=(sm[k]||0)+parseFloat(x.BaseCurrencyAmount||0);});
+  var lm={};d.filter(isOpen).forEach(function(x){var k=x.OpportunityLevel_KUTText||'(Not Set)';if(!lm[k])lm[k]={count:0,rev:0};lm[k].count++;lm[k].rev+=parseFloat(x.BaseCurrencyAmount||0);});
+  var cm={};d.filter(isOpen).forEach(function(x){var k=x.CustomerABCClassificationCode_PSMText||'(Not Set)';cm[k]=(cm[k]||0)+1;});
+  var openD=d.filter(isOpen);
+  var today=new Date();today.setHours(0,0,0,0);
+  var sopYears={};openD.forEach(function(x){if(x.ExpectedProcessingEndDate){var m=String(x.ExpectedProcessingEndDate).match(/\/Date\((\d+)\)\//);var dt=m?new Date(parseInt(m[1])):new Date(x.ExpectedProcessingEndDate);if(dt>today){var yr=dt.getFullYear();if(!sopYears[yr])sopYears[yr]={count:0,rev:0};sopYears[yr].count++;sopYears[yr].rev+=parseFloat(x.BaseCurrencyAmount||0);}}});
+  var stale90=openD.filter(function(x){if(!x.LastChangeDate)return true;var m=String(x.LastChangeDate).match(/\/Date\((\d+)\)\//);var dt=m?new Date(parseInt(m[1])):new Date(x.LastChangeDate);return Math.floor((today-dt)/86400000)>90;}).length;
+  var noSupplier=openD.filter(function(x){return!x.ZHasSupplier_KUT;}).length;
+  var noCompetitor=openD.filter(function(x){return!x.ZHasCompetitor_KUT;}).length;
+  var noSummary=openD.filter(function(x){return!x.ZHasSummary_KUT;}).length;
+  var zeroPct=openD.filter(function(x){return!x.ProbabilityPercent||parseFloat(x.ProbabilityPercent)===0;}).length;
+  var hi85=openD.filter(function(x){return parseFloat(x.ProbabilityPercent||0)>=85;}).length;
+  return JSON.stringify({
+    total:d.length,won:won,lost:lost,open:open,rev:Math.round(rev),
+    winRate:won+lost>0?Math.round(won/(won+lost)*100):0,
+    topOrgs:Object.entries(om).sort(function(a,b){return b[1].rev-a[1].rev;}).slice(0,8).map(function(e){return{org:e[0],rev:Math.round(e[1].rev),won:e[1].won,lost:e[1].lost,wr:e[1].won+e[1].lost>0?Math.round(e[1].won/(e[1].won+e[1].lost)*100):0};}),
+    topPhases:Object.entries(pm).sort(function(a,b){return b[1]-a[1];}).slice(0,6).map(function(e){return{phase:e[0],count:e[1]};}),
+    topReasons:Object.entries(rm).sort(function(a,b){return b[1]-a[1];}).slice(0,6).map(function(e){return{reason:e[0],count:e[1]};}),
+    topOwners:Object.entries(oom).sort(function(a,b){return b[1]-a[1];}).slice(0,8).map(function(e){return{owner:e[0],rev:Math.round(e[1])};}),
+    segments:Object.entries(sm).sort(function(a,b){return b[1]-a[1];}).slice(0,8).map(function(e){return{segment:e[0],rev:Math.round(e[1])};}),
+    levels:Object.entries(lm).sort(function(a,b){return b[1].count-a[1].count;}).map(function(e){return{level:e[0],count:e[1].count,rev:Math.round(e[1].rev)};}),
+    customerABC:Object.entries(cm).sort(function(a,b){return b[1]-a[1];}).map(function(e){return{class:e[0],count:e[1]};}),
+    sopByYear:Object.entries(sopYears).sort(function(a,b){return a[0]-b[0];}).map(function(e){return{year:e[0],count:e[1].count,rev:Math.round(e[1].rev)};}),
+    health:{stale90:stale90,noSupplier:noSupplier,noCompetitor:noCompetitor,noSummary:noSummary,zeroProbability:zeroPct,highProbability85:hi85},
+    months:(function(){var mm={};d.forEach(function(x){if(x.CreationDate){var m=x.CreationDate.substring(0,7);if(!mm[m])mm[m]={count:0,rev:0};mm[m].count++;mm[m].rev+=parseFloat(x.BaseCurrencyAmount||0);}});return Object.entries(mm).sort().slice(-12).map(function(e){return{month:e[0],count:e[1].count,rev:Math.round(e[1].rev)};});}())
+  });
+}
+
+async function goToConfirm(){
+  var q=document.getElementById('defineInput').value.trim();
+  if(!q)return;
+  if(allData.length===0){
+    var btn=document.getElementById('defineBtn');
+    btn.textContent='Loading data...';
+    btn.disabled=true;
+    await fetchData();
+    btn.disabled=false;
+    btn.innerHTML='Continue <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
+  }
+  currentQ=q;
+  document.getElementById('confirmRequest').textContent=q;
+  document.getElementById('confirmHeadline').innerHTML='AI is understanding your request<span class="thinking-dots"><span></span><span></span><span></span></span>';
+  document.getElementById('confirmBuildBtn').disabled=true;
+  document.getElementById('confirmUnderstanding').textContent='Analyzing...';
+  document.getElementById('confirmChips').innerHTML='<span class="confirm-chip chip-kpi">Loading...</span>';
+  goTo(2);
+  try{
+    var summary=buildQuickSummary();
+    var r=await fetch('/odata/v4/ai/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:'Analyze this report request and return a JSON plan. Request: "'+q+'". Return ONLY JSON no markdown: {"understanding":"1-2 sentences what you will analyze","reportType":"executive_summary|chart_report|mixed","primaryFocus":"main chart or analysis","supportingCharts":["2-4 relevant chart names"],"willInclude":["4-6 specific things the report contains"]}',summary:summary})});
+    var data=await r.json();
+    var raw=(data.value||'').replace(/```json|```/g,'').trim();
+    var plan=JSON.parse(raw);
+    aiPlan=plan;
+    document.getElementById('confirmHeadline').innerHTML='AI understood your request &nbsp;&#10003;';
+    document.getElementById('confirmUnderstanding').textContent=plan.understanding;
+    var chipColors=['chip-chart','chip-text','chip-kpi','chip-data','chip-kpi','chip-kpi'];
+    document.getElementById('confirmChips').innerHTML=(plan.willInclude||[]).map(function(item,i){return '<span class="confirm-chip '+chipColors[i%chipColors.length]+'">'+item+'</span>';}).join('');
+    document.getElementById('confirmBuildBtn').disabled=false;
+  }catch(e){
+    document.getElementById('confirmHeadline').innerHTML='Plan ready';
+    document.getElementById('confirmUnderstanding').textContent='Will build a comprehensive report for: '+q;
+    document.getElementById('confirmChips').innerHTML='<span class="confirm-chip chip-kpi">5 KPI tiles</span><span class="confirm-chip chip-chart">Primary chart</span><span class="confirm-chip chip-text">AI insight</span><span class="confirm-chip chip-data">Data table</span>';
+    document.getElementById('confirmBuildBtn').disabled=false;
+  }
+}
+
+async function goToBuild(){
+  goTo(3);
+  var bar=document.getElementById('buildBar');
+  var steps=['bs1','bs2','bs3','bs4'];
+  var prog=[15,40,70,95];
+  steps.forEach(function(id,i){
+    setTimeout(function(){
+      steps.forEach(function(s){document.getElementById(s).classList.remove('active');});
+      document.getElementById(id).classList.add('active');
+      for(var j=0;j<i;j++){document.getElementById(steps[j]).classList.remove('active');document.getElementById(steps[j]).classList.add('done');}
+      bar.style.width=prog[i]+'%';
+    },i*900);
+  });
+  try{
+    var summary=buildQuickSummary();
+    var res=await fetch('/odata/v4/ai/buildReport',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:currentQ,data:summary})});
+    var json=await res.json();
+    if(json.error)throw new Error(json.error.message);
+    var raw=json.value.replace(/```json|```/g,'').trim();
+    var config=JSON.parse(raw);
+    setTimeout(function(){
+      bar.style.width='100%';
+      steps.forEach(function(s){document.getElementById(s).classList.remove('active');document.getElementById(s).classList.add('done');});
+      setTimeout(function(){renderReport(config);},400);
+    },3800);
+  }catch(e){setTimeout(function(){renderError(e.message);},4000);}
+}
+
+function makeChart(id,type,labels,datasets,opts){
+  var horiz=type==='horizontalBar',isDough=type==='doughnut'||type==='pie',ctype=horiz?'bar':type,gc='#f1f5f9',tc='#94a3b8';
+  return new Chart(document.getElementById(id),{
+    type:ctype,
+    data:{labels:labels,datasets:datasets.map(function(ds){return Object.assign({borderRadius:isDough?0:3,borderSkipped:false,borderWidth:isDough?2:0,borderColor:isDough?'white':'transparent',hoverOffset:isDough?5:0},ds);})},
+    options:{indexAxis:horiz?'y':'x',responsive:true,plugins:{legend:{display:isDough||(opts&&opts.legend),position:'right',labels:{color:tc,font:{size:10},padding:10,boxWidth:10}},tooltip:{callbacks:{label:function(c){var v=c.raw;if(typeof v==='number'){if(v>=1e6)return' $'+(v/1e6).toFixed(1)+'M';if(v>=1e3&&v>100)return' $'+(v/1e3).toFixed(0)+'K';if(v<=100&&v>0)return' '+v.toFixed(1)+'%';}return' '+v;}}}},scales:isDough?{}:{x:{ticks:{color:tc,font:{size:9}},grid:{color:gc}},y:{ticks:{color:tc,font:{size:9},callback:function(v){return typeof v==='number'&&v>=1000?fmtN(v):v;}},grid:{color:gc}}}}
+  });
+}
+
+function renderReport(config){
+  goTo(4);
+  Object.values(reportCharts).forEach(function(c){c.destroy();});
+  reportCharts={};
+  var d=allData;
+  var won=d.filter(function(x){return x.LifeCycleStatusCode==='3';});
+  var lost=d.filter(function(x){return x.LifeCycleStatusCode==='5';});
+  var open=d.filter(function(x){return x.LifeCycleStatusCode==='1';});
+  var rev=d.reduce(function(s,x){return s+parseFloat(x.BaseCurrencyAmount||0);},0);
+  var wr=won.length+lost.length>0?((won.length/(won.length+lost.length))*100).toFixed(1):'0.0';
+  var orgs=[...new Set(d.map(function(x){return x.SalesOrganisationID;}).filter(Boolean))].length;
+
+  document.getElementById('rTopTitle').textContent=config.reportTitle||currentQ;
+  document.getElementById('rTopSub').textContent='C4C QUA · MY352500 · '+new Date().toLocaleString('en-GB',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})+' · '+d.length.toLocaleString()+' records';
+
+  var isText=config.reportType==='executive_summary'||!config.primaryChart||!config.primaryChart.labels||config.primaryChart.labels.length===0;
+  var supporting=config.supportingCharts||['revenue','winRate','phase','reasons','owners','trend'];
+  var ql=currentQ.toLowerCase();
+
+  var html='';
+
+  // KPIs
+  html+='<div class="kpi-row">'+
+    '<div class="kpi-tile"><div class="kl">Total Opportunities</div><div class="kv">'+d.length.toLocaleString()+'</div><div class="ks">'+orgs+' sales orgs</div></div>'+
+    '<div class="kpi-tile"><div class="kl">Expected Revenue</div><div class="kv">'+fmt(rev)+'</div><div class="ks">pipeline value</div></div>'+
+    '<div class="kpi-tile"><div class="kl">Win Rate</div><div class="kv">'+wr+'%</div><div class="ks">'+won.length+' won · '+lost.length+' lost</div></div>'+
+    '<div class="kpi-tile"><div class="kl">Open Pipeline</div><div class="kv">'+open.length+'</div><div class="ks">active deals</div></div>'+
+    '<div class="kpi-tile"><div class="kl">Lost Deals</div><div class="kv">'+lost.length+'</div><div class="ks">'+((lost.length/(d.length||1))*100).toFixed(1)+'% of total</div></div>'+
+  '</div>';
+
+  // Insight
+  var insightIcon=isText?
+    '<div class="insight-icon-wrap" style="background:var(--green-light);"><svg viewBox="0 0 24 24" fill="none" stroke="#107e3e" stroke-width="1.5" width="18" height="18"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8"/></svg></div>':
+    '<div class="insight-icon-wrap" style="background:var(--blue-light);"><svg viewBox="0 0 24 24" fill="none" stroke="#0a6ed1" stroke-width="1.5" width="18" height="18"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>';
+
+  html+='<div class="insight-card '+(isText?'text-report':'ai-insight')+'">'+
+    '<div class="insight-icon-wrap" style="background:'+(isText?'var(--green-light)':'var(--blue-light)')+';">'+
+    '<svg viewBox="0 0 24 24" fill="none" stroke="'+(isText?'#107e3e':'#0a6ed1')+'" stroke-width="1.5" width="18" height="18">'+
+    (isText?'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8"/>':'<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>')+
+    '</svg></div>'+
+    '<div><div class="insight-label">'+(isText?'Executive Summary':'AI Insight')+'</div>'+
+    '<div class="insight-text">'+(config.insight||'No insight returned.')+'</div></div></div>';
+
+  // Primary chart
+  if(!isText&&config.primaryChart&&config.primaryChart.labels&&config.primaryChart.labels.length>0){
+    var pc=config.primaryChart;
+    html+='<div class="chart-grid cg-hero">'+
+      '<div class="panel hero-panel"><div class="panel-hdr"><div class="panel-hdr-left">'+
+      '<div class="panel-icon" style="background:var(--blue-light);"><svg viewBox="0 0 24 24" fill="none" stroke="#0a6ed1" stroke-width="1.5" width="13" height="13"><path d="M3 3v18h18"/><path d="m7 16 4-4 4 4 4-4"/></svg></div>'+
+      '<div><div class="panel-title">'+(pc.title||'Primary Analysis')+'</div><div class="panel-sub">AI selected chart</div></div></div>'+
+      '<span class="panel-tag tag-ai">AI Selected</span></div>'+
+      '<div class="panel-body"><canvas id="cPrimary" role="img" aria-label="Primary chart" style="max-height:260px;"></canvas></div></div>'+
+      '<div class="panel"><div class="panel-hdr"><div class="panel-hdr-left">'+
+      '<div class="panel-icon" style="background:var(--green-light);"><svg viewBox="0 0 24 24" fill="none" stroke="#107e3e" stroke-width="1.5" width="13" height="13"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>'+
+      '<div><div class="panel-title">Win / Loss / Open</div><div class="panel-sub">Status distribution</div></div></div>'+
+      '<span class="panel-tag tag-live">Live</span></div>'+
+      '<div class="leg" id="donutLeg"></div><div class="panel-body"><canvas id="cDonut" role="img" aria-label="Status donut"></canvas></div></div></div>';
+  }
+
+  // Supporting charts
+  var panels=[];
+  if(supporting.indexOf('revenue')>=0||ql.includes('revenue')||ql.includes('pipeline')||ql.includes('org')||ql.includes('overview')||ql.includes('summary')||ql.includes('scorecard')){
+    panels.push('<div class="panel"><div class="panel-hdr"><div class="panel-hdr-left"><div class="panel-icon" style="background:#eff6ff;"><svg viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="1.5" width="13" height="13"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div><div><div class="panel-title">Revenue by Sales Org</div><div class="panel-sub">Top 8 · USD</div></div></div><span class="panel-tag tag-default">Top 8</span></div><div class="panel-body"><canvas id="cOrg" role="img" aria-label="Revenue by org"></canvas></div></div>');
+  }
+  if(supporting.indexOf('winRate')>=0||ql.includes('win')||ql.includes('rate')||ql.includes('performance')||ql.includes('scorecard')||ql.includes('overview')||ql.includes('summary')){
+    panels.push('<div class="panel"><div class="panel-hdr"><div class="panel-hdr-left"><div class="panel-icon" style="background:#f0fdf4;"><svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="1.5" width="13" height="13"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div><div><div class="panel-title">Win Rate by Sales Org</div><div class="panel-sub">% won of closed</div></div></div><span class="panel-tag tag-default">% Won</span></div><div class="panel-body"><canvas id="cWin" role="img" aria-label="Win rate"></canvas></div></div>');
+  }
+  if(supporting.indexOf('phase')>=0||ql.includes('phase')||ql.includes('funnel')||ql.includes('stage')||ql.includes('pipeline')||ql.includes('overview')){
+    panels.push('<div class="panel"><div class="panel-hdr"><div class="panel-hdr-left"><div class="panel-icon" style="background:#faf5ff;"><svg viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="1.5" width="13" height="13"><path d="M3 3v18h18"/><path d="M18 17V9M13 17V5M8 17v-3"/></svg></div><div><div class="panel-title">Opportunities by Phase</div><div class="panel-sub">Pipeline stages</div></div></div><span class="panel-tag tag-default">Count</span></div><div class="panel-body"><canvas id="cPhase" role="img" aria-label="By phase"></canvas></div></div>');
+  }
+  if(supporting.indexOf('reasons')>=0||ql.includes('lost')||ql.includes('losing')||ql.includes('reason')||ql.includes('why')||ql.includes('overview')||ql.includes('summary')){
+    panels.push('<div class="panel"><div class="panel-hdr"><div class="panel-hdr-left"><div class="panel-icon" style="background:#fef2f2;"><svg viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="1.5" width="13" height="13"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div><div><div class="panel-title">Loss Reasons</div><div class="panel-sub">Closed lost</div></div></div><span class="panel-tag tag-default">Donut</span></div><div class="leg" id="reasonLeg"></div><div class="panel-body"><canvas id="cReason" role="img" aria-label="Loss reasons"></canvas></div></div>');
+  }
+  if(supporting.indexOf('owners')>=0||ql.includes('owner')||ql.includes('rep')||ql.includes('person')||ql.includes('pipeline')){
+    panels.push('<div class="panel"><div class="panel-hdr"><div class="panel-hdr-left"><div class="panel-icon" style="background:#eff6ff;"><svg viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="1.5" width="13" height="13"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div><div><div class="panel-title">Open Pipeline by Owner</div><div class="panel-sub">Top 8 · USD</div></div></div><span class="panel-tag tag-default">Top 8</span></div><div class="panel-body"><canvas id="cOwner" role="img" aria-label="Owner pipeline"></canvas></div></div>');
+  }
+  if(supporting.indexOf('trend')>=0||ql.includes('trend')||ql.includes('month')||ql.includes('time')||ql.includes('summary')){
+    panels.push('<div class="panel"><div class="panel-hdr"><div class="panel-hdr-left"><div class="panel-icon" style="background:#fff7ed;"><svg viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="1.5" width="13" height="13"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/></svg></div><div><div class="panel-title">Monthly Trend</div><div class="panel-sub">Revenue by month</div></div></div><span class="panel-tag tag-default">Last 12M</span></div><div class="panel-body"><canvas id="cTrend" role="img" aria-label="Trend"></canvas></div></div>');
+  }
+  if(supporting.indexOf('segment')>=0||ql.includes('segment')||ql.includes('business')||ql.includes('industry')||ql.includes('overview')||ql.includes('summary')){
+    panels.push('<div class="panel"><div class="panel-hdr"><div class="panel-hdr-left"><div class="panel-icon" style="background:#f0fdfa;"><svg viewBox="0 0 24 24" fill="none" stroke="#0e7e76" stroke-width="1.5" width="13" height="13"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg></div><div><div class="panel-title">Business Segment Pipeline</div><div class="panel-sub">Open opps · USD</div></div></div><span class="panel-tag tag-default">Top 8</span></div><div class="panel-body"><canvas id="cSegment" role="img" aria-label="Segment pipeline"></canvas></div></div>');
+  }
+  if(supporting.indexOf('level')>=0||ql.includes('level')||ql.includes('tier')||ql.includes('overview')||ql.includes('summary')){
+    panels.push('<div class="panel"><div class="panel-hdr"><div class="panel-hdr-left"><div class="panel-icon" style="background:#fff7ed;"><svg viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="1.5" width="13" height="13"><circle cx="12" cy="12" r="10"/></svg></div><div><div class="panel-title">Opportunity Level</div><div class="panel-sub">Open opp distribution</div></div></div></div><div class="leg" id="levelLeg"></div><div class="panel-body"><canvas id="cLevel" role="img" aria-label="Opp level"></canvas></div></div>');
+  }
+  if(supporting.indexOf('sop')>=0||ql.includes('sop')||ql.includes('closing')||ql.includes('production')||ql.includes('forecast')){
+    panels.push('<div class="panel"><div class="panel-hdr"><div class="panel-hdr-left"><div class="panel-icon" style="background:#faf5ff;"><svg viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="1.5" width="13" height="13"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><div><div class="panel-title">SOP by Year</div><div class="panel-sub">Expected closing year</div></div></div></div><div class="panel-body"><canvas id="cSopYear" role="img" aria-label="SOP by year"></canvas></div></div>');
+  }
+
+  for(var i=0;i<panels.length;i+=3){
+    html+='<div class="chart-grid cg-3">'+panels.slice(i,i+3).join('')+'</div>';
+  }
+
+  // Table
+  html+='<div class="tbl-panel"><div class="tbl-hdr"><div class="tbl-hdr-left"><div class="tbl-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="13" height="13"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg></div><div class="tbl-title">Opportunity Detail</div></div><span class="tbl-ct" id="tblCt">Top 50</span></div>'+
+    '<div class="tbl-scroll"><table><thead><tr><th>ID</th><th>Opportunity</th><th>Account</th><th>Sales Org</th><th>Phase</th><th>Revenue</th><th>Status</th><th>Owner</th><th></th></tr></thead><tbody id="tBody"></tbody></table></div></div>';
+
+  // Refine
+  html+='<div class="refine-panel"><div class="refine-hdr"><div class="refine-hdr-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="13" height="13"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div><div class="refine-hdr-title">Refine this report</div></div>'+
+    '<div class="refine-row"><input class="refine-inp" id="refineInp" type="text" placeholder="e.g. Focus only on lost deals · Change to show Germany orgs only · Add probability analysis" onkeydown="if(event.key==\'Enter\')refineReport()" /><button class="refine-btn" onclick="refineReport()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M5 12h14M12 5l7 7-7 7"/></svg>Regenerate</button></div></div>';
+
+  document.getElementById('reportBody').innerHTML=html;
+
+  // Render primary
+  if(!isText&&config.primaryChart&&config.primaryChart.labels&&config.primaryChart.labels.length>0){
+    var pc=config.primaryChart;
+    reportCharts.primary=makeChart('cPrimary',pc.chartType||'bar',pc.labels,pc.datasets.map(function(ds){return{label:ds.label||'',data:ds.data,backgroundColor:ds.backgroundColor};}));
+    var dColors=['#22c55e','#ef4444','#3b82f6'];
+    var dTot=won.length+lost.length+open.length;
+    document.getElementById('donutLeg').innerHTML=['Won','Lost','Open'].map(function(l,i){return '<div class="leg-item"><div class="leg-dot" style="background:'+dColors[i]+'"></div>'+l+' '+((([won.length,lost.length,open.length][i]/(dTot||1))*100)).toFixed(1)+'%</div>';}).join('');
+    reportCharts.donut=makeChart('cDonut','doughnut',['Won','Lost','Open'],[{data:[won.length,lost.length,open.length],backgroundColor:dColors}]);
+  }
+
+  if(document.getElementById('cOrg')){var om={};allData.forEach(function(x){var o=(x.SalesOrganisationName||'?').replace(/TSS\s*/,'');om[o]=(om[o]||0)+parseFloat(x.BaseCurrencyAmount||0);});var os=Object.entries(om).sort(function(a,b){return b[1]-a[1];}).slice(0,8);reportCharts.org=makeChart('cOrg','bar',os.map(function(e){return e[0];}),  [{data:os.map(function(e){return e[1];}),backgroundColor:SAP}]);}
+  if(document.getElementById('cWin')){var wm={};allData.forEach(function(x){var k=(x.SalesOrganisationName||'?').replace(/TSS\s*/,'');if(!wm[k])wm[k]={w:0,l:0};if(x.LifeCycleStatusCode==='3')wm[k].w++;if(x.LifeCycleStatusCode==='5')wm[k].l++;});var ws=Object.entries(wm).filter(function(e){return e[1].w+e[1].l>=3;}).map(function(e){return{k:e[0],r:e[1].w/(e[1].w+e[1].l)*100};}).sort(function(a,b){return b.r-a.r;}).slice(0,8);reportCharts.win=makeChart('cWin','bar',ws.map(function(e){return e.k;}),[{data:ws.map(function(e){return e.r;}),backgroundColor:ws.map(function(e){return e.r>=30?'#22c55e':e.r>=20?'#3b82f6':'#f97316';})}]);}
+  if(document.getElementById('cPhase')){var pm={};allData.forEach(function(x){var p=(x.SalesCyclePhaseCodeText||'?').replace(/^\d+\s/,'').substring(0,22);pm[p]=(pm[p]||0)+1;});var ps=Object.entries(pm).sort(function(a,b){return b[1]-a[1];});reportCharts.phase=makeChart('cPhase','horizontalBar',ps.map(function(e){return e[0];}), [{data:ps.map(function(e){return e[1];}),backgroundColor:'rgba(168,85,247,0.75)'}]);}
+  if(document.getElementById('cReason')){var rm={};lost.forEach(function(x){var k=x.ResultReasonCodeText||'(Null)';rm[k]=(rm[k]||0)+1;});var rs=Object.entries(rm).sort(function(a,b){return b[1]-a[1];}).slice(0,6);var rTot=rs.reduce(function(s,e){return s+e[1];},0);document.getElementById('reasonLeg').innerHTML=rs.map(function(e,i){return '<div class="leg-item"><div class="leg-dot" style="background:'+SAP[i]+'"></div>'+e[0].substring(0,16)+' '+(e[1]/rTot*100).toFixed(1)+'%</div>';}).join('');reportCharts.reason=makeChart('cReason','doughnut',rs.map(function(e){return e[0].substring(0,16);}), [{data:rs.map(function(e){return e[1];}),backgroundColor:SAP}]);}
+  if(document.getElementById('cOwner')){var oo={};open.forEach(function(x){var k=x.MainEmployeeResponsiblePartyName||'?';oo[k]=(oo[k]||0)+parseFloat(x.BaseCurrencyAmount||0);});var ooe=Object.entries(oo).sort(function(a,b){return b[1]-a[1];}).slice(0,8);reportCharts.owner=makeChart('cOwner','horizontalBar',ooe.map(function(e){return e[0].split(' ').slice(-1)[0];}), [{data:ooe.map(function(e){return e[1];}),backgroundColor:'rgba(99,102,241,0.75)'}]);}
+  if(document.getElementById('cTrend')){var tm={};allData.forEach(function(x){if(x.CreationDate){var m=x.CreationDate.substring(0,7);if(!tm[m])tm[m]=0;tm[m]+=parseFloat(x.BaseCurrencyAmount||0);}});var tms=Object.keys(tm).sort().slice(-12);reportCharts.trend=makeChart('cTrend','line',tms,[{data:tms.map(function(m){return tm[m];}),backgroundColor:'rgba(249,115,22,0.06)',borderColor:'#f97316',tension:0.4,fill:true,pointBackgroundColor:'#f97316',pointRadius:3}]);}
+  var isOp=function(x){return x.LifeCycleStatusCode==='1'||x.LifeCycleStatusCode==='2';};
+  if(document.getElementById('cSegment')){var segm={};allData.filter(isOp).forEach(function(x){var k=x.BUS_SEG_CDE_KUTText||'(Not Set)';segm[k]=(segm[k]||0)+parseFloat(x.BaseCurrencyAmount||0);});var segs=Object.entries(segm).sort(function(a,b){return b[1]-a[1];}).slice(0,8);reportCharts.segment=makeChart('cSegment','horizontalBar',segs.map(function(e){return e[0].substring(0,22);}), [{data:segs.map(function(e){return e[1];}),backgroundColor:'rgba(14,126,118,0.75)'}]);}
+  if(document.getElementById('cLevel')){var lvm={};allData.filter(isOp).forEach(function(x){var k=x.OpportunityLevel_KUTText||'(Not Set)';lvm[k]=(lvm[k]||0)+1;});var lvKeys=Object.keys(lvm);var lvColors=['#0a6ed1','#6c32a9','#e9730c','#64748b'];if(document.getElementById('levelLeg'))document.getElementById('levelLeg').innerHTML=lvKeys.map(function(k,i){return '<div class="leg-item"><div class="leg-dot" style="background:'+lvColors[i%lvColors.length]+'"></div>'+k.substring(0,22)+'</div>';}).join('');reportCharts.level=makeChart('cLevel','doughnut',lvKeys,[{data:lvKeys.map(function(k){return lvm[k];}),backgroundColor:lvColors}]);}
+  if(document.getElementById('cSopYear')){var soym={};allData.filter(isOp).forEach(function(x){if(x.ExpectedProcessingEndDate){var m=String(x.ExpectedProcessingEndDate).match(/\/Date\((\d+)\)\//);var dt=m?new Date(parseInt(m[1])):new Date(x.ExpectedProcessingEndDate);var yr=dt.getFullYear();if(yr>=new Date().getFullYear()){soym[yr]=(soym[yr]||0)+parseFloat(x.BaseCurrencyAmount||0);}}});var soye=Object.entries(soym).sort(function(a,b){return a[0]-b[0];});reportCharts.sopYear=makeChart('cSopYear','bar',soye.map(function(e){return e[0];}), [{data:soye.map(function(e){return e[1];}),backgroundColor:SAP}]);}
+
+  var sc=function(s){return s==='3'?'b-won':s==='5'?'b-lost':'b-open';};
+  var st=function(s){return s==='3'?'Won':s==='5'?'Lost':'Open';};
+  document.getElementById('tblCt').textContent='Top 50 of '+allData.length.toLocaleString();
+  document.getElementById('tBody').innerHTML=allData.slice(0,50).map(function(row){
+    var link=C4C_BASE+'&param.InternalID='+row.ID+'&param.Type=COD_OPPORTUNITY_THINGTYPE';
+    return '<tr><td style="color:var(--muted);font-family:monospace;font-size:0.68rem">'+row.ID+'</td><td style="font-weight:500">'+(row.Name||'—')+'</td><td style="color:var(--muted)">'+(row.ProspectPartyName||'—')+'</td><td style="color:var(--muted)">'+(row.SalesOrganisationName||'').replace(/TSS\s*/,'')+'</td><td style="color:var(--muted);font-size:0.7rem">'+(row.SalesCyclePhaseCodeText||'—')+'</td><td style="font-weight:500">'+fmt(parseFloat(row.BaseCurrencyAmount||0))+'</td><td><span class="badge '+sc(row.LifeCycleStatusCode)+'">'+st(row.LifeCycleStatusCode)+'</span></td><td style="color:var(--muted);font-size:0.7rem">'+(row.MainEmployeeResponsiblePartyName||'—')+'</td><td><a class="c4c-link" href="'+link+'" target="_blank">Open<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 2h3v3M10 2 5 7M4 3H2v7h7V8"/></svg></a></td></tr>';
+  }).join('');
+}
+
+function renderError(msg){
+  goTo(4);
+  document.getElementById('reportBody').innerHTML='<div style="padding:40px;background:white;border-radius:12px;border:1px solid var(--border);"><div style="color:var(--red);font-size:0.85rem;margin-bottom:16px;">Error building report: '+msg+'</div><button class="btn-sec" onclick="goTo(1)" style="cursor:pointer;">← Try Again</button></div>';
+}
+
+async function refineReport(){
+  var r=document.getElementById('refineInp').value.trim();
+  if(!r)return;
+  currentQ=currentQ+'. Refinement: '+r;
+  document.getElementById('refineInp').value='';
+  goToBuild();
+}
+
+fetchData();
+</script>
+</body>
+</html>
