@@ -1,24 +1,29 @@
 {
-  "xsappname": "tss-cx-analytics",
+  "xsappname": "tss-dev-platform",
   "tenant-mode": "dedicated",
+  "oauth2-configuration": {
+    "redirect-uris": [
+      "https://*.cfapps.eu10.hana.ondemand.com/**"
+    ]
+  },
   "scopes": [
     {
       "name": "$XSAPPNAME.user",
-      "description": "Access TSS CX Analytics"
+      "description": "Authenticated Trelleborg user"
     }
   ],
   "role-templates": [
     {
-      "name": "CXAnalyticsUser",
-      "description": "TSS CX Analytics User",
+      "name": "User",
+      "description": "Any authenticated Trelleborg user",
       "scope-references": ["$XSAPPNAME.user"]
     }
   ],
   "role-collections": [
     {
-      "name": "TSS CX Analytics User",
-      "description": "Access to TSS CX Analytics application",
-      "role-template-references": ["$XSAPPNAME.CXAnalyticsUser"]
+      "name": "TSS Platform User",
+      "description": "Access to TSS BTP applications — any authenticated Trelleborg user",
+      "role-template-references": ["$XSAPPNAME.User"]
     }
   ]
 }
