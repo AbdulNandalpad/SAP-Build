@@ -5,7 +5,8 @@
     {
       "source": "^/(.*)",
       "destination": "tss-backend",
-      "authenticationType": "xsuaa"
+      "authenticationType": "xsuaa",
+      "csrfProtection": false
     }
   ]
 }
