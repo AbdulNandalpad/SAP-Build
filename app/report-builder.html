@@ -557,10 +557,16 @@ async function goToBuild(){
   try{
     var summary=buildQuickSummary();
     var res=await fetch('/odata/v4/ai/buildReport',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:currentQ,data:summary})});
-    var json=await res.json();
+    var text=await res.text();
+    var json;
+    try{json=JSON.parse(text);}catch(pe){
+      if(text.toLowerCase().includes('timeout')||text.toLowerCase().includes('gateway')){throw new Error('The AI request timed out. Please try again.');}
+      throw new Error('Unexpected server response. Please try again.');
+    }
     if(json.error)throw new Error(json.error.message);
-    var raw=json.value.replace(/```json|```/g,'').trim();
-    var config=JSON.parse(raw);
+    var raw=(json.value||'').replace(/```json|```/g,'').trim();
+    var config;
+    try{config=JSON.parse(raw);}catch(pe2){throw new Error('AI returned an unexpected format. Please try again.');}
     setTimeout(function(){
       bar.style.width='100%';
       steps.forEach(function(s){document.getElementById(s).classList.remove('active');document.getElementById(s).classList.add('done');});

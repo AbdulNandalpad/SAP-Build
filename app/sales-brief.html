@@ -438,10 +438,18 @@ async function generateBrief(){
   try{
     var payload=buildPayload(allData);
     var res=await fetch('/odata/v4/ai/generateBrief',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({audience:selectedAud,intent:intent||'Full pipeline overview',data:payload})});
-    var json=await res.json();
+    var text=await res.text();
+    var json;
+    try{json=JSON.parse(text);}catch(pe){
+      if(text.toLowerCase().includes('timeout')||text.toLowerCase().includes('gateway')){
+        throw new Error('The AI request timed out. Please try again — it usually works on a second attempt.');
+      }
+      throw new Error('Unexpected response from server. Please try again.');
+    }
     if(json.error)throw new Error(json.error.message);
     var raw=(json.value||'').replace(/```json|```/g,'').trim();
-    var brief=JSON.parse(raw);
+    var brief;
+    try{brief=JSON.parse(raw);}catch(pe2){throw new Error('AI returned an unexpected format. Please try again.');}
     setTimeout(function(){
       bar.style.width='100%';
       steps.forEach(function(s){document.getElementById(s).classList.remove('active');document.getElementById(s).classList.add('done');});
