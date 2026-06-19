@@ -238,8 +238,8 @@ body{background:#f0f4f8;color:var(--text);font-family:'Inter',sans-serif;min-hei
       C4C QUA · my352500
     </div>
     <div class="shell-divider"></div>
-    <span class="shell-user">ABDUL.NANDALPAD</span>
-    <div class="shell-avatar">AN</div>
+    <span class="shell-user" id="shellUser"></span>
+    <div class="shell-avatar" id="shellAvatar">?</div>
     <a href="/logout" style="display:flex;align-items:center;gap:5px;color:rgba(255,255,255,0.5);font-size:0.72rem;text-decoration:none;padding:5px 10px;border:1px solid rgba(255,255,255,0.15);border-radius:6px;transition:all 0.2s;" onmouseover="this.style.color='white';this.style.borderColor='rgba(255,255,255,0.4)'" onmouseout="this.style.color='rgba(255,255,255,0.5)';this.style.borderColor='rgba(255,255,255,0.15)'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>Sign Out</a>
   </div>
 </div>
@@ -460,6 +460,13 @@ body{background:#f0f4f8;color:var(--text);font-family:'Inter',sans-serif;min-hei
 
 <script>
 document.getElementById('heroTime').textContent = new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+fetch('/user-api/currentUser').then(function(r){return r.json();}).then(function(u){
+  var name = u.displayName || u.name || u.email || '';
+  var initials = name.split(' ').filter(Boolean).slice(0,2).map(function(p){return p[0].toUpperCase();}).join('') || name.substring(0,2).toUpperCase();
+  var display = (u.email||name).split('@')[0].toUpperCase().replace(/\./g,' ').trim().replace(/ /g,'.');
+  document.getElementById('shellUser').textContent = display;
+  document.getElementById('shellAvatar').textContent = initials;
+}).catch(function(){});
 </script>
 </body>
 </html>
