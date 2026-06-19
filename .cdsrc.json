@@ -1,7 +1,7 @@
 {
   "requires": {
     "c4c": {
-      "kind": "odata",
+      "kind": "odata-v2",
       "model": "srv/external/opportunity"
     }
   },
@@ -9,6 +9,14 @@
     "requires": {
       "auth": {
         "kind": "xsuaa"
+      },
+      "c4c": {
+        "kind": "odata-v2",
+        "model": "srv/external/opportunity",
+        "credentials": {
+          "destination": "C4C_QUA_OBO",
+          "path": "/sap/c4c/odata/v1/c4codataapi"
+        }
       }
     }
   }
