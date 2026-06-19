@@ -1,12 +1,21 @@
 {
   "authenticationMethod": "route",
   "sessionTimeout": 60,
+  "logout": {
+    "logoutEndpoint": "/logout",
+    "logoutPage": "/"
+  },
   "routes": [
     {
       "source": "^/odata/(.*)",
       "destination": "tss-backend",
       "authenticationType": "xsuaa",
       "csrfProtection": false
+    },
+    {
+      "source": "^/user-api/(.*)",
+      "service": "sap-approuter-userapi",
+      "authenticationType": "xsuaa"
     },
     {
       "source": "^/(.*)",
