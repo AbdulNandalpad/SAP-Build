@@ -36,6 +36,10 @@ function callClaude(system, prompt, apiKey) {
                 } catch(e) { reject(e); }
             });
         });
+        r.setTimeout(45000, () => {
+            r.destroy();
+            reject(new Error('AI request timed out after 45 seconds. Please try again.'));
+        });
         r.on('error', reject);
         r.write(body);
         r.end();
