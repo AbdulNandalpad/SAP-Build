@@ -213,12 +213,14 @@ async function compute(cds, businessContext, apiKey) {
             'SalesCyclePhaseCode,SalesCyclePhaseCodeText,ExpectedRevenueAmount,ExpectedRevenueAmountCurrencyCode,' +
             'ExpectedProcessingEndDate,LifeCycleStatusCode,LifeCycleStatusCodeText,' +
             'ResultReasonCode,ResultReasonCodeText,ProbabilityPercent,' +
-            'ProspectPartyName,MainEmployeeResponsiblePartyName,CreationDate,LastChangeDate,' +
-            'OpportunityLevel_KUT,BUS_SEG_CDE_KUT,BUS_SEG_CDE_KUTText,' +
-            'CustomerABCClassificationCode_PSM,MKT_SEG_CODE,MKT_SEG_CODEText,' +
+            'ProspectPartyID,ProspectPartyName,MainEmployeeResponsiblePartyName,CreationDate,LastChangeDate,' +
+            'OpportunityLevel_KUT,OpportunityLevel_KUTText,BUS_SEG_CDE_KUT,BUS_SEG_CDE_KUTText,' +
+            'CustomerABCClassificationCode_PSM,CustomerABCClassificationCode_PSMText,' +
+            'MKT_SEG_CODE,MKT_SEG_CODEText,MKT_SEG_GRP_CDE_KUT,MKT_SEG_GRP_CDE_KUTText,' +
             'ZHasCompetitor_KUT,ZHasSummary_KUT,ZHasSupplier_KUT,' +
             'ZBaseCurrency_KUTContent_KUT,ZBaseCurrency_KUTcurrencyCode_KUT,' +
-            'ZConfidential_SDK,Channel_KUT,Channel_KUTText';
+            'ZConfidential_SDK,CONGLOCODE_KUT,Channel_KUT,Channel_KUTText,' +
+            'ProcessingTypeCode,ProcessingTypeCodeText,PrimaryContactPartyName';
 
         let all = [], path = "OpportunityCollection?$filter=CreationDate ge datetime'2025-06-05T00:00:00'&$top=1000&$select=" + OPP_SEL, page = 0;
         while (path && page < 20) {
@@ -254,6 +256,7 @@ async function compute(cds, businessContext, apiKey) {
         _cache = {
             metrics,
             aiNarrative,
+            rawOpportunities: all,
             recordCount: all.length,
             computedAt: new Date().toISOString(),
             computeDurationMs: Date.now() - t0

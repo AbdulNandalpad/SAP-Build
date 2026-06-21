@@ -1,4 +1,5 @@
 const cds = require('@sap/cds');
+const preAssessment = require('./lib/pre-assessment');
 
 const OPP_SEL = "ObjectID,ID,Name,SalesOrganisationID,SalesOrganisationName,SalesCyclePhaseCode,SalesCyclePhaseCodeText,SalesCyclePhaseStartDate,ExpectedRevenueAmount,ExpectedRevenueAmountCurrencyCode,ExpectedProcessingEndDate,LifeCycleStatusCode,LifeCycleStatusCodeText,ResultReasonCode,ResultReasonCodeText,ProbabilityPercent,ProspectPartyID,ProspectPartyName,MainEmployeeResponsiblePartyName,CreationDate,LastChangeDate,ProcessingTypeCode,ProcessingTypeCodeText,OpportunityLevel_KUT,OpportunityLevel_KUTText,BUS_SEG_CDE_KUT,BUS_SEG_CDE_KUTText,CustomerABCClassificationCode_PSM,CustomerABCClassificationCode_PSMText,ZHasCompetitor_KUT,ZHasSummary_KUT,ZHasSupplier_KUT,ZBaseCurrency_KUTContent_KUT,ZBaseCurrency_KUTcurrencyCode_KUT,ZConfidential_SDK,PrimaryContactPartyName,CONGLOCODE_KUT,Channel_KUT,Channel_KUTText,MKT_SEG_CODE,MKT_SEG_CODEText,MKT_SEG_GRP_CDE_KUT,MKT_SEG_GRP_CDE_KUTText";
 
@@ -162,23 +163,17 @@ function computeSummary(all) {
     };
 }
 
-// In-memory cache for getSummary — refreshed every 6 hours
-let _summaryCache = null;
-let _summaryCachedAt = null;
-const SUMMARY_TTL_MS = 6 * 60 * 60 * 1000;
-
 async function getCachedSummary(c4c) {
-    const now = Date.now();
-    if (_summaryCache && _summaryCachedAt && (now - _summaryCachedAt) < SUMMARY_TTL_MS) {
-        console.log('[CAP] getSummary: returning cached result from ' + new Date(_summaryCachedAt).toISOString());
-        return _summaryCache;
+    // Use pre-assessment raw records (fetched in background — no gateway timeout risk)
+    const { cache, status } = preAssessment.getCache();
+    if (cache && cache.rawOpportunities && cache.rawOpportunities.length > 0) {
+        console.log('[CAP] getSummary: using pre-assessment records (' + cache.rawOpportunities.length + ') from ' + cache.computedAt);
+        return computeSummary(cache.rawOpportunities);
     }
-    console.log('[CAP] getSummary: fetching fresh data...');
+    // Pre-assessment not ready yet — fetch directly (only happens in the first ~15s after boot)
+    console.log('[CAP] getSummary: pre-assessment cache empty (status=' + status + '), fetching live...');
     const all = await fetchAllOpportunities(c4c);
-    const summary = computeSummary(all);
-    _summaryCache = summary;
-    _summaryCachedAt = now;
-    return summary;
+    return computeSummary(all);
 }
 
 module.exports = cds.service.impl(async function () {
@@ -198,8 +193,4 @@ module.exports = cds.service.impl(async function () {
         return JSON.stringify(summary);
     });
 
-    // Warm the cache 15 seconds after CAP boots so UI requests don't trigger the cold fetch
-    setTimeout(() => {
-        getCachedSummary(c4c).catch(err => console.warn('[CAP] Opportunity cache warm-up failed:', err.message));
-    }, 15000);
 });
