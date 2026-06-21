@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Access Denied — TSS CX Analytics</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#0f172a;color:white;font-family:'Inter',sans-serif;min-height:100vh;display:flex;flex-direction:column;}
+.shell{height:60px;display:flex;align-items:center;padding:0 28px;border-bottom:1px solid rgba(255,255,255,0.06);}
+.brand{display:flex;align-items:center;gap:8px;text-decoration:none;}
+.brand-badge{width:32px;height:32px;background:#a39245;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:800;color:white;}
+.brand-name{font-size:0.88rem;font-weight:600;color:white;}
+.center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;text-align:center;}
+.icon{width:72px;height:72px;border-radius:50%;background:rgba(220,38,38,0.15);border:2px solid rgba(220,38,38,0.3);display:flex;align-items:center;justify-content:center;margin:0 auto 28px;}
+.icon svg{width:32px;height:32px;color:#f87171;}
+.code{font-size:0.72rem;font-weight:600;letter-spacing:2px;color:#f87171;text-transform:uppercase;margin-bottom:12px;}
+h1{font-size:1.8rem;font-weight:700;color:white;margin-bottom:12px;}
+.sub{font-size:0.95rem;color:rgba(255,255,255,0.55);max-width:440px;line-height:1.7;margin-bottom:36px;}
+.steps{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:24px 28px;max-width:440px;text-align:left;margin-bottom:32px;}
+.steps-title{font-size:0.72rem;font-weight:600;letter-spacing:1.2px;color:rgba(255,255,255,0.4);text-transform:uppercase;margin-bottom:16px;}
+.step{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px;}
+.step:last-child{margin-bottom:0;}
+.step-num{width:22px;height:22px;border-radius:50%;background:rgba(163,146,69,0.2);border:1px solid rgba(163,146,69,0.4);display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:700;color:#a39245;flex-shrink:0;margin-top:1px;}
+.step-text{font-size:0.82rem;color:rgba(255,255,255,0.65);line-height:1.5;}
+.step-text strong{color:white;font-weight:500;}
+.actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+.btn{padding:10px 22px;border-radius:8px;font-size:0.82rem;font-weight:600;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:7px;transition:all 0.15s;}
+.btn-pri{background:#a39245;color:white;border:none;}
+.btn-pri:hover{background:#8b7a38;}
+.btn-sec{background:transparent;color:rgba(255,255,255,0.6);border:1px solid rgba(255,255,255,0.15);}
+.btn-sec:hover{background:rgba(255,255,255,0.08);color:white;}
+</style>
+</head>
+<body>
+<div class="shell">
+  <a href="/" class="brand">
+    <div class="brand-badge">TSS</div>
+    <span class="brand-name">CX Analytics</span>
+  </a>
+</div>
+<div class="center">
+  <div class="icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+      <circle cx="12" cy="12" r="10"/>
+      <path d="M12 8v4M12 16h.01"/>
+    </svg>
+  </div>
+  <div class="code">Access Denied</div>
+  <h1>You don't have access</h1>
+  <p class="sub">Your Trelleborg account was recognised but you haven't been granted access to TSS CX Analytics yet.</p>
+  <div class="steps">
+    <div class="steps-title">How to get access</div>
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-text">Contact your manager or the <strong>TSS CX Analytics admin</strong> and ask them to grant you access.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-text">The admin assigns you the <strong>TSS Platform User</strong> role in SAP BTP Cockpit.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-text">Once assigned, <strong>sign out and sign back in</strong> for the change to take effect.</div>
+    </div>
+  </div>
+  <div class="actions">
+    <a href="/logout" class="btn btn-pri">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+      Sign Out
+    </a>
+    <a href="/" class="btn btn-sec">Try Again</a>
+  </div>
+</div>
+</body>
+</html>
