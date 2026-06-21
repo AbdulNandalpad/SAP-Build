@@ -1,6 +1,9 @@
 {
   "name": "tss-approuter",
   "version": "1.0.0",
+  "engines": {
+    "node": ">=20"
+  },
   "dependencies": {
     "@sap/approuter": "^16"
   },
