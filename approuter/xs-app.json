@@ -1,9 +1,6 @@
 {
   "authenticationMethod": "route",
   "sessionTimeout": 60,
-  "errorPage": [
-    {"status": [401, 403], "file": "/error.html"}
-  ],
   "logout": {
     "logoutEndpoint": "/logout",
     "logoutPage": "/"
