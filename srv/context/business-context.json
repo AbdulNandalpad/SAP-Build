@@ -1,0 +1,110 @@
+{
+  "_readme": "This file is injected into every AI call as business context. Fill in the blanks marked TODO.",
+
+  "company": {
+    "name": "Trelleborg Sealing Solutions",
+    "abbreviation": "TSS",
+    "description": "Division of Trelleborg AB specialising in precision sealing solutions for demanding industrial applications.",
+    "crm_system": "SAP C4C (Cloud for Customer)",
+    "crm_instance": "my352500 (QA/Test)"
+  },
+
+  "opportunity_fields": {
+    "LifeCycleStatusCode": {
+      "description": "Current status of the opportunity",
+      "values": {
+        "1": "Open",
+        "2": "In Process",
+        "3": "Won",
+        "5": "Lost"
+      }
+    },
+    "SalesCyclePhaseCode": {
+      "description": "Stage in the sales funnel",
+      "note": "TODO: list your actual phase codes and what they mean at TSS e.g. {'1': 'Prospecting', '2': 'Qualification', '3': 'Proposal'}"
+    },
+    "OpportunityLevel_KUT": {
+      "description": "TODO: explain what opportunity level means at TSS (e.g. strategic vs transactional)",
+      "values": {
+        "TODO": "fill in your actual codes and labels here"
+      }
+    },
+    "BUS_SEG_CDE_KUT": {
+      "description": "Business segment code — the market/industry the customer operates in",
+      "values": {
+        "TODO": "fill in your segment codes e.g. IND = Industrial, AUTO = Automotive, AER = Aerospace"
+      }
+    },
+    "CustomerABCClassificationCode_PSM": {
+      "description": "Customer importance classification",
+      "values": {
+        "A": "Strategic / top-tier customer",
+        "B": "Important customer",
+        "C": "Standard customer",
+        "TODO": "confirm if TSS uses different definitions"
+      }
+    },
+    "ProcessingTypeCode": {
+      "description": "TODO: what processing types does TSS use? e.g. standard opportunity vs project"
+    },
+    "ZHasCompetitor_KUT": {
+      "description": "Boolean — true if a competitor has been logged against this opportunity"
+    },
+    "ZHasSummary_KUT": {
+      "description": "Boolean — true if a sales summary/note has been added to the opportunity"
+    },
+    "ZHasSupplier_KUT": {
+      "description": "Boolean — true if a supplier has been linked to the opportunity"
+    },
+    "ProbabilityPercent": {
+      "description": "Sales rep estimated win probability (0-100%)",
+      "note": "At TSS, opportunities above 85% are considered near-certain. Below 20% are considered at risk."
+    },
+    "ExpectedRevenueAmount": {
+      "description": "Expected deal value in the opportunity currency",
+      "note": "Currency varies by sales org. Always check ExpectedRevenueAmountCurrencyCode."
+    },
+    "ExpectedProcessingEndDate": {
+      "description": "Expected SOP (Start of Production) or deal close date — when revenue is expected to begin"
+    }
+  },
+
+  "sales_organisations": {
+    "description": "TSS sales organisations in C4C. SalesOrganisationName follows pattern 'TSS [Region] [Segment]'",
+    "note": "TODO: list your key sales orgs and what they cover. Example format below — replace with real data.",
+    "examples": [
+      "TODO: e.g. TSS Germany Industrial = German industrial sealing sales team",
+      "TODO: e.g. TSS UK Aerospace = UK aerospace sealing sales team",
+      "TODO: add all relevant orgs"
+    ],
+    "geography_keywords": {
+      "TODO": "map country/region keywords to org name patterns so AI can filter correctly",
+      "example": "germany -> orgs containing 'Germany', uk -> orgs containing 'UK' or 'United Kingdom'"
+    }
+  },
+
+  "business_rules": {
+    "win_rate_benchmark": "TODO: what is a good win rate at TSS? e.g. >30% is considered strong",
+    "stale_deal_threshold_days": 90,
+    "high_probability_threshold_pct": 85,
+    "large_deal_threshold_currency": "TODO: e.g. deals above $500K are considered strategic",
+    "typical_sales_cycle_months": "TODO: how long is a typical TSS opportunity from open to close?"
+  },
+
+  "terminology": {
+    "SOP": "Start of Production — the date the customer begins using TSS sealing components in their manufacturing process",
+    "CSC": "Customer Service Centre — same as Sales Organisation in C4C reporting",
+    "OBO": "On Behalf Of — used in authentication context (principal propagation)",
+    "TODO_add_more": "Add any Trelleborg/TSS-specific terms, abbreviations or jargon the AI should understand"
+  },
+
+  "reporting_guidance": {
+    "default_date_filter": "Opportunities created since 2025-06-05 (current data range in system)",
+    "currency_note": "Revenue figures are in mixed currencies. When comparing across orgs treat amounts as approximate unless filtered to a single currency.",
+    "data_quality_notes": [
+      "Some opportunities may have zero probability — these are likely not yet qualified",
+      "Missing SOP date = opportunity not yet at proposal stage",
+      "ZHasSummary_KUT = false means the sales rep has not documented the opportunity"
+    ]
+  }
+}
