@@ -430,11 +430,12 @@ function pd(v){if(!v)return'';var m=v.match?v.match(/\/Date\((\d+)\)\/$/):null;i
 
 async function fetchData(){
   try{
-    var url='/odata/v4/opportunity/Opportunities?$top=1000',all=[];
-    while(url){var r=await fetch(url);var j=await r.json();if(j.error)throw new Error(j.error.message);all=all.concat(j.value);url=j['@odata.nextLink']?'/odata/v4/opportunity/'+j['@odata.nextLink']:null;}
-    allData=all;
+    var r=await fetch('/odata/v4/opportunity/Opportunities?$top=200');
+    var j=await r.json();
+    if(j.error)throw new Error(j.error.message);
+    allData=j.value||[];
     document.getElementById('defineBtn').disabled=false;
-    document.getElementById('confirmCount').textContent=all.length.toLocaleString();
+    document.getElementById('confirmCount').textContent=allData.length.toLocaleString()+' (last 18mo)';
   }catch(e){console.error(e);document.getElementById('defineBtn').disabled=false;}
 }
 

@@ -201,14 +201,10 @@ function stClass(lc, rs){ if(lc==='1')return'b-open'; if(rs==='3')return'b-won';
 var stColors={'Open':'#0a6ed1','Won':'#107e3e','Lost':'#bb0000','Cancelled':'#e9730c','Completed':'#059669','Other':'#94a3b8'};
 
 async function fetchAll(){
-  var url='/odata/v4/quotes/SalesQuotes?$top=1000', all=[];
-  while(url){
-    var r=await fetch(url);var j=await r.json();
-    if(j.error)throw new Error(j.error.message);
-    all=all.concat(j.value||[]);
-    url=j['@odata.nextLink']?'/odata/v4/quotes/'+j['@odata.nextLink']:null;
-  }
-  return all;
+  var r=await fetch('/odata/v4/quotes/SalesQuotes?$top=300');
+  var j=await r.json();
+  if(j.error)throw new Error(j.error.message);
+  return j.value||[];
 }
 
 function populateFilters(data){

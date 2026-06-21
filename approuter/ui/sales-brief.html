@@ -469,9 +469,10 @@ function showPage(n){
 }
 
 async function fetchData(){
-  var url='/odata/v4/opportunity/Opportunities?$top=1000',all=[];
-  while(url){var r=await fetch(url);var j=await r.json();if(j.error)throw new Error(j.error.message);all=all.concat(j.value);url=j['@odata.nextLink']?'/odata/v4/opportunity/'+j['@odata.nextLink']:null;}
-  return all;
+  var r=await fetch('/odata/v4/opportunity/Opportunities?$top=200');
+  var j=await r.json();
+  if(j.error)throw new Error(j.error.message);
+  return j.value||[];
 }
 
 function buildPayload(d){
@@ -859,7 +860,7 @@ function buildDataSummary(d){
 async function init(){
   try{
     allData=await fetchData();
-    document.getElementById('dataStatus').textContent=allData.length.toLocaleString()+' records loaded from C4C';
+    document.getElementById('dataStatus').textContent=allData.length.toLocaleString()+' records loaded (last 18 months)';
     document.getElementById('genBtn').disabled=false;
     buildDataSummary(allData);
   }catch(e){

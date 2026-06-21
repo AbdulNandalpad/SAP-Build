@@ -24,24 +24,20 @@ const QUOTE_SEL = [
     "ZQuoteLayout_KUT,ZQuoteLayout_KUTText"
 ].join(',');
 
-async function fetchAllQuotes(c4c) {
-    let all = [], skip = 0, page = 0;
-    while (page < 20) {
-        const path = `SalesQuoteCollection?$top=1000&$skip=${skip}&$select=${QUOTE_SEL}`;
-        const result = await c4c.send({ method: 'GET', path });
-        const records = Array.isArray(result) ? result : (result.value || result);
-        if (!records || records.length === 0) break;
-        all = all.concat(records);
-        skip += records.length;
-        page++;
-        if (records.length < 1000) break;
-    }
-    console.log('[CAP] SalesQuotes: ' + all.length + ' records in ' + page + ' pages');
+// Rolling 24-month window — quotes have longer lifecycle than opportunities
+function dateFilter24m() {
+    const d = new Date();
+    d.setMonth(d.getMonth() - 24);
+    return d.toISOString().substring(0, 10) + 'T00:00:00';
+}
 
-    // Enrich with opportunity links via SalesQuoteReference nav property (sample fetch)
-    // Full expand would be: $expand=SalesQuoteReference but can be slow for large sets
-    // We tag VersionGroupID as the version-family key instead
-    return all;
+async function fetchAllQuotes(c4c) {
+    const filter = `CreationDateTime ge datetime'${dateFilter24m()}'`;
+    const path = `SalesQuoteCollection?$filter=${encodeURIComponent(filter)}&$top=300&$select=${QUOTE_SEL}`;
+    const result = await c4c.send({ method: 'GET', path });
+    const records = Array.isArray(result) ? result : (result.value || result);
+    console.log('[CAP] SalesQuotes: ' + records.length + ' records');
+    return records;
 }
 
 // Fetch opportunity link for a specific quote by expanding SalesQuoteReference

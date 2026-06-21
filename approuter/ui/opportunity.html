@@ -703,9 +703,10 @@ function renderTableData(data,bodyId,ctId){
 function renderTable(){renderTableData(filtered,'tBody','tblCt');}
 
 async function fetchAll(){
-  var url='/odata/v4/opportunity/Opportunities?$top=1000',all=[];
-  while(url){var r=await fetch(url);var j=await r.json();if(j.error)throw new Error(j.error.message);all=all.concat(j.value);url=j['@odata.nextLink']?'/odata/v4/opportunity/'+j['@odata.nextLink']:null;}
-  return all;
+  var r=await fetch('/odata/v4/opportunity/Opportunities?$top=200');
+  var j=await r.json();
+  if(j.error)throw new Error(j.error.message);
+  return j.value||[];
 }
 
 async function init(){
