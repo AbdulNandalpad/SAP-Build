@@ -1074,7 +1074,7 @@ function renderSnapshot(snap) {
 
 // ── loadSnapshot ──────────────────────────────────────────────────────
 function loadSnapshot(retry) {
-  fetch('/odata/ai/getSnapshot', { method:'POST', headers:{'Content-Type':'application/json'}, body:'{}' })
+  fetch('/odata/v4/ai/getSnapshot', { method:'POST', headers:{'Content-Type':'application/json'}, body:'{}' })
     .then(function(r){ return r.json(); })
     .then(function(res) {
       var result = typeof res.value === 'string' ? JSON.parse(res.value) : res.value;
@@ -1113,7 +1113,7 @@ function refreshSnapshot() {
     '<div class="intel-skel-grid">' +
     ['','','',''].map(function(){return '<div class="intel-skel-kpi"><div class="skeleton skel-val" style="width:70%"></div><div class="skeleton skel-text" style="width:55%;margin-top:6px"></div><div class="skeleton skel-sub" style="margin-top:8px"></div></div>';}).join('') +
     '</div><div style="text-align:center;padding:8px 0 16px;font-size:0.75rem;color:var(--muted);">Refreshing pipeline intelligence — this will take 30–60 seconds…</div>';
-  fetch('/odata/ai/refreshSnapshot', { method:'POST', headers:{'Content-Type':'application/json'}, body:'{}' })
+  fetch('/odata/v4/ai/refreshSnapshot', { method:'POST', headers:{'Content-Type':'application/json'}, body:'{}' })
     .then(function(){
       setTimeout(function(){
         loadSnapshot(false);
