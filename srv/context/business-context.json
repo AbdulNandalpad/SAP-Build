@@ -1,10 +1,8 @@
 {
-  "_readme": "This file is injected into every AI call as business context. Fill in the blanks marked TODO.",
-
   "company": {
     "name": "Trelleborg Sealing Solutions",
     "abbreviation": "TSS",
-    "description": "Division of Trelleborg AB specialising in precision sealing solutions for demanding industrial applications.",
+    "description": "Division of Trelleborg AB specialising in precision sealing solutions for demanding industrial applications including automotive, aerospace, industrial, healthcare, and food & beverage sectors.",
     "crm_system": "SAP C4C (Cloud for Customer)",
     "crm_instance": "my352500 (QA/Test)"
   },
@@ -19,92 +17,254 @@
         "5": "Lost"
       }
     },
+    "ProcessingTypeCode": {
+      "description": "Type of CRM document",
+      "values": {
+        "OPPT": "Opportunity — standard sales opportunity record"
+      }
+    },
+    "SalesCycleCode": {
+      "description": "Sales methodology used",
+      "values": {
+        "Z05": "Sales Opportunity — TSS standard sales cycle"
+      }
+    },
     "SalesCyclePhaseCode": {
-      "description": "Stage in the sales funnel",
-      "note": "TODO: list your actual phase codes and what they mean at TSS e.g. {'1': 'Prospecting', '2': 'Qualification', '3': 'Proposal'}"
+      "description": "Stage in the TSS sales funnel (Miller Heiman-style phases)",
+      "values": {
+        "Z01": "1 Prospecting / Identification",
+        "Z02": "2 Qualification / Pain Recognition",
+        "Z03": "3 Alleviation of Risk/Worry (Prototyping)",
+        "Z04": "4 Value Demonstration / Proposal",
+        "Z05": "5 Negotiation / Decision",
+        "Z06": "5 Commitment / Award",
+        "Z07": "6 Closure / Renew / Expand (Launch)"
+      },
+      "note": "Higher phase = further along the sales funnel. Phase Z07 is near-launch or post-award."
     },
     "OpportunityLevel_KUT": {
-      "description": "TODO: explain what opportunity level means at TSS (e.g. strategic vs transactional)",
+      "description": "Strategic level / complexity of the opportunity at TSS",
       "values": {
-        "TODO": "fill in your actual codes and labels here"
+        "101": "Level 0 - Opportunity (standard transactional opportunity)",
+        "102": "Level 1 - Project (moderate complexity, cross-functional)",
+        "103": "Level 2 - Strategic Project (high-value, strategic customer)"
       }
     },
     "BUS_SEG_CDE_KUT": {
-      "description": "Business segment code — the market/industry the customer operates in",
+      "description": "Business segment — the market/industry the customer operates in",
       "values": {
-        "TODO": "fill in your segment codes e.g. IND = Industrial, AUTO = Automotive, AER = Aerospace"
+        "AUT": "AUT-Automotive (passenger cars, trucks, EVs)",
+        "IND": "IND-Industrial (general industrial, fluid power, machinery)",
+        "AER": "AER-Aerospace (aviation, defence, space)",
+        "HEA": "HEA-Healthcare & Medical (medical devices, pharma)",
+        "FBW": "FBW-Food, Beverage & Water",
+        "CPI": "CPI-Chemical, Process & Industrial",
+        "OG": "OG-Oil & Gas",
+        "SEM": "SEM-Semiconductor / Electronics"
       }
     },
     "CustomerABCClassificationCode_PSM": {
-      "description": "Customer importance classification",
+      "description": "Customer importance classification (PSM = Partner & Segment Management)",
       "values": {
-        "A": "Strategic / top-tier customer",
-        "B": "Important customer",
-        "C": "Standard customer",
-        "TODO": "confirm if TSS uses different definitions"
+        "A": "A class — Strategic / top-tier key account",
+        "B": "B class — Important regional account",
+        "C": "C class — Standard account",
+        "G": "G class — Global key account (highest tier, managed globally)"
       }
     },
-    "ProcessingTypeCode": {
-      "description": "TODO: what processing types does TSS use? e.g. standard opportunity vs project"
+    "Channel_KUT": {
+      "description": "Sales channel through which the opportunity is being pursued",
+      "values": {
+        "151": "Sales (direct sales by TSS sales team)",
+        "152": "Distribution (through distributor/reseller)",
+        "153": "E-Commerce"
+      }
     },
-    "ZHasCompetitor_KUT": {
-      "description": "Boolean — true if a competitor has been logged against this opportunity"
+    "MKT_SEG_CODE": {
+      "description": "Market segment code — detailed sub-segment within the business segment",
+      "examples": {
+        "C1": "C1 - Light Vehicle Manufacturers (passenger car OEMs)",
+        "C2": "C2 - Heavy Vehicle Manufacturers (trucks, buses)",
+        "C3": "C3 - Tier 1 Automotive Suppliers",
+        "I1": "I1 - General Industrial Machinery",
+        "I2": "I2 - Hydraulics & Fluid Power",
+        "A1": "A1 - Commercial Aviation",
+        "A2": "A2 - Defence & Military"
+      }
     },
-    "ZHasSummary_KUT": {
-      "description": "Boolean — true if a sales summary/note has been added to the opportunity"
+    "MKT_SEG_GRP_CDE_KUT": {
+      "description": "Market segment group code — broader grouping above MKT_SEG_CODE",
+      "note": "Groups multiple market segments under a common theme (e.g. P36A groups automotive platform segments)"
     },
-    "ZHasSupplier_KUT": {
-      "description": "Boolean — true if a supplier has been linked to the opportunity"
+    "CONGLOCODE_KUT": {
+      "description": "Conglomerate code — identifies the corporate group/parent of the customer account",
+      "examples": {
+        "BOA": "Robert Bosch Group",
+        "VWG": "Volkswagen Group",
+        "STL": "Stellantis Group",
+        "note": "Used to aggregate revenue across all subsidiaries of a global customer group"
+      }
+    },
+    "ZBaseCurrency_KUTContent_KUT": {
+      "description": "Expected revenue converted to EUR base currency for cross-org comparison. Always EUR. Use this field when comparing revenue across different sales organisations with different local currencies.",
+      "currency": "EUR (always)"
+    },
+    "ZConfidential_SDK": {
+      "description": "Boolean flag — true if this opportunity has been marked confidential. Confidential opportunities should not be shared externally.",
+      "values": {
+        "true": "Confidential — restricted access",
+        "false": "Not confidential — standard visibility"
+      }
+    },
+    "PrimaryContactPartyName": {
+      "description": "Name of the primary contact person at the customer organisation (prospect side). This is the key stakeholder or decision-maker TSS is working with."
     },
     "ProbabilityPercent": {
-      "description": "Sales rep estimated win probability (0-100%)",
-      "note": "At TSS, opportunities above 85% are considered near-certain. Below 20% are considered at risk."
+      "description": "Sales rep estimated win probability (0–100%)",
+      "note": "At TSS, opportunities above 75% are considered near-certain wins. Below 25% are considered at risk or early stage. Many opportunities are set to 0% when not yet formally qualified."
     },
     "ExpectedRevenueAmount": {
-      "description": "Expected deal value in the opportunity currency",
-      "note": "Currency varies by sales org. Always check ExpectedRevenueAmountCurrencyCode."
+      "description": "Expected annual deal value in the local opportunity currency (see ExpectedRevenueAmountCurrencyCode). Prefer ZBaseCurrency_KUTContent_KUT (EUR) for cross-org comparison.",
+      "note": "Currency varies by sales org (USD for Americas, EUR for Europe, etc.)"
     },
     "ExpectedProcessingEndDate": {
-      "description": "Expected SOP (Start of Production) or deal close date — when revenue is expected to begin"
+      "description": "Expected SOP (Start of Production) or deal close date — when revenue is expected to begin flowing from this opportunity"
+    },
+    "ZHasCompetitor_KUT": {
+      "description": "Boolean — true if a named competitor has been logged against this opportunity. Opportunities with competitors logged are more contested."
+    },
+    "ZHasSummary_KUT": {
+      "description": "Boolean — true if the sales rep has added a written summary/note to the opportunity. false = opportunity not yet documented, a data quality gap."
+    },
+    "ZHasSupplier_KUT": {
+      "description": "Boolean — true if a supplier (e.g. raw material partner) has been linked to the opportunity."
+    },
+    "ResultReasonCode": {
+      "description": "Reason code for why an opportunity was Won or Lost. Populated when LifeCycleStatusCode = 3 (Won) or 5 (Lost).",
+      "note": "Key for win/loss analysis. Missing result reason = data quality gap."
     }
   },
 
   "sales_organisations": {
-    "description": "TSS sales organisations in C4C. SalesOrganisationName follows pattern 'TSS [Region] [Segment]'",
-    "note": "TODO: list your key sales orgs and what they cover. Example format below — replace with real data.",
-    "examples": [
-      "TODO: e.g. TSS Germany Industrial = German industrial sealing sales team",
-      "TODO: e.g. TSS UK Aerospace = UK aerospace sealing sales team",
-      "TODO: add all relevant orgs"
-    ],
-    "geography_keywords": {
-      "TODO": "map country/region keywords to org name patterns so AI can filter correctly",
-      "example": "germany -> orgs containing 'Germany', uk -> orgs containing 'UK' or 'United Kingdom'"
+    "description": "TSS sales organisations (CSCs = Customer Service Centres) in C4C. The SalesOrganisationID maps to a human-readable name.",
+    "geography_mapping": {
+      "germany": ["TSSGERMANY", "TSSINDSALGERMANY"],
+      "uk": ["TSSUK"],
+      "france": ["TSSFRANCE"],
+      "italy": ["TSSITALY"],
+      "spain": ["TSSSPAIN"],
+      "netherlands": ["TSSNETHERLANDS"],
+      "sweden": ["TSSSWEDEN"],
+      "finland": ["TSSFINLAND"],
+      "norway": ["TSSNORWAY"],
+      "denmark": ["TSSDENMARK"],
+      "switzerland": ["TSSSWITZERLAND", "TSSSWISSEXPORT"],
+      "poland": ["TSSPOLAND"],
+      "czech": ["TSSCZECH"],
+      "hungary": ["TSSHUNGARY"],
+      "croatia": ["TSSCROATIA"],
+      "turkey": ["TSSTURKEY"],
+      "russia": ["TSSRUSSIA"],
+      "europe_auto": ["TSSEURAUTOHUB"],
+      "europe": ["TSSGERMANY", "TSSFRANCE", "TSSUK", "TSSITALY", "TSSSPAIN", "TSSNETHERLANDS", "TSSSWITZERLAND", "TSSSWEDEN", "TSSFINLAND", "TSSNORWAY", "TSSDENMARK", "TSSPOLAND", "TSSCZECH", "TSSHUNGARY", "TSSCROATIA", "TSSEURAUTOHUB"],
+      "usa": ["TSSSEGCHETRAOPER", "TSSEAST", "TSSWEST", "TSSMIDWEST", "TSSSOUTHWEST", "TSSNAAUTOHUB"],
+      "americas": ["TSSSEGCHETRAOPER", "TSSEAST", "TSSWEST", "TSSMIDWEST", "TSSSOUTHWEST", "TSSNAAUTOHUB", "TSSMEXICO"],
+      "china": ["TSSCNNORTHCSE", "TSSCNSOUTHCSE", "TSSCNCENTRALCSE", "TSSCNEAST", "TSSCNCENTRAL"],
+      "apac": ["TSSSINGAPORE", "TSSJAPAN", "TSSKOREA", "TSSTAIWAN", "TSSHONGKONG", "TSSINDIA"],
+      "japan": ["TSSJAPAN"],
+      "india": ["TSSINDIA"],
+      "korea": ["TSSKOREA"],
+      "singapore": ["TSSSINGAPORE"]
+    },
+    "key_organisations": {
+      "TSSGERMANY": "CSC Germany",
+      "TSSUK": "CSC UK",
+      "TSSFRANCE": "CSC France",
+      "TSSITALY": "CSC Italy",
+      "TSSSPAIN": "CSC Spain",
+      "TSSNETHERLANDS": "CSC Netherlands",
+      "TSSSWITZERLAND": "CSC Switzerland",
+      "TSSSWISSEXPORT": "CSC Swiss Export",
+      "TSSSWEDEN": "CSC Sweden",
+      "TSSFINLAND": "CSC Finland",
+      "TSSNORWAY": "CSC Norway",
+      "TSSDENMARK": "CSC Denmark",
+      "TSSPOLAND": "CSC Poland",
+      "TSSCZECH": "CSC Czechia",
+      "TSSHUNGARY": "CSC Hungary",
+      "TSSCROATIA": "CSC Croatia",
+      "TSSTURKEY": "CSC Turkey",
+      "TSSRUSSIA": "CSC Russia",
+      "TSSEURAUTOHUB": "TSS Auto Europe (European Automotive Hub)",
+      "TSSNAAUTOHUB": "TSS Automotive Hub North America",
+      "TSSSEGCHETRAOPER": "TSS US Industrial",
+      "TSSEAST": "TSS East (US East)",
+      "TSSWEST": "TSS West (US West)",
+      "TSSMIDWEST": "TSS Midwest",
+      "TSSSOUTHWEST": "TSS Southwest",
+      "TSSMEXICO": "TSS Mexico",
+      "TSSJAPAN": "TSS Japan",
+      "TSSKOREA": "TSS Korea",
+      "TSSTAIWAN": "TSS Taiwan",
+      "TSSSINGAPORE": "TSS Singapore",
+      "TSSINDIA": "TSS India",
+      "TSSHONGKONG": "TSS Hong Kong",
+      "TSSINDSALGERMANY": "TSS Industrial Sales Germany",
+      "TSSMCEUROPE": "Industrial EMEA",
+      "TSSMCAPAC": "Industrial Asia Pacific",
+      "TSSMCAMERICAS": "Industrial Americas",
+      "TSSUSLIFESCIENCES": "TSS Americas Life Sciences",
+      "TSSSEGHEAMED": "TSS Segment Healthcare and Medical",
+      "TSSNORTHBOROUGHAERO": "TSS Northborough Aerospace",
+      "TSSNORTHBOROUGHLS": "TSS Northborough Life Sciences"
     }
   },
 
   "business_rules": {
-    "win_rate_benchmark": "TODO: what is a good win rate at TSS? e.g. >30% is considered strong",
+    "win_rate_benchmark": "A win rate above 30% is considered healthy at TSS. Top performers achieve 40–50%. Below 20% indicates pipeline quality issues.",
     "stale_deal_threshold_days": 90,
-    "high_probability_threshold_pct": 85,
-    "large_deal_threshold_currency": "TODO: e.g. deals above $500K are considered strategic",
-    "typical_sales_cycle_months": "TODO: how long is a typical TSS opportunity from open to close?"
+    "high_probability_threshold_pct": 75,
+    "at_risk_probability_threshold_pct": 25,
+    "large_deal_threshold_eur": 500000,
+    "strategic_deal_threshold_eur": 1000000,
+    "typical_sales_cycle_months": "12–36 months for automotive (long lead time to SOP). 3–12 months for industrial. 6–18 months for aerospace.",
+    "data_completeness_rules": [
+      "ZHasSummary_KUT = false means the sales rep has not documented the opportunity — flag as data quality gap",
+      "ProbabilityPercent = 0 means the opportunity has not been formally qualified yet",
+      "Missing ResultReasonCode on Won/Lost opportunities = data quality gap",
+      "Missing ExpectedProcessingEndDate = opportunity not yet at proposal stage",
+      "ZConfidential_SDK = true means restrict details in external-facing reports"
+    ]
   },
 
   "terminology": {
-    "SOP": "Start of Production — the date the customer begins using TSS sealing components in their manufacturing process",
-    "CSC": "Customer Service Centre — same as Sales Organisation in C4C reporting",
-    "OBO": "On Behalf Of — used in authentication context (principal propagation)",
-    "TODO_add_more": "Add any Trelleborg/TSS-specific terms, abbreviations or jargon the AI should understand"
+    "SOP": "Start of Production — the date the customer begins using TSS sealing components in their manufacturing process. This is the key milestone for automotive opportunities.",
+    "CSC": "Customer Service Centre — TSS term for a regional sales organisation (same as SalesOrganisationName in C4C)",
+    "KUT": "Key User Text field — SAP C4C extension fields added by TSS (visible as field names ending in _KUT or _SDK)",
+    "OBO": "On Behalf Of — used in authentication context (principal propagation / OAuth2SAMLBearerAssertion)",
+    "ESAC": "Expected Sales After Contract — EUR-denominated projected annual revenue broken out by year (EsacExpectedSalesYear1-5_KUT fields)",
+    "AutoHub": "Automotive Hub — TSS regional hub managing all automotive segment opportunities for a geography (e.g. TSS Auto Europe = TSSEURAUTOHUB)",
+    "Pipeline": "All active opportunities with LifeCycleStatusCode = 1 (Open) or 2 (In Process)",
+    "Conglomerate": "Corporate parent group of a customer (CONGLOCODE_KUT) — used to track total exposure to a global group like Bosch or VW Group",
+    "G-class": "G class customer (CustomerABCClassificationCode_PSM = G) = global key account, highest strategic tier at TSS",
+    "OOD": "Out of Distribution — routing/territory classification code used in SALESTERRITORYDETCODE",
+    "Miller Heiman": "Sales methodology used at TSS — phase codes Z01-Z07 map to Miller Heiman Blue Sheet phases",
+    "Base Currency": "ZBaseCurrency_KUTContent_KUT — all opportunity amounts normalised to EUR for cross-currency comparison"
   },
 
   "reporting_guidance": {
-    "default_date_filter": "Opportunities created since 2025-06-05 (current data range in system)",
-    "currency_note": "Revenue figures are in mixed currencies. When comparing across orgs treat amounts as approximate unless filtered to a single currency.",
+    "default_date_filter": "Opportunities with CreationDate >= 2025-06-05 (current data range in system)",
+    "preferred_amount_field": "Use ZBaseCurrency_KUTContent_KUT (EUR) for revenue aggregation and comparison across orgs. Use ExpectedRevenueAmount only when showing local currency for a single org.",
+    "currency_note": "ExpectedRevenueAmount is in local currency (USD for Americas, EUR for Europe, JPY for Japan etc). Always use ZBaseCurrency_KUTContent_KUT for cross-org totals.",
+    "geography_filtering": "Filter by SalesOrganisationName or SalesOrganisationID. 'Germany' = TSSGERMANY + TSSINDSALGERMANY. 'Europe' includes all CSC Europe orgs plus TSSEURAUTOHUB. 'Auto' or 'Automotive' = TSSEURAUTOHUB + TSSNAAUTOHUB + orgs with BUS_SEG_CDE_KUT = AUT.",
+    "segment_filtering": "BUS_SEG_CDE_KUT = 'AUT' for automotive, 'IND' for industrial, 'AER' for aerospace, 'HEA' for healthcare. MKT_SEG_CODE for sub-segments.",
+    "status_filtering": "Active pipeline = LifeCycleStatusCode IN ('1','2'). Won = '3'. Lost = '5'. Exclude Lost when showing pipeline unless specifically asked.",
     "data_quality_notes": [
-      "Some opportunities may have zero probability — these are likely not yet qualified",
-      "Missing SOP date = opportunity not yet at proposal stage",
-      "ZHasSummary_KUT = false means the sales rep has not documented the opportunity"
+      "ProbabilityPercent = 0 → not yet qualified, may be early pipeline",
+      "ZHasSummary_KUT = false → sales rep has not documented the opportunity",
+      "Missing SOP date (ExpectedProcessingEndDate) → pre-proposal stage",
+      "Large volumes of 0-probability deals inflate pipeline count without revenue credibility",
+      "ZConfidential_SDK = true → omit names/details from any external report"
     ]
   }
 }

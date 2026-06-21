@@ -38,7 +38,18 @@
         "CustomerABCClassificationCode_PSMText": { "type": "cds.String" },
         "ZHasCompetitor_KUT": { "type": "cds.Boolean" },
         "ZHasSummary_KUT": { "type": "cds.Boolean" },
-        "ZHasSupplier_KUT": { "type": "cds.Boolean" }
+        "ZHasSupplier_KUT": { "type": "cds.Boolean" },
+        "ZBaseCurrency_KUTContent_KUT": { "type": "cds.Decimal" },
+        "ZBaseCurrency_KUTcurrencyCode_KUT": { "type": "cds.String" },
+        "ZConfidential_SDK": { "type": "cds.Boolean" },
+        "PrimaryContactPartyName": { "type": "cds.String" },
+        "CONGLOCODE_KUT": { "type": "cds.String" },
+        "Channel_KUT": { "type": "cds.String" },
+        "Channel_KUTText": { "type": "cds.String" },
+        "MKT_SEG_CODE": { "type": "cds.String" },
+        "MKT_SEG_CODEText": { "type": "cds.String" },
+        "MKT_SEG_GRP_CDE_KUT": { "type": "cds.String" },
+        "MKT_SEG_GRP_CDE_KUTText": { "type": "cds.String" }
       }
     },
     "c4c.SalesQuoteCollection": {
