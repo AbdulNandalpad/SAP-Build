@@ -187,14 +187,16 @@ async function runAINarrative(metrics, businessContext, apiKey) {
 
     const system = 'You are a senior sales intelligence analyst for Trelleborg Sealing Solutions (TSS). ' +
         'Generate a concise executive snapshot from the pipeline metrics provided. ' +
-        'Return ONLY valid JSON, no markdown, no code blocks. ' +
+        'Return ONLY raw valid JSON. Do NOT wrap in markdown. Do NOT use ``` or ```json. Start your response with { and end with }. ' +
         'Structure: {"headline":"one powerful sentence","narrative":["2-3 sentence para 1","2-3 sentence para 2"],' +
         '"keyInsights":["insight 1","insight 2","insight 3"],' +
         '"topAlert":"single most important risk or action needed right now"}. ' +
         'Use real numbers. Be sharp and specific. No hallucination.' +
         businessContext;
 
-    return JSON.parse(await callClaude(system, 'Pipeline metrics: ' + summary, apiKey));
+    const raw = await callClaude(system, 'Pipeline metrics: ' + summary, apiKey);
+    const cleaned = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '').trim();
+    return JSON.parse(cleaned);
 }
 
 // ─── Main compute function ────────────────────────────────────────────────────
