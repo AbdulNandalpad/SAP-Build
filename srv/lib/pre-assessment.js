@@ -7,6 +7,7 @@
  */
 
 const { callClaude } = require('./claude');
+const { computeSummary } = require('./opp-summary');
 
 const REFRESH_INTERVAL_MS = 6 * 60 * 60 * 1000; // 6 hours
 const STALE_THRESHOLD_DAYS = 90;
@@ -238,6 +239,7 @@ async function compute(cds, businessContext, apiKey) {
 
         // 2. Compute metrics in JS
         const metrics = computeMetrics(all);
+        const opportunitySummary = computeSummary(all);
 
         // 3. Run AI once on the small summary
         let aiNarrative = null;
@@ -256,6 +258,7 @@ async function compute(cds, businessContext, apiKey) {
         _cache = {
             metrics,
             aiNarrative,
+            opportunitySummary,
             rawOpportunities: all,
             recordCount: all.length,
             computedAt: new Date().toISOString(),

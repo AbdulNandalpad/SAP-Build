@@ -647,12 +647,18 @@ async function fetchAll(){
   var j=await r.json();
   if(j.error)throw new Error(j.error.message);
   var raw=j.value||j;
-  return typeof raw==='string'?JSON.parse(raw):raw;
+  var data=typeof raw==='string'?JSON.parse(raw):raw;
+  if(data.status==='computing'){
+    document.getElementById('kpiRow').innerHTML='<div style="grid-column:span 6;padding:20px;color:var(--orange);font-size:0.82rem;">Pipeline data is loading — please refresh in 30 seconds.</div>';
+    return null;
+  }
+  return data;
 }
 
 async function init(){
   try{
     summaryData=await fetchAll();
+    if(!summaryData)return;
     allData=summaryData.topDeals||[];
     filtered=allData;
     var now=new Date();
