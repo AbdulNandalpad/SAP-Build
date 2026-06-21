@@ -473,7 +473,9 @@ async function fetchData(){
   var j=await r.json();
   if(j.error)throw new Error(j.error.message);
   var raw=j.value||j;
-  return typeof raw==='string'?JSON.parse(raw):raw;
+  var d=typeof raw==='string'?JSON.parse(raw):raw;
+  if(d.status==='computing') return null; // caller handles retry
+  return d;
 }
 
 function buildPayload(d){
@@ -836,9 +838,16 @@ function buildDataSummary(d){
   document.getElementById('dataSummarySection').style.display='block';
 }
 
+var _sbPoll=null;
 async function init(){
+  if(_sbPoll){clearTimeout(_sbPoll);_sbPoll=null;}
   try{
     allData=await fetchData();
+    if(!allData){
+      document.getElementById('dataStatus').textContent='⏳ Pipeline data loading… retrying in 15s';
+      _sbPoll=setTimeout(init,15000);
+      return;
+    }
     document.getElementById('dataStatus').textContent=(allData.total||0).toLocaleString()+' records loaded (full pipeline)';
     document.getElementById('genBtn').disabled=false;
     buildDataSummary(allData);

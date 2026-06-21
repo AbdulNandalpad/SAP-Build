@@ -649,16 +649,23 @@ async function fetchAll(){
   var raw=j.value||j;
   var data=typeof raw==='string'?JSON.parse(raw):raw;
   if(data.status==='computing'){
-    document.getElementById('kpiRow').innerHTML='<div style="grid-column:span 6;padding:20px;color:var(--orange);font-size:0.82rem;">Pipeline data is loading — please refresh in 30 seconds.</div>';
-    return null;
+    return null; // not ready — caller will retry
   }
   return data;
 }
 
+var _pollTimer=null;
+function startPolling(){
+  document.getElementById('kpiRow').innerHTML='<div style="grid-column:span 6;padding:24px;color:var(--orange);font-size:0.85rem;">⏳ Pipeline data is loading in the background — retrying in 15 seconds…</div>';
+  if(_pollTimer)clearTimeout(_pollTimer);
+  _pollTimer=setTimeout(()=>init(),15000);
+}
+
 async function init(){
+  if(_pollTimer){clearTimeout(_pollTimer);_pollTimer=null;}
   try{
     summaryData=await fetchAll();
-    if(!summaryData)return;
+    if(!summaryData){startPolling();return;}
     allData=summaryData.topDeals||[];
     filtered=allData;
     var now=new Date();

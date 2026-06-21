@@ -211,29 +211,26 @@ async function compute(cds, businessContext, apiKey) {
         // 1. Fetch all opportunities
         const c4c = await cds.connect.to('c4c');
         const OPP_SEL = 'ObjectID,ID,Name,SalesOrganisationID,SalesOrganisationName,' +
-            'SalesCyclePhaseCode,SalesCyclePhaseCodeText,ExpectedRevenueAmount,ExpectedRevenueAmountCurrencyCode,' +
+            'SalesCyclePhaseCode,SalesCyclePhaseCodeText,ExpectedRevenueAmount,' +
             'ExpectedProcessingEndDate,LifeCycleStatusCode,LifeCycleStatusCodeText,' +
             'ResultReasonCode,ResultReasonCodeText,ProbabilityPercent,' +
-            'ProspectPartyID,ProspectPartyName,MainEmployeeResponsiblePartyName,CreationDate,LastChangeDate,' +
-            'OpportunityLevel_KUT,OpportunityLevel_KUTText,BUS_SEG_CDE_KUT,BUS_SEG_CDE_KUTText,' +
-            'CustomerABCClassificationCode_PSM,CustomerABCClassificationCode_PSMText,' +
-            'MKT_SEG_CODE,MKT_SEG_CODEText,MKT_SEG_GRP_CDE_KUT,MKT_SEG_GRP_CDE_KUTText,' +
+            'ProspectPartyName,MainEmployeeResponsiblePartyName,CreationDate,LastChangeDate,' +
+            'BUS_SEG_CDE_KUT,BUS_SEG_CDE_KUTText,MKT_SEG_CODE,MKT_SEG_CODEText,' +
             'ZHasCompetitor_KUT,ZHasSummary_KUT,ZHasSupplier_KUT,' +
-            'ZBaseCurrency_KUTContent_KUT,ZBaseCurrency_KUTcurrencyCode_KUT,' +
-            'ZConfidential_SDK,CONGLOCODE_KUT,Channel_KUT,Channel_KUTText,' +
-            'ProcessingTypeCode,ProcessingTypeCodeText,PrimaryContactPartyName';
+            'ZBaseCurrency_KUTContent_KUT,ZBaseCurrency_KUTcurrencyCode_KUT,ZConfidential_SDK';
 
-        let all = [], path = "OpportunityCollection?$filter=CreationDate ge datetime'2025-06-05T00:00:00'&$top=1000&$select=" + OPP_SEL, page = 0;
-        while (path && page < 20) {
+        const since = new Date(); since.setFullYear(since.getFullYear() - 1);
+        const sinceStr = since.toISOString().replace(/\.\d{3}Z$/, '').replace('T', 'T');
+        let all = [], skip = 0, page = 0;
+        while (page < 10) {
+            const path = `OpportunityCollection?$filter=CreationDate ge datetime'${sinceStr}'&$top=500&$skip=${skip}&$select=${OPP_SEL}`;
             const result = await c4c.send({ method: 'GET', path });
             const records = Array.isArray(result) ? result : (result.value || result);
             if (!records || records.length === 0) break;
             all = all.concat(records);
+            skip += records.length;
             page++;
-            const nextLink = result['@odata.nextLink'] || result['odata.nextLink'];
-            path = (nextLink && records.length >= 1000)
-                ? "OpportunityCollection?$filter=CreationDate ge datetime'2025-06-05T00:00:00'&$top=1000&$select=" + OPP_SEL + '&$skip=' + all.length
-                : null;
+            if (records.length < 500) break;
         }
         console.log('[PreAssessment] Fetched ' + all.length + ' opportunities in ' + page + ' pages');
 
@@ -259,7 +256,6 @@ async function compute(cds, businessContext, apiKey) {
             metrics,
             aiNarrative,
             opportunitySummary,
-            rawOpportunities: all,
             recordCount: all.length,
             computedAt: new Date().toISOString(),
             computeDurationMs: Date.now() - t0

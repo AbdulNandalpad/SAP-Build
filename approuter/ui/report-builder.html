@@ -434,7 +434,13 @@ async function fetchData(){
     var j=await r.json();
     if(j.error)throw new Error(j.error.message);
     var raw=j.value||j;
-    allData=typeof raw==='string'?JSON.parse(raw):raw;
+    var d=typeof raw==='string'?JSON.parse(raw):raw;
+    if(d.status==='computing'){
+      document.getElementById('confirmCount').textContent='⏳ Loading pipeline data… retrying in 15s';
+      setTimeout(fetchData,15000);
+      return;
+    }
+    allData=d;
     document.getElementById('defineBtn').disabled=false;
     document.getElementById('confirmCount').textContent=(allData.total||0).toLocaleString()+' records (full pipeline)';
   }catch(e){console.error(e);document.getElementById('defineBtn').disabled=false;}
