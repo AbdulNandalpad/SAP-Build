@@ -56,12 +56,9 @@
         "AUT": "AUT-Automotive (passenger cars, trucks, EVs)",
         "IND": "IND-Industrial (general industrial, fluid power, machinery)",
         "AER": "AER-Aerospace (aviation, defence, space)",
-        "HEA": "HEA-Healthcare & Medical (medical devices, pharma)",
-        "FBW": "FBW-Food, Beverage & Water",
-        "CPI": "CPI-Chemical, Process & Industrial",
-        "OG": "OG-Oil & Gas",
-        "SEM": "SEM-Semiconductor / Electronics"
-      }
+        "HM": "HM-Healthcare & Medical (medical devices, pharma)"
+      },
+      "note": "Only these 4 segment codes are actively used in TSS C4C. Older codes (HEA, FBW, CPI, OG, SEM) may appear in historical data but are no longer in use."
     },
     "CustomerABCClassificationCode_PSM": {
       "description": "Customer importance classification (PSM = Partner & Segment Management)",
