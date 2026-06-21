@@ -469,38 +469,17 @@ function showPage(n){
 }
 
 async function fetchData(){
-  var r=await fetch('/odata/v4/opportunity/Opportunities?$top=200');
+  var r=await fetch('/odata/v4/opportunity/getSummary()');
   var j=await r.json();
   if(j.error)throw new Error(j.error.message);
-  return j.value||[];
+  var raw=j.value||j;
+  return typeof raw==='string'?JSON.parse(raw):raw;
 }
 
 function buildPayload(d){
-  var isOp=isOpen;
-  var won=d.filter(function(x){return x.LifeCycleStatusCode==='3';});
-  var lost=d.filter(function(x){return x.LifeCycleStatusCode==='5';});
-  var open=d.filter(isOp);
-  var rev=d.reduce(function(s,x){return s+parseFloat(x.ExpectedRevenueAmount||0);},0);
-  var openRev=open.reduce(function(s,x){return s+parseFloat(x.ExpectedRevenueAmount||0);},0);
-  var wr=won.length+lost.length>0?Math.round(won.length/(won.length+lost.length)*100):0;
-  var today=new Date();today.setHours(0,0,0,0);
-  var next12=new Date(today);next12.setFullYear(next12.getFullYear()+1);
-  var sopN12=open.filter(function(x){var s=pd(x.ExpectedProcessingEndDate);return s&&s>=today&&s<=next12;}).reduce(function(s,x){return s+parseFloat(x.ExpectedRevenueAmount||0);},0);
-  var stale90=open.filter(function(x){var lc=pd(x.LastChangeDate);return!lc||Math.floor((today-lc)/86400000)>90;}).length;
-  var om={};d.forEach(function(x){var k=(x.SalesOrganisationName||'?').replace(/TSS\s*/,'').substring(0,25);if(!om[k])om[k]={rev:0,won:0,lost:0};om[k].rev+=parseFloat(x.ExpectedRevenueAmount||0);if(x.LifeCycleStatusCode==='3')om[k].won++;if(x.LifeCycleStatusCode==='5')om[k].lost++;});
-  var sm={};open.forEach(function(x){var k=x.BUS_SEG_CDE_KUTText||'(Not Set)';sm[k]=(sm[k]||0)+parseFloat(x.ExpectedRevenueAmount||0);});
-  var sopY={};open.forEach(function(x){var s=pd(x.ExpectedProcessingEndDate);if(s&&s>today){var yr=s.getFullYear();sopY[yr]=(sopY[yr]||0)+parseFloat(x.ExpectedRevenueAmount||0);}});
-  var rm={};lost.forEach(function(x){var k=x.ResultReasonCodeText||'Unknown';rm[k]=(rm[k]||0)+1;});
-  return JSON.stringify({
-    total:d.length,won:won.length,lost:lost.length,open:open.length,
-    totalRev:Math.round(rev),openRev:Math.round(openRev),winRate:wr,
-    sopNext12Months:Math.round(sopN12),stale90Days:stale90,
-    topOrgs:Object.entries(om).sort(function(a,b){return b[1].rev-a[1].rev;}).slice(0,8).map(function(e){return{org:e[0],rev:Math.round(e[1].rev),won:e[1].won,lost:e[1].lost,wr:e[1].won+e[1].lost>0?Math.round(e[1].won/(e[1].won+e[1].lost)*100):0};}),
-    topSegments:Object.entries(sm).sort(function(a,b){return b[1]-a[1];}).slice(0,6).map(function(e){return{segment:e[0],rev:Math.round(e[1])};}),
-    sopByYear:Object.entries(sopY).sort(function(a,b){return a[0]-b[0];}).map(function(e){return{year:e[0],rev:Math.round(e[1])};}),
-    lossReasons:Object.entries(rm).sort(function(a,b){return b[1]-a[1];}).slice(0,5).map(function(e){return{reason:e[0],count:e[1]};}),
-    topOpen:open.slice().sort(function(a,b){return parseFloat(b.ExpectedRevenueAmount||0)-parseFloat(a.ExpectedRevenueAmount||0);}).slice(0,5).map(function(x){return{id:x.ID,name:x.Name,account:x.ProspectPartyName,owner:x.MainEmployeeResponsiblePartyName,rev:Math.round(parseFloat(x.ExpectedRevenueAmount||0)),phase:x.SalesCyclePhaseCodeText,sop:pds(x.ExpectedProcessingEndDate)};})
-  });
+  // d is now the server-computed summary object (full pipeline, all records)
+  if(d && d.total) return JSON.stringify(d);
+  return JSON.stringify({total:0,openCount:0,wonCount:0,lostCount:0,openRev:0,winRate:0});
 }
 
 // ── Pre-flight state ──────────────────────────────────────────────────────────
@@ -526,10 +505,10 @@ async function generateBrief(){
   openPreflight();
   try{
     var payload=buildPayload(allData);
-    var availOrgs=[...new Set(allData.map(function(x){return x.SalesOrganisationName||'';}).filter(Boolean))].slice(0,12).join(', ');
-    var availSegs=[...new Set(allData.map(function(x){return x.BUS_SEG_CDE_KUTText||'';}).filter(Boolean))].join(', ');
-    var won=allData.filter(function(x){return x.LifeCycleStatusCode==='3';}).length;
-    var lost=allData.filter(function(x){return x.LifeCycleStatusCode==='5';}).length;
+    var availOrgs=(allData.byOrg||[]).slice(0,12).map(function(o){return o.name;}).join(', ');
+    var availSegs=(allData.bySeg||[]).map(function(s){return s.seg;}).join(', ');
+    var won=allData.wonCount||0;
+    var lost=allData.lostCount||0;
 
     var clarPrompt='You are a professional TSS sales analyst. A user wants to generate a "'+selectedAud+'" sales brief.\n'+
       'User intent: "'+(pfIntent||'Full pipeline overview')+'"\n'+
@@ -860,7 +839,7 @@ function buildDataSummary(d){
 async function init(){
   try{
     allData=await fetchData();
-    document.getElementById('dataStatus').textContent=allData.length.toLocaleString()+' records loaded (last 18 months)';
+    document.getElementById('dataStatus').textContent=(allData.total||0).toLocaleString()+' records loaded (full pipeline)';
     document.getElementById('genBtn').disabled=false;
     buildDataSummary(allData);
   }catch(e){
