@@ -156,10 +156,10 @@ tr:hover td{background:#f8fafc;}
   <span class="fl">Status</span>
   <select id="fStatus" onchange="applyFilters()">
     <option value="">All</option>
-    <option value="1">Open</option>
-    <option value="2">Won / Ordered</option>
-    <option value="3">Lost</option>
-    <option value="4">Expired</option>
+    <option value="lc1">Open (In Process)</option>
+    <option value="rs3">Won</option>
+    <option value="rs4">Lost</option>
+    <option value="lc3">Completed</option>
   </select>
   <span class="fl">Owner</span>
   <select id="fOwner" onchange="applyFilters()"><option value="">All</option></select>
@@ -195,9 +195,10 @@ function pd(v){if(!v)return null;var m=String(v).match(/\/Date\((\d+)\)\//);if(m
 function pds(v){var d=pd(v);if(!d||isNaN(d))return'—';return d.toISOString().substring(0,10);}
 function yr(v){var d=pd(v);return(!d||isNaN(d))?null:d.getFullYear();}
 
-function stLabel(s){return s==='1'?'Open':s==='2'?'Won':s==='3'?'Lost':s==='4'?'Expired':'Other';}
-function stClass(s){return s==='1'?'b-open':s==='2'?'b-won':s==='3'?'b-lost':s==='4'?'b-expired':'b-other';}
-var stColors={'Open':'#0a6ed1','Won':'#107e3e','Lost':'#bb0000','Expired':'#e9730c','Other':'#94a3b8'};
+// LifeCycleStatusCode: 1=In Process, 3=Completed   ResultStatusCode: 3=Won, 4=Lost, 5=Cancelled
+function stLabel(lc, rs){ if(lc==='1')return'Open'; if(rs==='3')return'Won'; if(rs==='4')return'Lost'; if(rs==='5')return'Cancelled'; if(lc==='3')return'Completed'; return'Other'; }
+function stClass(lc, rs){ if(lc==='1')return'b-open'; if(rs==='3')return'b-won'; if(rs==='4')return'b-lost'; if(rs==='5')return'b-expired'; if(lc==='3')return'b-won'; return'b-other'; }
+var stColors={'Open':'#0a6ed1','Won':'#107e3e','Lost':'#bb0000','Cancelled':'#e9730c','Completed':'#059669','Other':'#94a3b8'};
 
 async function fetchAll(){
   var url='/odata/v4/quotes/SalesQuotes?$top=1000', all=[];
@@ -213,7 +214,7 @@ async function fetchAll(){
 function populateFilters(data){
   var orgs=[...new Set(data.map(function(d){return d.SalesOrganisationName||d.SalesOrganisationID;}).filter(Boolean))].sort();
   orgs.forEach(function(o){var e=document.createElement('option');e.value=o;e.textContent=o;document.getElementById('fOrg').appendChild(e);});
-  var owners=[...new Set(data.map(function(d){return d.MainEmployeeResponsiblePartyName;}).filter(Boolean))].sort();
+  var owners=[...new Set(data.map(function(d){return d.EmployeeResponsiblePartyName;}).filter(Boolean))].sort();
   owners.forEach(function(o){var e=document.createElement('option');e.value=o;e.textContent=o;document.getElementById('fOwner').appendChild(e);});
 }
 
@@ -232,8 +233,8 @@ function applyFilters(){
   var year=parseInt(document.getElementById('fYear').value)||2024;
   filtered=allData.filter(function(d){
     if(org&&(d.SalesOrganisationName||d.SalesOrganisationID)!==org)return false;
-    if(status&&d.LifeCycleStatusCode!==status)return false;
-    if(owner&&d.MainEmployeeResponsiblePartyName!==owner)return false;
+    if(status){var lc=status.startsWith('lc')?status.slice(2):null;var rs=status.startsWith('rs')?status.slice(2):null;if(lc&&d.LifeCycleStatusCode!==lc)return false;if(rs&&d.ResultStatusCode!==rs)return false;}
+    if(owner&&d.EmployeeResponsiblePartyName!==owner)return false;
     var y=yr(d.CreationDateTime);
     if(y&&y<year)return false;
     return true;
@@ -244,17 +245,17 @@ function applyFilters(){
 function renderKPIs(){
   var d=filtered;
   var open=d.filter(function(x){return x.LifeCycleStatusCode==='1';}).length;
-  var won=d.filter(function(x){return x.LifeCycleStatusCode==='2';}).length;
-  var lost=d.filter(function(x){return x.LifeCycleStatusCode==='3';}).length;
-  var expired=d.filter(function(x){return x.LifeCycleStatusCode==='4';}).length;
-  var rev=d.reduce(function(s,x){return s+parseFloat(x.TotalNetAmount||x.TotalGrossAmount||0);},0);
+  var won=d.filter(function(x){return x.ResultStatusCode==='3';}).length;
+  var lost=d.filter(function(x){return x.ResultStatusCode==='4';}).length;
+  var cancelled=d.filter(function(x){return x.ResultStatusCode==='5';}).length;
+  var rev=d.reduce(function(s,x){return s+parseFloat(x.NetAmount||x.GrossAmount||0);},0);
   var wr=won+lost>0?Math.round(won/(won+lost)*100):0;
   document.getElementById('kpiRow').innerHTML=
     '<div class="kpi"><div class="kl">Total Quotes</div><div class="kv">'+d.length.toLocaleString()+'</div><div class="ks">filtered records</div></div>'+
     '<div class="kpi"><div class="kl">Total Net Value</div><div class="kv">'+fmt(rev)+'</div><div class="ks">net amount</div></div>'+
     '<div class="kpi"><div class="kl">Open Quotes</div><div class="kv">'+open+'</div><div class="ks">pending decision</div></div>'+
     '<div class="kpi"><div class="kl">Won / Ordered</div><div class="kv">'+won+'</div><div class="ks">win rate '+wr+'%</div></div>'+
-    '<div class="kpi"><div class="kl">Lost / Expired</div><div class="kv">'+(lost+expired)+'</div><div class="ks">'+lost+' lost · '+expired+' expired</div></div>';
+    '<div class="kpi"><div class="kl">Lost / Cancelled</div><div class="kv">'+(lost+cancelled)+'</div><div class="ks">'+lost+' lost · '+cancelled+' cancelled</div></div>';
 }
 
 function destroyCharts(){Object.values(charts).forEach(function(c){c.destroy();});charts={};}
@@ -270,18 +271,18 @@ function renderContent(){
     '<div class="panel"><div class="panel-hdr"><h3>Quotes Created by Month</h3><span class="ph-tag">TREND</span></div><div class="panel-body"><canvas id="cTrend"></canvas></div></div>'+
     '<div class="panel"><div class="panel-hdr"><h3>Top Customers by Value</h3><span class="ph-tag">TOP 8</span></div><div class="panel-body"><canvas id="cCustomer"></canvas></div></div>'+
     '<div class="panel"><div class="panel-hdr"><h3>Win Rate by Sales Org</h3><span class="ph-tag">%</span></div><div class="panel-body"><canvas id="cWinRate"></canvas></div></div>'+
-    '<div class="panel"><div class="panel-hdr"><h3>Quote Value by Phase</h3><span class="ph-tag">PIPELINE</span></div><div class="panel-body"><canvas id="cPhase"></canvas></div></div>'+
+    '<div class="panel"><div class="panel-hdr"><h3>Quote Value by Business Segment</h3><span class="ph-tag">BUS SEG</span></div><div class="panel-body"><canvas id="cPhase"></canvas></div></div>'+
     '<div class="tbl-panel"><div class="tbl-hdr"><h3>Sales Quote List</h3><span class="tbl-ct" id="tblCt">—</span></div>'+
     '<table><thead><tr><th>Quote ID</th><th>Name</th><th>Customer</th><th>Sales Org</th><th>Owner</th><th>Net Value</th><th>Status</th><th>Created</th><th>Expires</th><th></th></tr></thead>'+
     '<tbody id="tBody"></tbody></table></div>';
 
   // Net value by org
-  var om={};d.forEach(function(x){var o=(x.SalesOrganisationName||x.SalesOrganisationID||'Unknown').substring(0,22);om[o]=(om[o]||0)+parseFloat(x.TotalNetAmount||x.TotalGrossAmount||0);});
+  var om={};d.forEach(function(x){var o=(x.SalesOrganisationName||x.SalesOrganisationID||'Unknown').substring(0,22);om[o]=(om[o]||0)+parseFloat(x.NetAmount||x.GrossAmount||0);});
   var os=Object.entries(om).sort(function(a,b){return b[1]-a[1];}).slice(0,8);
   charts.org=new Chart(document.getElementById('cOrg'),{type:'bar',data:{labels:os.map(function(e){return e[0];}),datasets:[{data:os.map(function(e){return e[1];}),backgroundColor:SAP,borderRadius:3,borderSkipped:false}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return' '+fmt(c.raw);}}}},scales:{x:{ticks:{color:tc,font:{size:9}},grid:{color:gc}},y:{ticks:{color:tc,callback:function(v){return fmtN(v);}},grid:{color:gc}}}}});
 
-  // Status donut
-  var sm={};d.forEach(function(x){var k=stLabel(x.LifeCycleStatusCode);sm[k]=(sm[k]||0)+1;});
+  // Status donut (combine lifecycle + result)
+  var sm={};d.forEach(function(x){var k=stLabel(x.LifeCycleStatusCode,x.ResultStatusCode);sm[k]=(sm[k]||0)+1;});
   var ss=Object.entries(sm);
   var rTotal=ss.reduce(function(s,e){return s+e[1];},0);
   document.getElementById('statusLeg').innerHTML=ss.map(function(e){return '<div class="leg-i"><div class="leg-dot" style="background:'+(stColors[e[0]]||'#94a3b8')+'"></div>'+e[0]+' '+(e[1]/rTotal*100).toFixed(1)+'%</div>';}).join('');
@@ -293,17 +294,17 @@ function renderContent(){
   charts.trend=new Chart(document.getElementById('cTrend'),{type:'line',data:{labels:tms,datasets:[{label:'Quotes',data:tms.map(function(m){return tm[m];}),borderColor:'#0a6ed1',backgroundColor:'rgba(10,110,209,0.06)',tension:0.4,fill:true,pointBackgroundColor:'#0a6ed1',pointRadius:3}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:tc,font:{size:8}},grid:{color:gc}},y:{ticks:{color:tc},grid:{color:gc}}}}});
 
   // Top customers by net value
-  var cm={};d.forEach(function(x){var c=(x.BuyerPartyName||'Unknown').substring(0,20);cm[c]=(cm[c]||0)+parseFloat(x.TotalNetAmount||x.TotalGrossAmount||0);});
+  var cm={};d.forEach(function(x){var c=(x.BuyerPartyName||'Unknown').substring(0,20);cm[c]=(cm[c]||0)+parseFloat(x.NetAmount||x.GrossAmount||0);});
   var cs=Object.entries(cm).sort(function(a,b){return b[1]-a[1];}).slice(0,8);
   charts.customer=new Chart(document.getElementById('cCustomer'),{type:'bar',data:{labels:cs.map(function(e){return e[0];}),datasets:[{data:cs.map(function(e){return e[1];}),backgroundColor:'rgba(108,50,169,0.75)',borderRadius:3,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return' '+fmt(c.raw);}}}},scales:{x:{ticks:{color:tc,callback:function(v){return fmtN(v);}},grid:{color:gc}},y:{ticks:{color:tc,font:{size:9}},grid:{color:gc}}}}});
 
-  // Win rate by org (won vs lost)
-  var wr={};d.forEach(function(x){var o=(x.SalesOrganisationName||x.SalesOrganisationID||'?').substring(0,18);if(!wr[o])wr[o]={won:0,lost:0};if(x.LifeCycleStatusCode==='2')wr[o].won++;if(x.LifeCycleStatusCode==='3')wr[o].lost++;});
+  // Win rate by org (won vs lost using ResultStatusCode)
+  var wr={};d.forEach(function(x){var o=(x.SalesOrganisationID||'?').substring(0,18);if(!wr[o])wr[o]={won:0,lost:0};if(x.ResultStatusCode==='3')wr[o].won++;if(x.ResultStatusCode==='4')wr[o].lost++;});
   var wrs=Object.entries(wr).filter(function(e){return e[1].won+e[1].lost>=1;}).map(function(e){return{k:e[0],r:e[1].won+e[1].lost>0?e[1].won/(e[1].won+e[1].lost)*100:0,total:e[1].won+e[1].lost};}).sort(function(a,b){return b.r-a.r;}).slice(0,8);
   charts.winRate=new Chart(document.getElementById('cWinRate'),{type:'bar',data:{labels:wrs.map(function(e){return e.k;}),datasets:[{data:wrs.map(function(e){return e.r;}),backgroundColor:wrs.map(function(e){return e.r>=50?'#107e3e':e.r>=25?'#0a6ed1':'#e9730c';}),borderRadius:3,borderSkipped:false}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return' '+c.raw.toFixed(1)+'%';}}}},scales:{x:{ticks:{color:tc,font:{size:9}},grid:{color:gc}},y:{ticks:{color:tc,callback:function(v){return v+'%';}},grid:{color:gc},max:100}}}});
 
-  // Value by sales phase
-  var pm={};d.forEach(function(x){var p=x.SalesCyclePhaseCodeText||'(Unknown)';pm[p]=(pm[p]||0)+parseFloat(x.TotalNetAmount||x.TotalGrossAmount||0);});
+  // Value by business segment
+  var pm={};d.forEach(function(x){var p=x.BUS_SEG_CDE_KUTText||x.BUS_SEG_CDE_KUT||'(Unknown)';pm[p]=(pm[p]||0)+parseFloat(x.NetAmount||x.GrossAmount||0);});
   var ps=Object.entries(pm).sort(function(a,b){return b[1]-a[1];}).slice(0,6);
   charts.phase=new Chart(document.getElementById('cPhase'),{type:'bar',data:{labels:ps.map(function(e){return e[0].substring(0,16);}),datasets:[{data:ps.map(function(e){return e[1];}),backgroundColor:SAP.slice(0,ps.length),borderRadius:3,borderSkipped:false}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return' '+fmt(c.raw);}}}},scales:{x:{ticks:{color:tc,font:{size:9}},grid:{color:gc}},y:{ticks:{color:tc,callback:function(v){return fmtN(v);}},grid:{color:gc}}}}});
 
@@ -318,11 +319,11 @@ function renderContent(){
       '<td style="font-weight:500;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(row.Name||'—')+'</td>'+
       '<td style="color:var(--muted);max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(row.BuyerPartyName||'—')+'</td>'+
       '<td style="color:var(--muted);font-size:0.7rem">'+(row.SalesOrganisationName||row.SalesOrganisationID||'—')+'</td>'+
-      '<td style="color:var(--muted);font-size:0.7rem">'+(row.MainEmployeeResponsiblePartyName||'—')+'</td>'+
+      '<td style="color:var(--muted);font-size:0.7rem">'+(row.EmployeeResponsiblePartyName||'—')+'</td>'+
       '<td style="font-weight:600;color:var(--blue)">'+fmt(val)+'</td>'+
-      '<td><span class="badge '+stClass(row.LifeCycleStatusCode)+'">'+stLabel(row.LifeCycleStatusCode)+'</span></td>'+
+      '<td><span class="badge '+stClass(row.LifeCycleStatusCode,row.ResultStatusCode)+'">'+stLabel(row.LifeCycleStatusCode,row.ResultStatusCode)+'</span></td>'+
       '<td style="color:var(--muted);font-size:0.7rem">'+pds(row.CreationDateTime)+'</td>'+
-      '<td style="color:var(--muted);font-size:0.7rem">'+pds(row.ExpirationDate)+'</td>'+
+      '<td style="color:var(--muted);font-size:0.7rem">'+pds(row.ValidToDate)+'</td>'+
       '<td><a class="c4c-link" href="'+link+'" target="_blank">Open<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 2h3v3M10 2 5 7M4 3H2v7h7V8"/></svg></a></td>'+
       '</tr>';
   }).join('');
