@@ -217,6 +217,17 @@ tbody tr:hover td{background:#f8fafc;}
 .refine-btn:hover{background:var(--blue2);}
 .refine-btn svg{width:13px;height:13px;}
 
+/* CLARIFICATION */
+.clarify-wrap{padding:20px 26px;}
+.clarify-intro{font-size:0.82rem;color:var(--muted);margin-bottom:18px;line-height:1.6;}
+.clarify-q{margin-bottom:16px;}
+.clarify-q-label{font-size:0.75rem;font-weight:600;color:var(--text);margin-bottom:6px;display:flex;align-items:flex-start;gap:7px;}
+.clarify-q-num{width:20px;height:20px;border-radius:50%;background:var(--blue);color:white;font-size:0.62rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.clarify-inp{width:100%;border:1px solid var(--border2);border-radius:8px;padding:10px 13px;font-size:0.82rem;font-family:'Inter',sans-serif;color:var(--text);outline:none;transition:border-color 0.15s;background:white;}
+.clarify-inp:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,0.08);}
+.clarify-tip{font-size:0.68rem;color:var(--light);margin-top:4px;padding-left:27px;}
+.clarify-skip{font-size:0.7rem;color:var(--muted);background:none;border:none;cursor:pointer;text-decoration:underline;padding:0;}
+
 /* RESPONSIVE */
 @media(max-width:900px){
   .kpi-row{grid-template-columns:repeat(2,1fr);}
@@ -313,35 +324,56 @@ tbody tr:hover td{background:#f8fafc;}
       </div>
       <p>Review the plan before building. Go back to refine if needed.</p>
     </div>
-    <div class="confirm-body">
-      <div class="confirm-section">
-        <div class="confirm-label">Your Request</div>
-        <div class="confirm-value" id="confirmRequest">—</div>
+    <!-- CLARIFICATION MODE -->
+    <div id="clarifyPanel" style="display:none;">
+      <div class="clarify-wrap">
+        <div class="clarify-intro" id="clarifyIntro"></div>
+        <div id="clarifyQuestions"></div>
       </div>
-      <div class="confirm-section">
-        <div class="confirm-label">AI Understanding</div>
-        <div class="confirm-understanding">
-          <div class="confirm-understanding-text" id="confirmUnderstanding">Analyzing your request...</div>
-        </div>
-      </div>
-      <div class="confirm-section">
-        <div class="confirm-label">Report Will Include</div>
-        <div class="confirm-chips" id="confirmChips"><span class="confirm-chip chip-kpi">Loading...</span></div>
-      </div>
-      <div class="confirm-section">
-        <div class="confirm-label">Data Source</div>
-        <div class="confirm-value">C4C OpportunityCollection · my352500 QUA · Last 12 months · <span id="confirmCount">—</span> records loaded</div>
+      <div class="confirm-actions">
+        <button class="btn-sec" onclick="goTo(1)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          Redefine
+        </button>
+        <button class="btn-pri" id="clarifySubmitBtn" onclick="submitClarifications()">
+          Submit Answers
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
       </div>
     </div>
-    <div class="confirm-actions">
-      <button class="btn-sec" onclick="goTo(1)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-        Redefine
-      </button>
-      <button class="btn-pri" id="confirmBuildBtn" onclick="goToBuild()" disabled>
-        Confirm &amp; Build
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-      </button>
+
+    <!-- PLAN MODE -->
+    <div id="planPanel">
+      <div class="confirm-body">
+        <div class="confirm-section">
+          <div class="confirm-label">Your Request</div>
+          <div class="confirm-value" id="confirmRequest">—</div>
+        </div>
+        <div class="confirm-section">
+          <div class="confirm-label">AI Understanding</div>
+          <div class="confirm-understanding">
+            <div class="confirm-understanding-text" id="confirmUnderstanding">Analyzing your request...</div>
+          </div>
+        </div>
+        <div class="confirm-section">
+          <div class="confirm-label">Report Will Include</div>
+          <div class="confirm-chips" id="confirmChips"><span class="confirm-chip chip-kpi">Loading...</span></div>
+        </div>
+        <div class="confirm-section">
+          <div class="confirm-label">Data Source</div>
+          <div class="confirm-value">C4C OpportunityCollection · my352500 QUA · Last 12 months · <span id="confirmCount">—</span> records loaded</div>
+        </div>
+      </div>
+      <div class="confirm-actions">
+        <button class="btn-sec" onclick="goTo(1)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          Redefine
+        </button>
+        <button class="btn-pri" id="confirmBuildBtn" onclick="goToBuild()" disabled>
+          Confirm &amp; Build
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </div>
     </div>
   </div>
 </div>
@@ -460,6 +492,8 @@ function buildQuickSummary(){
   });
 }
 
+var pendingQuestions = [];
+
 async function goToConfirm(){
   var q=document.getElementById('defineInput').value.trim();
   if(!q)return;
@@ -472,67 +506,125 @@ async function goToConfirm(){
     btn.innerHTML='Continue <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
   }
   currentQ=q;
+  // Reset panels
+  document.getElementById('clarifyPanel').style.display='none';
+  document.getElementById('planPanel').style.display='block';
   document.getElementById('confirmRequest').textContent=q;
-  document.getElementById('confirmHeadline').innerHTML='AI is understanding your request<span class="thinking-dots"><span></span><span></span><span></span></span>';
+  document.getElementById('confirmHeadline').innerHTML='AI is reviewing your request<span class="thinking-dots"><span></span><span></span><span></span></span>';
   document.getElementById('confirmBuildBtn').disabled=true;
   document.getElementById('confirmUnderstanding').textContent='Analyzing...';
   document.getElementById('confirmChips').innerHTML='<span class="confirm-chip chip-kpi">Loading...</span>';
   goTo(2);
+
   try{
     var summary=buildQuickSummary();
-    var r=await fetch('/odata/v4/ai/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:'Analyze this report request and return a JSON plan. Request: "'+q+'". Return ONLY JSON no markdown: {"understanding":"1-2 sentences what you will analyze","reportType":"executive_summary|chart_report|mixed","primaryFocus":"main chart or analysis","supportingCharts":["2-4 relevant chart names"],"willInclude":["4-6 specific things the report contains"]}',summary:summary})});
+    var availableOrgs=[...new Set(allData.map(function(x){return x.SalesOrganisationName||'';}).filter(Boolean))].slice(0,15).join(', ');
+    var availableSegs=[...new Set(allData.map(function(x){return x.BUS_SEG_CDE_KUTText||'';}).filter(Boolean))].join(', ');
+
+    var prompt='You are a professional TSS sales analyst. A user has submitted a report request.\n\n'+
+      'Available data: '+allData.length+' C4C opportunities. Sales orgs in data: '+availableOrgs+'. Segments: '+availableSegs+'.\n\n'+
+      'User request: "'+q+'"\n\n'+
+      'First, decide if you need clarification before building a meaningful report.\n'+
+      'Ask clarifying questions ONLY if: (1) geography is mentioned but ambiguous, (2) time period is unclear and would significantly affect the result, (3) the request could mean multiple very different reports, (4) a key filter (segment, status, owner) is partially specified.\n'+
+      'Do NOT ask if the request is reasonably clear or broad.\n\n'+
+      'Return ONLY valid JSON, no markdown:\n'+
+      'If clarification needed: {"needsClarification":true,"clarifyIntro":"1 sentence explaining why you need to clarify","questions":["Question 1 (professional, specific)?","Question 2?"]}\n'+
+      'If clear enough: {"needsClarification":false,"understanding":"1-2 sentences what you will analyze and how","reportType":"executive_summary|chart_report|mixed","willInclude":["4-6 specific things the report contains"]}';
+
+    var r=await fetch('/odata/v4/ai/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:prompt,summary:summary})});
+    var data=await r.json();
+    var raw=(data.value||'').replace(/```json|```/g,'').trim();
+    var plan=JSON.parse(raw);
+
+    if(plan.needsClarification && plan.questions && plan.questions.length>0){
+      // Switch to clarification mode
+      pendingQuestions=plan.questions;
+      document.getElementById('confirmHeadline').innerHTML='A few questions before I build';
+      document.getElementById('planPanel').style.display='none';
+      document.getElementById('clarifyPanel').style.display='block';
+      document.getElementById('clarifyIntro').textContent=plan.clarifyIntro||'To build the most accurate report, I need a few details:';
+      var qHtml=plan.questions.map(function(q,i){
+        return '<div class="clarify-q">'+
+          '<div class="clarify-q-label"><div class="clarify-q-num">'+(i+1)+'</div>'+q+'</div>'+
+          '<input class="clarify-inp" id="clarifyA'+i+'" type="text" placeholder="Your answer..." />'+
+          '</div>';
+      }).join('');
+      document.getElementById('clarifyQuestions').innerHTML=qHtml+
+        '<button class="clarify-skip" onclick="skipClarifications()">Skip questions and build anyway →</button>';
+      // Focus first input
+      var firstInp=document.getElementById('clarifyA0');
+      if(firstInp)setTimeout(function(){firstInp.focus();},100);
+    } else {
+      // Plan mode — show understanding
+      aiPlan=plan;
+      document.getElementById('confirmHeadline').innerHTML='Ready to build &nbsp;&#10003;';
+      document.getElementById('confirmUnderstanding').textContent=plan.understanding||'Will build a report based on your request.';
+      var chipColors=['chip-chart','chip-text','chip-kpi','chip-data','chip-kpi','chip-kpi'];
+      document.getElementById('confirmChips').innerHTML=(plan.willInclude||[]).map(function(item,i){return '<span class="confirm-chip '+chipColors[i%chipColors.length]+'">'+item+'</span>';}).join('');
+      activeFilters=extractFilters(q);
+      filteredData=applyFilters(allData,activeFilters);
+      document.getElementById('confirmBuildBtn').disabled=false;
+    }
+  }catch(e){
+    // Fallback — just build without clarification
+    document.getElementById('confirmHeadline').innerHTML='Ready to build';
+    document.getElementById('confirmUnderstanding').textContent='Will build a comprehensive report for: '+q;
+    document.getElementById('confirmChips').innerHTML='<span class="confirm-chip chip-kpi">5 KPI tiles</span><span class="confirm-chip chip-chart">Primary chart</span><span class="confirm-chip chip-text">AI insight</span><span class="confirm-chip chip-data">Data table</span>';
+    activeFilters=extractFilters(q);
+    filteredData=applyFilters(allData,activeFilters);
+    document.getElementById('confirmBuildBtn').disabled=false;
+  }
+}
+
+async function submitClarifications(){
+  // Collect answers
+  var qa=pendingQuestions.map(function(q,i){
+    var a=(document.getElementById('clarifyA'+i)||{}).value||'';
+    return a.trim()?q+' → '+a:'';
+  }).filter(Boolean).join('. ');
+
+  // Enrich the original question with answers
+  if(qa) currentQ=currentQ+'. Additional context: '+qa;
+
+  // Switch to plan panel, show understanding, build
+  document.getElementById('clarifyPanel').style.display='none';
+  document.getElementById('planPanel').style.display='block';
+  document.getElementById('confirmHeadline').innerHTML='Building plan with your answers<span class="thinking-dots"><span></span><span></span><span></span></span>';
+  document.getElementById('confirmBuildBtn').disabled=true;
+
+  try{
+    var summary=buildQuickSummary();
+    var r=await fetch('/odata/v4/ai/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+      question:'Analyze this report request and return a JSON plan. Request: "'+currentQ+'". Return ONLY JSON no markdown: {"understanding":"1-2 sentences what you will analyze","reportType":"executive_summary|chart_report|mixed","willInclude":["4-6 specific things the report contains"]}',
+      summary:summary
+    })});
     var data=await r.json();
     var raw=(data.value||'').replace(/```json|```/g,'').trim();
     var plan=JSON.parse(raw);
     aiPlan=plan;
-    document.getElementById('confirmHeadline').innerHTML='AI understood your request &nbsp;&#10003;';
-    document.getElementById('confirmUnderstanding').textContent=plan.understanding;
+    document.getElementById('confirmHeadline').innerHTML='Ready to build &nbsp;&#10003;';
+    document.getElementById('confirmUnderstanding').textContent=plan.understanding||currentQ;
     var chipColors=['chip-chart','chip-text','chip-kpi','chip-data','chip-kpi','chip-kpi'];
     document.getElementById('confirmChips').innerHTML=(plan.willInclude||[]).map(function(item,i){return '<span class="confirm-chip '+chipColors[i%chipColors.length]+'">'+item+'</span>';}).join('');
-    // Extract filters from question
-    activeFilters = extractFilters(q);
-    filteredData = applyFilters(allData, activeFilters);
-    // Show clarification if geography/segment found
-    var clarHtml = '';
-    if (activeFilters.geography) {
-        var matchingOrgs = [...new Set(allData.map(function(x){return x.SalesOrganisationName||'';}).filter(function(n){return n.toLowerCase().includes(activeFilters.geography);}))];
-        if (matchingOrgs.length > 0) {
-            clarHtml = '<div class="confirm-section" id="clarSection" style="margin-top:12px;padding:12px 16px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;">'
-                +'<div class="confirm-label" style="margin-bottom:8px;">⚠ Clarification: Geography Filter</div>'
-                +'<div style="font-size:0.78rem;color:#475569;margin-bottom:8px;">Found <strong>'+matchingOrgs.length+'</strong> orgs matching "<strong>'+activeFilters.geography+'</strong>" ('+filteredData.length+' of '+allData.length+' records). Showing only these orgs:</div>'
-                +'<div style="font-size:0.72rem;color:#64748b;font-family:monospace;">'+(matchingOrgs.slice(0,5).join(' · '))+(matchingOrgs.length>5?' + '+(matchingOrgs.length-5)+' more':'')+'</div>'
-                +'<div style="margin-top:8px;display:flex;gap:8px;">'
-                +'<button style="font-size:0.72rem;padding:4px 10px;border-radius:6px;border:1px solid #0a6ed1;background:#0a6ed1;color:white;cursor:pointer;" onclick="filteredData=applyFilters(allData,activeFilters);document.getElementById(\'clarSection\').style.background=\'#f0fdf4\';document.getElementById(\'clarSection\').style.borderColor=\'#22c55e\';">✓ Analyze '+activeFilters.geography+' only ('+filteredData.length+' records)</button>'
-                +'<button style="font-size:0.72rem;padding:4px 10px;border-radius:6px;border:1px solid #e2e8f0;background:white;color:#475569;cursor:pointer;" onclick="filteredData=allData;activeFilters={};document.getElementById(\'clarSection\').style.background=\'#f0fdf4\';document.getElementById(\'clarSection\').style.borderColor=\'#22c55e\';">Analyze all orgs ('+allData.length+' records)</button>'
-                +'</div></div>';
-        }
-    } else if (activeFilters.segment) {
-        var matchingSegs = [...new Set(allData.map(function(x){return x.BUS_SEG_CDE_KUTText||'';}).filter(function(n){return n.toLowerCase().includes(activeFilters.segment);}))];
-        if (matchingSegs.length > 0) {
-            clarHtml = '<div class="confirm-section" id="clarSection" style="margin-top:12px;padding:12px 16px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;">'
-                +'<div class="confirm-label" style="margin-bottom:8px;">⚠ Clarification: Segment Filter</div>'
-                +'<div style="font-size:0.78rem;color:#475569;margin-bottom:8px;">Found segment "<strong>'+activeFilters.segment+'</strong>" in '+filteredData.length+' of '+allData.length+' records.</div>'
-                +'<div style="margin-top:8px;display:flex;gap:8px;">'
-                +'<button style="font-size:0.72rem;padding:4px 10px;border-radius:6px;border:1px solid #0a6ed1;background:#0a6ed1;color:white;cursor:pointer;" onclick="filteredData=applyFilters(allData,activeFilters);document.getElementById(\'clarSection\').style.background=\'#f0fdf4\';">✓ '+activeFilters.segment+' segment only</button>'
-                +'<button style="font-size:0.72rem;padding:4px 10px;border-radius:6px;border:1px solid #e2e8f0;background:white;color:#475569;cursor:pointer;" onclick="filteredData=allData;activeFilters={};">All segments</button>'
-                +'</div></div>';
-        }
-    }
-    if (clarHtml) {
-        var confirmBody = document.querySelector('.confirm-body');
-        if (confirmBody && !document.getElementById('clarSection')) {
-            confirmBody.insertAdjacentHTML('beforeend', clarHtml);
-        }
-    }
-    document.getElementById('confirmBuildBtn').disabled=false;
   }catch(e){
-    document.getElementById('confirmHeadline').innerHTML='Plan ready';
-    document.getElementById('confirmUnderstanding').textContent='Will build a comprehensive report for: '+q;
-    document.getElementById('confirmChips').innerHTML='<span class="confirm-chip chip-kpi">5 KPI tiles</span><span class="confirm-chip chip-chart">Primary chart</span><span class="confirm-chip chip-text">AI insight</span><span class="confirm-chip chip-data">Data table</span>';
-    activeFilters = extractFilters(q);
-    filteredData = applyFilters(allData, activeFilters);
-    document.getElementById('confirmBuildBtn').disabled=false;
+    document.getElementById('confirmHeadline').innerHTML='Ready to build';
+    document.getElementById('confirmUnderstanding').textContent=currentQ;
+    document.getElementById('confirmChips').innerHTML='<span class="confirm-chip chip-kpi">Report with clarified context</span>';
   }
+  activeFilters=extractFilters(currentQ);
+  filteredData=applyFilters(allData,activeFilters);
+  document.getElementById('confirmBuildBtn').disabled=false;
+}
+
+function skipClarifications(){
+  document.getElementById('clarifyPanel').style.display='none';
+  document.getElementById('planPanel').style.display='block';
+  document.getElementById('confirmHeadline').innerHTML='Ready to build';
+  document.getElementById('confirmUnderstanding').textContent='Building report for: '+currentQ;
+  document.getElementById('confirmChips').innerHTML='<span class="confirm-chip chip-kpi">5 KPI tiles</span><span class="confirm-chip chip-chart">Primary chart</span><span class="confirm-chip chip-text">AI insight</span><span class="confirm-chip chip-data">Data table</span>';
+  activeFilters=extractFilters(currentQ);
+  filteredData=applyFilters(allData,activeFilters);
+  document.getElementById('confirmBuildBtn').disabled=false;
 }
 
 async function goToBuild(){
