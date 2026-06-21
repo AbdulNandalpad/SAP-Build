@@ -162,6 +162,25 @@ function computeSummary(all) {
     };
 }
 
+// In-memory cache for getSummary — refreshed every 6 hours
+let _summaryCache = null;
+let _summaryCachedAt = null;
+const SUMMARY_TTL_MS = 6 * 60 * 60 * 1000;
+
+async function getCachedSummary(c4c) {
+    const now = Date.now();
+    if (_summaryCache && _summaryCachedAt && (now - _summaryCachedAt) < SUMMARY_TTL_MS) {
+        console.log('[CAP] getSummary: returning cached result from ' + new Date(_summaryCachedAt).toISOString());
+        return _summaryCache;
+    }
+    console.log('[CAP] getSummary: fetching fresh data...');
+    const all = await fetchAllOpportunities(c4c);
+    const summary = computeSummary(all);
+    _summaryCache = summary;
+    _summaryCachedAt = now;
+    return summary;
+}
+
 module.exports = cds.service.impl(async function () {
     const c4c = await cds.connect.to('c4c');
 
@@ -173,10 +192,14 @@ module.exports = cds.service.impl(async function () {
         return Array.isArray(result) ? result : (result.value || result);
     });
 
-    // Full aggregation — called by UI pages for charts and AI
+    // Full aggregation — cached; first call fetches all records, subsequent calls return cache
     this.on('getSummary', async (req) => {
-        const all = await fetchAllOpportunities(c4c);
-        const summary = computeSummary(all);
+        const summary = await getCachedSummary(c4c);
         return JSON.stringify(summary);
     });
+
+    // Warm the cache 15 seconds after CAP boots so UI requests don't trigger the cold fetch
+    setTimeout(() => {
+        getCachedSummary(c4c).catch(err => console.warn('[CAP] Opportunity cache warm-up failed:', err.message));
+    }, 15000);
 });
