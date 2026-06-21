@@ -34,6 +34,45 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-h
 .shell-back:hover{background:rgba(255,255,255,0.08);color:white;}
 .shell-back svg{width:12px;height:12px;}
 
+/* PRE-FLIGHT MODAL */
+.modal-backdrop{position:fixed;inset:0;background:rgba(15,23,42,0.55);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;}
+.modal{background:white;border-radius:16px;width:100%;max-width:580px;box-shadow:0 24px 64px rgba(0,0,0,0.18);overflow:hidden;animation:modalIn 0.2s ease;}
+@keyframes modalIn{from{opacity:0;transform:scale(0.96);}to{opacity:1;transform:scale(1);}}
+.modal-hdr{padding:22px 26px 0;}
+.modal-badge{display:inline-flex;align-items:center;gap:6px;background:var(--purple-light);border:1px solid rgba(124,58,237,0.2);border-radius:20px;padding:4px 12px;font-size:0.66rem;font-weight:600;color:var(--purple);letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;}
+.modal-title{font-size:1rem;font-weight:700;color:var(--text);margin-bottom:6px;}
+.modal-sub{font-size:0.78rem;color:var(--muted);line-height:1.6;margin-bottom:18px;}
+.modal-divider{height:1px;background:var(--border);margin:0 -0px;}
+.modal-body{padding:20px 26px;}
+.modal-section{margin-bottom:20px;}
+.modal-section:last-child{margin-bottom:0;}
+.modal-section-label{font-size:0.64rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:10px;}
+/* Clarify questions */
+.pf-q{margin-bottom:14px;}
+.pf-q-label{font-size:0.8rem;font-weight:500;color:var(--text);margin-bottom:6px;display:flex;align-items:flex-start;gap:8px;line-height:1.4;}
+.pf-q-num{width:22px;height:22px;border-radius:50%;background:var(--blue);color:white;font-size:0.62rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.pf-inp{width:100%;border:1.5px solid var(--border2);border-radius:8px;padding:9px 13px;font-size:0.82rem;font-family:'Inter',sans-serif;color:var(--text);outline:none;transition:border-color 0.15s;}
+.pf-inp:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,0.08);}
+/* Validation warnings */
+.val-warn{background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:14px 16px;margin-bottom:10px;display:flex;gap:10px;align-items:flex-start;}
+.val-warn svg{flex-shrink:0;margin-top:1px;}
+.val-warn-text{font-size:0.78rem;color:#92400e;line-height:1.5;}
+.val-ok{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px 16px;display:flex;gap:10px;align-items:center;}
+.val-ok-text{font-size:0.78rem;color:#065f46;line-height:1.5;}
+/* Modal footer */
+.modal-footer{padding:16px 26px;border-top:1px solid var(--border);background:#fafcff;display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.modal-btn-sec{background:white;color:var(--text);border:1px solid var(--border2);padding:9px 18px;border-radius:8px;font-size:0.78rem;cursor:pointer;font-family:'Inter',sans-serif;font-weight:500;transition:background 0.15s;}
+.modal-btn-sec:hover{background:var(--bg);}
+.modal-btn-pri{background:var(--blue);color:white;border:none;padding:9px 20px;border-radius:8px;font-size:0.78rem;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:background 0.15s;display:flex;align-items:center;gap:6px;}
+.modal-btn-pri:hover{background:var(--blue2);}
+.modal-btn-pri:disabled{opacity:0.4;cursor:not-allowed;}
+.modal-skip{font-size:0.7rem;color:var(--muted);background:none;border:none;cursor:pointer;text-decoration:underline;padding:0;}
+.thinking-dots{display:inline-flex;gap:3px;align-items:center;margin-left:4px;}
+.thinking-dots span{width:4px;height:4px;background:var(--blue);border-radius:50%;animation:dot 1.2s infinite;}
+.thinking-dots span:nth-child(2){animation-delay:0.2s;}
+.thinking-dots span:nth-child(3){animation-delay:0.4s;}
+@keyframes dot{0%,80%,100%{opacity:0.2;}40%{opacity:1;}}
+
 /* PAGE 1 — INTENT */
 #page1{min-height:calc(100vh - 52px);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 24px;}
 .eyebrow{display:inline-flex;align-items:center;gap:8px;background:var(--blue-light);border:1px solid rgba(10,110,209,0.2);border-radius:20px;padding:5px 14px;margin-bottom:20px;font-size:0.68rem;font-weight:600;color:var(--blue);letter-spacing:1.2px;text-transform:uppercase;}
@@ -302,6 +341,55 @@ tbody tr:hover td{background:#f8fafc;}
   </div>
 </div>
 
+<!-- PRE-FLIGHT MODAL -->
+<div id="preFlightModal" class="modal-backdrop" style="display:none;" onclick="if(event.target===this)closePreflight()">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="10" height="10"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/><path d="M22 2 12 12"/><circle cx="22" cy="2" r="2" fill="currentColor"/></svg>
+        AI Pre-flight Check
+      </div>
+      <div class="modal-title" id="pfTitle">Reviewing your brief request</div>
+      <div class="modal-sub" id="pfSub">AI is analysing your intent and data before generating the brief.</div>
+    </div>
+
+    <!-- CLARIFICATION SECTION -->
+    <div class="modal-body" id="pfClarifyBody" style="display:none;">
+      <div class="modal-section">
+        <div class="modal-section-label">Questions before I generate</div>
+        <div id="pfQuestions"></div>
+      </div>
+    </div>
+
+    <!-- VALIDATION SECTION -->
+    <div class="modal-body" id="pfValidateBody" style="display:none;">
+      <div class="modal-section">
+        <div class="modal-section-label">Data validation</div>
+        <div id="pfValidations"></div>
+      </div>
+    </div>
+
+    <!-- LOADING STATE -->
+    <div class="modal-body" id="pfLoadingBody">
+      <div style="text-align:center;padding:20px 0;color:var(--muted);font-size:0.82rem;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" width="28" height="28" style="animation:spin 0.8s linear infinite;display:block;margin:0 auto 12px;"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+        <span id="pfLoadingText">Checking your request...</span>
+      </div>
+    </div>
+
+    <div class="modal-footer" id="pfFooter" style="display:none;">
+      <button class="modal-skip" id="pfSkipBtn" onclick="skipAndGenerate()">Skip & generate anyway</button>
+      <div style="display:flex;gap:8px;">
+        <button class="modal-btn-sec" onclick="closePreflight()">Cancel</button>
+        <button class="modal-btn-pri" id="pfConfirmBtn" onclick="confirmPreflight()" disabled>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+          Generate Brief
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- PAGE 2: BUILDING -->
 <div id="page2">
   <div class="build-ring"></div>
@@ -414,8 +502,163 @@ function buildPayload(d){
   });
 }
 
+// ── Pre-flight state ──────────────────────────────────────────────────────────
+var pfAnswers=[], pfQuestions=[], pfIntent='', pfValidationPassed=false;
+
+function closePreflight(){
+  document.getElementById('preFlightModal').style.display='none';
+}
+
+function openPreflight(){
+  var m=document.getElementById('preFlightModal');
+  m.style.display='flex';
+  document.getElementById('pfClarifyBody').style.display='none';
+  document.getElementById('pfValidateBody').style.display='none';
+  document.getElementById('pfLoadingBody').style.display='block';
+  document.getElementById('pfFooter').style.display='none';
+  document.getElementById('pfTitle').textContent='Reviewing your brief request';
+  document.getElementById('pfSub').textContent='AI is checking whether it needs any clarification before generating.';
+}
+
 async function generateBrief(){
-  var intent=document.getElementById('intentInput').value.trim();
+  pfIntent=document.getElementById('intentInput').value.trim();
+  openPreflight();
+  try{
+    var payload=buildPayload(allData);
+    var availOrgs=[...new Set(allData.map(function(x){return x.SalesOrganisationName||'';}).filter(Boolean))].slice(0,12).join(', ');
+    var availSegs=[...new Set(allData.map(function(x){return x.BUS_SEG_CDE_KUTText||'';}).filter(Boolean))].join(', ');
+    var won=allData.filter(function(x){return x.LifeCycleStatusCode==='3';}).length;
+    var lost=allData.filter(function(x){return x.LifeCycleStatusCode==='5';}).length;
+
+    var clarPrompt='You are a professional TSS sales analyst. A user wants to generate a "'+selectedAud+'" sales brief.\n'+
+      'User intent: "'+(pfIntent||'Full pipeline overview')+'"\n'+
+      'Available data: '+allData.length+' C4C opportunities. Orgs: '+availOrgs+'. Segments: '+availSegs+'. Won: '+won+'. Lost: '+lost+'.\n\n'+
+      'Decide if you need brief clarification before generating. Ask ONLY if: (1) a specific geography, segment or owner is referenced but unclear which, (2) intent mentions a timeframe not obvious from context, (3) intent is contradictory or too vague to tailor the brief.\n'+
+      'Keep questions to max 2. Do NOT ask for things the audience type already implies.\n'+
+      'Return ONLY valid JSON:\n'+
+      'If clarification needed: {"needsClarification":true,"questions":["Short professional question 1?","Question 2?"]}\n'+
+      'If clear: {"needsClarification":false}';
+
+    var r=await fetch('/odata/v4/ai/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:clarPrompt,summary:payload})});
+    var d=await r.json();
+    var clarResult=JSON.parse((d.value||'{}').replace(/```json|```/g,'').trim());
+
+    if(clarResult.needsClarification && clarResult.questions && clarResult.questions.length){
+      // Show clarification questions
+      pfQuestions=clarResult.questions;
+      document.getElementById('pfLoadingBody').style.display='none';
+      document.getElementById('pfTitle').textContent='A couple of questions first';
+      document.getElementById('pfSub').textContent='Your answers will help me tailor the brief precisely. They\'re optional — skip if you\'re happy with a general brief.';
+      document.getElementById('pfClarifyBody').style.display='block';
+      document.getElementById('pfQuestions').innerHTML=clarResult.questions.map(function(q,i){
+        return '<div class="pf-q"><div class="pf-q-label"><div class="pf-q-num">'+(i+1)+'</div>'+q+'</div>'+
+          '<input class="pf-inp" id="pfA'+i+'" type="text" placeholder="Your answer (optional)" /></div>';
+      }).join('');
+      document.getElementById('pfFooter').style.display='flex';
+      document.getElementById('pfConfirmBtn').disabled=false;
+      document.getElementById('pfConfirmBtn').textContent='';
+      document.getElementById('pfConfirmBtn').innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M5 12h14M12 5l7 7-7 7"/></svg> Next: Validate';
+      document.getElementById('pfConfirmBtn').onclick=runValidation;
+      var f=document.getElementById('pfA0');if(f)setTimeout(function(){f.focus();},100);
+    } else {
+      // No clarification needed — go straight to validation
+      pfQuestions=[];
+      await runValidation();
+    }
+  }catch(e){
+    // On error, skip preflight and generate
+    closePreflight();
+    doGenerate(pfIntent);
+  }
+}
+
+async function runValidation(){
+  // Collect clarification answers if any
+  pfAnswers=pfQuestions.map(function(q,i){
+    var a=(document.getElementById('pfA'+i)||{}).value||'';
+    return a.trim()?q+' → '+a:'';
+  }).filter(Boolean);
+
+  document.getElementById('pfClarifyBody').style.display='none';
+  document.getElementById('pfLoadingBody').style.display='block';
+  document.getElementById('pfFooter').style.display='none';
+  document.getElementById('pfTitle').textContent='Validating against your data';
+  document.getElementById('pfSub').textContent='Checking your intent matches what\'s available in the C4C data.';
+
+  try{
+    var enrichedIntent=(pfIntent||'Full pipeline overview')+(pfAnswers.length?'. '+pfAnswers.join('. '):'');
+    var won=allData.filter(function(x){return x.LifeCycleStatusCode==='3';});
+    var lost=allData.filter(function(x){return x.LifeCycleStatusCode==='5';});
+    var open=allData.filter(function(x){return isOpen(x);});
+
+    // Build mini-context for validation
+    var context='Total: '+allData.length+'. Open: '+open.length+'. Won: '+won.length+'. Lost: '+lost.length+'. '+
+      'Win rate: '+(won.length+lost.length>0?Math.round(won.length/(won.length+lost.length)*100):0)+'%. '+
+      'Orgs: '+[...new Set(allData.map(function(x){return x.SalesOrganisationName||'';}))].filter(Boolean).slice(0,10).join(', ')+'. '+
+      'Segments: '+[...new Set(allData.map(function(x){return x.BUS_SEG_CDE_KUTText||'';}))].filter(Boolean).join(', ')+'.';
+
+    var valPrompt='You are a TSS data validation expert. A user wants a "'+selectedAud+'" brief with intent: "'+enrichedIntent+'".\n'+
+      'Data snapshot: '+context+'\n\n'+
+      'Check if the intent can be fulfilled well by the available data. Identify ONLY genuine mismatches or risks that could make the brief misleading or thin.\n'+
+      'Return ONLY valid JSON:\n'+
+      '{"warnings":[{"severity":"high|medium","message":"specific warning about data gap or mismatch"}],"dataScore":0-100,"scoreLabel":"Excellent|Good|Limited|Poor","summary":"1 sentence on data fit"}\n'+
+      'Warnings array can be empty if data is good. Max 3 warnings. Be concise and professional.';
+
+    var r=await fetch('/odata/v4/ai/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:valPrompt,summary:context})});
+    var d=await r.json();
+    var val=JSON.parse((d.value||'{}').replace(/```json|```/g,'').trim());
+
+    // Show validation results
+    document.getElementById('pfLoadingBody').style.display='none';
+    document.getElementById('pfValidateBody').style.display='block';
+    document.getElementById('pfTitle').textContent='Ready to generate';
+    document.getElementById('pfSub').textContent='Review the data check below, then confirm.';
+
+    var scoreColor=val.dataScore>=80?'var(--green)':val.dataScore>=50?'var(--orange)':'var(--red)';
+    var warnHtml='<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;padding:10px 14px;background:#f8fafc;border-radius:8px;border:1px solid var(--border);">'+
+      '<div style="font-size:1.4rem;font-weight:700;color:'+scoreColor+';">'+(val.dataScore||'—')+'</div>'+
+      '<div><div style="font-size:0.72rem;font-weight:600;color:'+scoreColor+';">'+(val.scoreLabel||'')+'</div>'+
+      '<div style="font-size:0.72rem;color:var(--muted);">'+(val.summary||'')+'</div></div></div>';
+
+    (val.warnings||[]).forEach(function(w){
+      var isHigh=w.severity==='high';
+      warnHtml+='<div class="val-warn">'+
+        '<svg viewBox="0 0 24 24" fill="none" stroke="'+(isHigh?'#b45309':'#92400e')+'" stroke-width="2" width="16" height="16"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>'+
+        '<div class="val-warn-text"><strong>'+(isHigh?'High':'Medium')+' concern:</strong> '+w.message+'</div></div>';
+    });
+    if(!(val.warnings||[]).length){
+      warnHtml+='<div class="val-ok"><svg viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" width="16" height="16"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg><div class="val-ok-text">Data looks well suited for this brief. No significant gaps detected.</div></div>';
+    }
+    document.getElementById('pfValidations').innerHTML=warnHtml;
+    document.getElementById('pfFooter').style.display='flex';
+    document.getElementById('pfConfirmBtn').disabled=false;
+    document.getElementById('pfConfirmBtn').innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg> Generate Brief';
+    document.getElementById('pfConfirmBtn').onclick=confirmPreflight;
+
+  }catch(e){
+    // Validation failed — show fallback and let user proceed
+    document.getElementById('pfLoadingBody').style.display='none';
+    document.getElementById('pfValidateBody').style.display='block';
+    document.getElementById('pfValidations').innerHTML='<div class="val-ok"><svg viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" width="16" height="16"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg><div class="val-ok-text">Data validation skipped — proceeding with available data.</div></div>';
+    document.getElementById('pfFooter').style.display='flex';
+    document.getElementById('pfConfirmBtn').disabled=false;
+    document.getElementById('pfConfirmBtn').innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg> Generate Brief';
+    document.getElementById('pfConfirmBtn').onclick=confirmPreflight;
+  }
+}
+
+function confirmPreflight(){
+  closePreflight();
+  var enriched=(pfIntent||'Full pipeline overview')+(pfAnswers.length?'. '+pfAnswers.join('. '):'');
+  doGenerate(enriched);
+}
+
+function skipAndGenerate(){
+  closePreflight();
+  doGenerate(pfIntent||'Full pipeline overview');
+}
+
+function doGenerate(intent){
   currentIntent=(selectedAud+(intent?' — '+intent:''));
   showPage(2);
   var steps=['bs1','bs2','bs3','bs4'];
@@ -429,29 +672,27 @@ async function generateBrief(){
       bar.style.width=prog[i]+'%';
     },i*900);
   });
-  try{
-    var payload=buildPayload(allData);
-    var res=await fetch('/odata/v4/ai/generateBrief',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({audience:selectedAud,intent:intent||'Full pipeline overview',data:payload})});
-    var text=await res.text();
+  var payload=buildPayload(allData);
+  fetch('/odata/v4/ai/generateBrief',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({audience:selectedAud,intent:intent,data:payload})})
+  .then(function(res){return res.text();})
+  .then(function(text){
     var json;
     try{json=JSON.parse(text);}catch(pe){
       if(text.toLowerCase().includes('timeout')||text.toLowerCase().includes('gateway')){
-        throw new Error('The AI request timed out. Please try again — it usually works on a second attempt.');
+        throw new Error('The AI request timed out. Please try again.');
       }
       throw new Error('Unexpected response from server. Please try again.');
     }
     if(json.error)throw new Error(json.error.message);
     var raw=(json.value||'').replace(/```json|```/g,'').trim();
-    var brief;
-    try{brief=JSON.parse(raw);}catch(pe2){throw new Error('AI returned an unexpected format. Please try again.');}
+    var brief=JSON.parse(raw);
     setTimeout(function(){
       bar.style.width='100%';
       steps.forEach(function(s){document.getElementById(s).classList.remove('active');document.getElementById(s).classList.add('done');});
       setTimeout(function(){renderBrief(brief);},400);
     },3800);
-  }catch(e){
-    setTimeout(function(){renderError(e.message);},4000);
-  }
+  })
+  .catch(function(e){setTimeout(function(){renderError(e.message);},4000);});
 }
 
 function renderBrief(brief){
