@@ -218,6 +218,42 @@ body{background:#f0f4f8;color:var(--text);font-family:'Inter',sans-serif;min-hei
   .shell{padding:0 16px;}
 }
 @media(max-width:400px){.hero-stats{flex-direction:column;}.hero-stat{border-right:none;border-bottom:1px solid rgba(255,255,255,0.1);padding:10px 0;}}
+
+/* LIVE INTELLIGENCE */
+.intel-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px;}
+.intel-kpi{background:var(--card);border-radius:12px;border:1px solid var(--border);padding:20px;box-shadow:var(--shadow-sm);}
+.intel-kpi-val{font-size:1.6rem;font-weight:700;color:var(--text);line-height:1;}
+.intel-kpi-lbl{font-size:0.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:6px;}
+.intel-kpi-sub{font-size:0.72rem;color:var(--muted);margin-top:4px;}
+.intel-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
+.intel-card{background:var(--card);border-radius:12px;border:1px solid var(--border);padding:20px;box-shadow:var(--shadow-sm);}
+.intel-card-title{font-size:0.72rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.intel-narrative{font-size:0.85rem;color:var(--text);line-height:1.65;margin-bottom:10px;}
+.intel-headline{font-size:0.95rem;font-weight:600;color:var(--text);line-height:1.4;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border);}
+.intel-insight{font-size:0.8rem;color:var(--text);line-height:1.5;padding:8px 0;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:8px;}
+.intel-insight:last-child{border-bottom:none;}
+.intel-insight-dot{width:6px;height:6px;border-radius:50%;background:var(--purple);margin-top:6px;flex-shrink:0;}
+.intel-alert{background:#fff5f5;border:1px solid #fecaca;border-radius:8px;padding:12px 14px;font-size:0.8rem;color:#991b1b;display:flex;align-items:flex-start;gap:8px;margin-top:4px;}
+.intel-alert svg{flex-shrink:0;margin-top:1px;}
+.alert-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px;}
+.alert-card{background:var(--card);border-radius:12px;border:1px solid var(--border);padding:18px;box-shadow:var(--shadow-sm);}
+.alert-card-title{font-size:0.68rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+.alert-item{font-size:0.76rem;color:var(--text);padding:6px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:8px;}
+.alert-item:last-child{border-bottom:none;}
+.alert-item-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.alert-badge{font-size:0.65rem;font-weight:600;padding:2px 7px;border-radius:10px;flex-shrink:0;}
+.badge-orange{background:#fff7ed;color:#c2410c;}
+.badge-red{background:#fef2f2;color:#dc2626;}
+.badge-blue{background:#eff6ff;color:#1d4ed8;}
+.intel-computing{text-align:center;padding:40px;color:var(--muted);font-size:0.85rem;}
+.intel-spinner{display:inline-block;width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin 0.8s linear infinite;margin-bottom:10px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.intel-refresh{font-size:0.68rem;color:var(--muted);margin-top:4px;}
+.dq-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+.dq-item{background:#f8fafc;border-radius:8px;padding:12px;text-align:center;border:1px solid var(--border);}
+.dq-val{font-size:1.2rem;font-weight:700;}
+.dq-lbl{font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-top:4px;}
+@media(max-width:900px){.intel-grid{grid-template-columns:repeat(2,1fr);}.intel-row{grid-template-columns:1fr;}.alert-row{grid-template-columns:1fr;}}
 </style>
 </head>
 <body>
@@ -384,6 +420,17 @@ body{background:#f0f4f8;color:var(--text);font-family:'Inter',sans-serif;min-hei
 
   </div>
 
+  <!-- LIVE INTELLIGENCE PANEL -->
+  <div class="sec-hdr">
+    <span class="sec-title">Live Intelligence</span>
+    <div class="sec-line"></div>
+    <span style="font-size:0.65rem;color:var(--muted);white-space:nowrap;" id="snapshotAge"></span>
+    <button onclick="refreshSnapshot()" id="refreshBtn" style="font-size:0.65rem;color:var(--blue);background:none;border:none;cursor:pointer;padding:0 6px;white-space:nowrap;">&#x21bb; Refresh</button>
+  </div>
+  <div id="intelPanel">
+    <div class="intel-computing"><div class="intel-spinner"></div><br>Computing pipeline intelligence...<div class="intel-refresh">This runs once on startup and refreshes every 6 hours</div></div>
+  </div>
+
   <div class="sec-hdr"><span class="sec-title">Quick Actions</span><div class="sec-line"></div></div>
   <div class="qa-grid">
     <a href="report-builder.html" class="qa-card">
@@ -461,6 +508,152 @@ fetch('/user-api/currentUser').then(function(r){return r.json();}).then(function
   document.getElementById('shellUser').textContent = display;
   document.getElementById('shellAvatar').textContent = initials;
 }).catch(function(){});
+
+// ── Snapshot loader ──────────────────────────────────────────────────────────
+function fmtEur(n) {
+  if (!n || isNaN(n)) return '—';
+  if (n >= 1000000) return '€' + (n/1000000).toFixed(1) + 'M';
+  if (n >= 1000) return '€' + Math.round(n/1000) + 'K';
+  return '€' + n;
+}
+function pct(n) { return (n||0) + '%'; }
+function esc(s) { return String(s||'').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function renderSnapshot(snap) {
+  var m = snap.metrics, ai = snap.aiNarrative || {}, s = m.summary;
+  var segs = m.bySegment || {}, phases = m.byPhase || {}, alerts = m.alerts || {};
+  var dq = alerts.dataQuality || {};
+
+  // KPI row
+  var kpiHtml =
+    '<div class="intel-grid">' +
+    '<div class="intel-kpi"><div class="intel-kpi-val">' + fmtEur(s.totalPipelineEur) + '</div><div class="intel-kpi-lbl">Active Pipeline (EUR)</div><div class="intel-kpi-sub">' + s.activeCount + ' opportunities</div></div>' +
+    '<div class="intel-kpi"><div class="intel-kpi-val" style="color:var(--green)">' + pct(s.winRate) + '</div><div class="intel-kpi-lbl">Win Rate</div><div class="intel-kpi-sub">' + s.wonCount + ' won · ' + s.lostCount + ' lost</div></div>' +
+    '<div class="intel-kpi"><div class="intel-kpi-val" style="color:var(--blue)">' + pct(s.avgProbability) + '</div><div class="intel-kpi-lbl">Avg Probability</div><div class="intel-kpi-sub">Qualified deals only</div></div>' +
+    '<div class="intel-kpi"><div class="intel-kpi-val" style="color:var(--orange)">' + (alerts.staleDeals||[]).length + '</div><div class="intel-kpi-lbl">Stale Deals</div><div class="intel-kpi-sub">No change &gt;90 days</div></div>' +
+    '</div>';
+
+  // AI narrative + segment breakdown
+  var aiHtml = '<div class="intel-row">';
+  aiHtml += '<div class="intel-card"><div class="intel-card-title"><svg viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="1.5" width="14" height="14"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/><path d="M22 2 12 12"/><circle cx="22" cy="2" r="2" fill="currentColor"/></svg>AI Pipeline Narrative</div>';
+  if (ai.headline) aiHtml += '<div class="intel-headline">' + esc(ai.headline) + '</div>';
+  (ai.narrative||[]).forEach(function(p){ aiHtml += '<div class="intel-narrative">' + esc(p) + '</div>'; });
+  (ai.keyInsights||[]).forEach(function(ins){ aiHtml += '<div class="intel-insight"><div class="intel-insight-dot"></div><span>' + esc(ins) + '</span></div>'; });
+  if (ai.topAlert) aiHtml += '<div class="intel-alert"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>' + esc(ai.topAlert) + '</div>';
+  aiHtml += '</div>';
+
+  // Segment + phase
+  aiHtml += '<div class="intel-card"><div class="intel-card-title">Breakdown</div>';
+  var segEntries = Object.entries(segs).sort(function(a,b){return b[1].eur-a[1].eur;});
+  if (segEntries.length) {
+    aiHtml += '<div style="margin-bottom:14px;"><div style="font-size:0.68rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px;">By Segment</div>';
+    segEntries.forEach(function(e){
+      var pctW = Math.round((e[1].eur / (s.totalPipelineEur||1)) * 100);
+      aiHtml += '<div style="margin-bottom:8px;"><div style="display:flex;justify-content:space-between;font-size:0.75rem;margin-bottom:3px;"><span>' + esc(e[0]) + '</span><span style="color:var(--muted)">' + fmtEur(e[1].eur) + ' · ' + e[1].count + ' deals</span></div><div style="height:4px;background:var(--border);border-radius:2px;"><div style="height:4px;background:var(--blue);border-radius:2px;width:' + pctW + '%;"></div></div></div>';
+    });
+    aiHtml += '</div>';
+  }
+  var phEntries = Object.entries(phases).sort(function(a,b){return b[1]-a[1];}).slice(0,5);
+  if (phEntries.length) {
+    var totalPhase = phEntries.reduce(function(t,e){return t+e[1];},0);
+    aiHtml += '<div><div style="font-size:0.68rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px;">By Phase</div>';
+    phEntries.forEach(function(e){
+      var pctW = Math.round((e[1]/totalPhase)*100);
+      aiHtml += '<div style="margin-bottom:6px;"><div style="display:flex;justify-content:space-between;font-size:0.72rem;margin-bottom:3px;"><span style="max-width:70%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + esc(e[0]) + '</span><span style="color:var(--muted)">' + e[1] + '</span></div><div style="height:4px;background:var(--border);border-radius:2px;"><div style="height:4px;background:var(--teal);border-radius:2px;width:' + pctW + '%;"></div></div></div>';
+    });
+    aiHtml += '</div>';
+  }
+  aiHtml += '</div></div>';
+
+  // Alert cards
+  var alertHtml = '<div class="alert-row">';
+  // At-risk
+  alertHtml += '<div class="alert-card"><div class="alert-card-title" style="color:var(--red)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/></svg>At Risk (' + (alerts.atRisk||[]).length + ')</div>';
+  (alerts.atRisk||[]).slice(0,5).forEach(function(d){
+    alertHtml += '<div class="alert-item"><span class="alert-item-name">' + esc(d.name) + '</span><span class="alert-badge badge-red">' + pct(d.probability) + '</span><span style="font-size:0.68rem;color:var(--muted);flex-shrink:0;">' + fmtEur(d.eur) + '</span></div>';
+  });
+  if (!(alerts.atRisk||[]).length) alertHtml += '<div style="font-size:0.75rem;color:var(--muted);padding:8px 0;">No at-risk deals found</div>';
+  alertHtml += '</div>';
+
+  // Stale deals
+  alertHtml += '<div class="alert-card"><div class="alert-card-title" style="color:var(--orange)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Stale Deals (' + (alerts.staleDeals||[]).length + ')</div>';
+  (alerts.staleDeals||[]).slice(0,5).forEach(function(d){
+    alertHtml += '<div class="alert-item"><span class="alert-item-name">' + esc(d.name) + '</span><span class="alert-badge badge-orange">' + d.daysSinceChange + 'd</span><span style="font-size:0.68rem;color:var(--muted);flex-shrink:0;">' + fmtEur(d.eur) + '</span></div>';
+  });
+  if (!(alerts.staleDeals||[]).length) alertHtml += '<div style="font-size:0.75rem;color:var(--muted);padding:8px 0;">No stale deals found</div>';
+  alertHtml += '</div>';
+
+  // Data quality
+  alertHtml += '<div class="alert-card"><div class="alert-card-title" style="color:var(--blue)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>Data Quality</div>';
+  alertHtml += '<div class="dq-grid">' +
+    '<div class="dq-item"><div class="dq-val" style="color:' + (dq.noSummaryCount>20?'var(--orange)':'var(--green)') + '">' + (dq.noSummaryCount||0) + '</div><div class="dq-lbl">No Summary</div></div>' +
+    '<div class="dq-item"><div class="dq-val" style="color:' + (dq.noSOPCount>20?'var(--orange)':'var(--green)') + '">' + (dq.noSOPCount||0) + '</div><div class="dq-lbl">No SOP Date</div></div>' +
+    '<div class="dq-item"><div class="dq-val" style="color:' + (dq.zeroProbCount>50?'var(--orange)':'var(--green)') + '">' + (dq.zeroProbCount||0) + '</div><div class="dq-lbl">0% Probability</div></div>' +
+    '<div class="dq-item"><div class="dq-val" style="color:' + (dq.noResultReasonCount>5?'var(--orange)':'var(--green)') + '">' + (dq.noResultReasonCount||0) + '</div><div class="dq-lbl">Missing W/L Reason</div></div>' +
+    '</div></div>';
+  alertHtml += '</div>';
+
+  // Top 10 opportunities table
+  var top10Html = '';
+  if ((m.top10||[]).length) {
+    top10Html = '<div class="intel-card" style="margin-bottom:14px;"><div class="intel-card-title">Top Opportunities by EUR Value</div><div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:0.75rem;">' +
+      '<thead><tr style="border-bottom:2px solid var(--border);color:var(--muted);text-align:left;">' +
+      '<th style="padding:6px 8px;font-weight:600;">Opportunity</th><th style="padding:6px 8px;font-weight:600;">Account</th><th style="padding:6px 8px;font-weight:600;">Org</th><th style="padding:6px 8px;font-weight:600;">Phase</th><th style="padding:6px 8px;font-weight:600;text-align:right;">EUR</th><th style="padding:6px 8px;font-weight:600;text-align:right;">Prob</th></tr></thead><tbody>';
+    (m.top10||[]).forEach(function(o,i){
+      var bg = i%2===0?'':'background:#f8fafc;';
+      top10Html += '<tr style="border-bottom:1px solid var(--border);' + bg + '">' +
+        '<td style="padding:7px 8px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + esc(o.name) + '">' + esc(o.name) + '</td>' +
+        '<td style="padding:7px 8px;color:var(--muted);">' + esc(o.account||'—') + '</td>' +
+        '<td style="padding:7px 8px;color:var(--muted);">' + esc(o.org||'—') + '</td>' +
+        '<td style="padding:7px 8px;color:var(--muted);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + esc(o.phase||'—') + '</td>' +
+        '<td style="padding:7px 8px;text-align:right;font-weight:600;">' + fmtEur(o.eur) + '</td>' +
+        '<td style="padding:7px 8px;text-align:right;color:' + (o.probability>=50?'var(--green)':o.probability>=25?'var(--orange)':'var(--red)') + ';">' + pct(o.probability) + '</td>' +
+        '</tr>';
+    });
+    top10Html += '</tbody></table></div></div>';
+  }
+
+  document.getElementById('intelPanel').innerHTML = kpiHtml + aiHtml + alertHtml + top10Html;
+}
+
+function loadSnapshot(retry) {
+  fetch('/odata/ai/getSnapshot', { method:'POST', headers:{'Content-Type':'application/json'}, body:'{}' })
+    .then(function(r){ return r.json(); })
+    .then(function(res) {
+      var result = typeof res.value === 'string' ? JSON.parse(res.value) : res.value;
+      if (result.status === 'computing' || result.status === 'pending') {
+        document.getElementById('intelPanel').innerHTML = '<div class="intel-computing"><div class="intel-spinner"></div><br>Computing pipeline intelligence — please wait...<div class="intel-refresh">This runs once on startup. Retrying in 10 seconds.</div></div>';
+        setTimeout(function(){ loadSnapshot(true); }, 10000);
+        return;
+      }
+      if (result.status === 'error') {
+        document.getElementById('intelPanel').innerHTML = '<div class="intel-computing" style="color:var(--red)">Intelligence engine error: ' + esc(result.error||'unknown') + '<br><small>Try refreshing or wait for next auto-retry.</small></div>';
+        return;
+      }
+      if (result.cache) {
+        renderSnapshot(result.cache);
+        var ago = result.lastComputed ? new Date(result.lastComputed).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) : '—';
+        var el = document.getElementById('snapshotAge');
+        if (el) el.textContent = 'Computed at ' + ago + ' · ' + (result.cache.recordCount||0) + ' records · ' + Math.round((result.cache.computeDurationMs||0)/1000) + 's';
+      }
+    })
+    .catch(function(e){
+      if (!retry) setTimeout(function(){ loadSnapshot(true); }, 5000);
+      else document.getElementById('intelPanel').innerHTML = '<div class="intel-computing" style="color:var(--muted)">Unable to load intelligence snapshot. <a href="" style="color:var(--blue)">Reload page</a></div>';
+    });
+}
+
+function refreshSnapshot() {
+  var btn = document.getElementById('refreshBtn');
+  if (btn) btn.textContent = '⏳ Refreshing...';
+  document.getElementById('intelPanel').innerHTML = '<div class="intel-computing"><div class="intel-spinner"></div><br>Refreshing pipeline intelligence...<div class="intel-refresh">This will take 30–60 seconds</div></div>';
+  fetch('/odata/ai/refreshSnapshot', { method:'POST', headers:{'Content-Type':'application/json'}, body:'{}' })
+    .then(function(){ setTimeout(function(){ loadSnapshot(false); if(btn)btn.textContent='↻ Refresh'; }, 15000); })
+    .catch(function(){ if(btn)btn.textContent='↻ Refresh'; });
+}
+
+// Start loading 1s after page load
+setTimeout(loadSnapshot, 1000);
 </script>
 </body>
 </html>
