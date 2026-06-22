@@ -202,10 +202,16 @@ var stColors={'Open':'#0a6ed1','Won':'#107e3e','Lost':'#bb0000','Cancelled':'#e9
 
 async function fetchAll(){
   var r=await fetch('/odata/v4/quotes/SalesQuotes?$top=500');
-  var j=await r.json();
+  var text=await r.text();
+  var j;
+  try{ j=JSON.parse(text); }catch(e){
+    // Non-JSON response (gateway error page) — retry if not 200
+    if(r.status!==200) return null;
+    throw new Error('Invalid response: '+text.substring(0,80));
+  }
   if(j.error){
     var msg=j.error.message||'';
-    if(r.status===503||msg.indexOf('loading')>-1||msg.indexOf('503')>-1) return null;
+    if(r.status===503||r.status===504||msg.indexOf('loading')>-1) return null;
     throw new Error(msg);
   }
   return j.value||[];
