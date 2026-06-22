@@ -236,7 +236,7 @@ async function compute(cds, businessContext, apiKey) {
 
         // 2. Fetch sales quotes in background (same session)
         const QUOTE_SEL = 'ObjectID,ID,Name,BuyerPartyID,BuyerPartyName,' +
-            'SalesOrganisationID,SalesOrganisationName,EmployeeResponsiblePartyID,EmployeeResponsiblePartyName,' +
+            'SalesOrganisationID,EmployeeResponsiblePartyID,EmployeeResponsiblePartyName,' +
             'SalesTerritoryID,SalesTerritoryName,LifeCycleStatusCode,LifeCycleStatusCodeText,' +
             'ResultStatusCode,ResultStatusCodeText,ApprovalStatusCode,ApprovalStatusCodeText,' +
             'ProcessingTypeCode,ProcessingTypeCodeText,NetAmount,NetAmountCurrencyCode,' +

@@ -63,7 +63,6 @@
         "BuyerContactPartyID": { "type": "cds.String" },
         "BuyerContactPartyName": { "type": "cds.String" },
         "SalesOrganisationID": { "type": "cds.String" },
-        "SalesOrganisationName": { "type": "cds.String" },
         "EmployeeResponsiblePartyID": { "type": "cds.String" },
         "EmployeeResponsiblePartyName": { "type": "cds.String" },
         "SalesTerritoryID": { "type": "cds.String" },
