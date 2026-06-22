@@ -201,9 +201,13 @@ function stClass(lc, rs){ if(lc==='1')return'b-open'; if(rs==='3')return'b-won';
 var stColors={'Open':'#0a6ed1','Won':'#107e3e','Lost':'#bb0000','Cancelled':'#e9730c','Completed':'#059669','Other':'#94a3b8'};
 
 async function fetchAll(){
-  var r=await fetch('/odata/v4/quotes/SalesQuotes?$top=300');
+  var r=await fetch('/odata/v4/quotes/SalesQuotes?$top=500');
   var j=await r.json();
-  if(j.error)throw new Error(j.error.message);
+  if(j.error){
+    var msg=j.error.message||'';
+    if(r.status===503||msg.indexOf('loading')>-1||msg.indexOf('503')>-1) return null;
+    throw new Error(msg);
+  }
   return j.value||[];
 }
 
@@ -325,9 +329,16 @@ function renderContent(){
   }).join('');
 }
 
+var _sqPoll=null;
 async function init(){
+  if(_sqPoll){clearTimeout(_sqPoll);_sqPoll=null;}
   try{
     allData=await fetchAll();
+    if(!allData){
+      document.getElementById('pageSub').textContent='⏳ Quote data loading in background — retrying in 15s…';
+      _sqPoll=setTimeout(init,15000);
+      return;
+    }
     var now=new Date();
     document.getElementById('lastUpdate').textContent='Updated '+now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
     document.getElementById('pageSub').textContent=now.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})+' · C4C QUA · MY352500 · '+allData.length.toLocaleString()+' quotes';
