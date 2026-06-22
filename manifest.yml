@@ -2,7 +2,7 @@
 applications:
 
 - name: tss-cx-analytics
-  memory: 1024M
+  memory: 1536M
   disk_quota: 1G
   instances: 1
   buildpacks:
