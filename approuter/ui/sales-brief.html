@@ -514,7 +514,7 @@ async function generateBrief(){
 
     var clarPrompt='You are a professional TSS sales analyst. A user wants to generate a "'+selectedAud+'" sales brief.\n'+
       'User intent: "'+(pfIntent||'Full pipeline overview')+'"\n'+
-      'Available data: '+allData.length+' C4C opportunities. Orgs: '+availOrgs+'. Segments: '+availSegs+'. Won: '+won+'. Lost: '+lost+'.\n\n'+
+      'Available data: '+(allData.total||0)+' C4C opportunities. Orgs: '+availOrgs+'. Segments: '+availSegs+'. Won: '+won+'. Lost: '+lost+'.\n\n'+
       'Decide if you need brief clarification before generating. Ask ONLY if: (1) a specific geography, segment or owner is referenced but unclear which, (2) intent mentions a timeframe not obvious from context, (3) intent is contradictory or too vague to tailor the brief.\n'+
       'Keep questions to max 2. Do NOT ask for things the audience type already implies.\n'+
       'Return ONLY valid JSON:\n'+
@@ -569,15 +569,11 @@ async function runValidation(){
 
   try{
     var enrichedIntent=(pfIntent||'Full pipeline overview')+(pfAnswers.length?'. '+pfAnswers.join('. '):'');
-    var won=allData.filter(function(x){return x.LifeCycleStatusCode==='3';});
-    var lost=allData.filter(function(x){return x.LifeCycleStatusCode==='5';});
-    var open=allData.filter(function(x){return isOpen(x);});
-
-    // Build mini-context for validation
-    var context='Total: '+allData.length+'. Open: '+open.length+'. Won: '+won.length+'. Lost: '+lost.length+'. '+
-      'Win rate: '+(won.length+lost.length>0?Math.round(won.length/(won.length+lost.length)*100):0)+'%. '+
-      'Orgs: '+[...new Set(allData.map(function(x){return x.SalesOrganisationName||'';}))].filter(Boolean).slice(0,10).join(', ')+'. '+
-      'Segments: '+[...new Set(allData.map(function(x){return x.BUS_SEG_CDE_KUTText||'';}))].filter(Boolean).join(', ')+'.';
+    // Build mini-context for validation using summary object
+    var context='Total: '+(allData.total||0)+'. Open: '+(allData.openCount||0)+'. Won: '+(allData.wonCount||0)+'. Lost: '+(allData.lostCount||0)+'. '+
+      'Win rate: '+(allData.winRate||0)+'%. '+
+      'Orgs: '+(allData.byOrg||[]).slice(0,10).map(function(o){return o.name;}).join(', ')+'. '+
+      'Segments: '+(allData.bySeg||[]).map(function(s){return s.seg;}).join(', ')+'.';
 
     var valPrompt='You are a TSS data validation expert. A user wants a "'+selectedAud+'" brief with intent: "'+enrichedIntent+'".\n'+
       'Data snapshot: '+context+'\n\n'+
@@ -679,21 +675,19 @@ function doGenerate(intent){
 
 function renderBrief(brief){
   Object.values(briefCharts).forEach(function(c){c.destroy();});briefCharts={};
-  var d=allData;
-  var won=d.filter(function(x){return x.LifeCycleStatusCode==='3';});
-  var lost=d.filter(function(x){return x.LifeCycleStatusCode==='5';});
-  var open=d.filter(isOpen);
+  var d=allData; // summary object
+  var wonCnt=d.wonCount||0, lostCnt=d.lostCount||0, openCnt=d.openCount||0;
   var today=new Date();today.setHours(0,0,0,0);
 
   document.getElementById('docTitle').textContent=brief.title||'Sales Brief';
-  document.getElementById('docSub').textContent='C4C QUA · MY352500 · '+today.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})+' · '+d.length.toLocaleString()+' records · '+selectedAud;
+  document.getElementById('docSub').textContent='C4C QUA · MY352500 · '+today.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})+' · '+(d.total||0).toLocaleString()+' records · '+selectedAud;
 
   // highlights
   var hlItems=(brief.highlights&&brief.highlights.length?brief.highlights:[
-    {label:'Open Pipeline',value:fmt(open.reduce(function(s,x){return s+parseFloat(x.ExpectedRevenueAmount||0);},0)),context:'Active opportunities'},
-    {label:'Win Rate',value:(won.length+lost.length>0?Math.round(won.length/(won.length+lost.length)*100):0)+'%',context:won.length+' won · '+lost.length+' lost'},
-    {label:'Total Opportunities',value:d.length.toLocaleString(),context:'All statuses'},
-    {label:'Open Deals',value:open.length.toLocaleString(),context:'Active pipeline'}
+    {label:'Open Pipeline',value:fmt(d.openRev||0),context:'Active opportunities'},
+    {label:'Win Rate',value:(d.winRate||0)+'%',context:wonCnt+' won · '+lostCnt+' lost'},
+    {label:'Total Opportunities',value:(d.total||0).toLocaleString(),context:'All statuses'},
+    {label:'Open Deals',value:openCnt.toLocaleString(),context:'Active pipeline'}
   ]).slice(0,4);
 
   var hlHtml=hlItems.map(function(h){
@@ -715,17 +709,17 @@ function renderBrief(brief){
     return '<div class="alert-item"><svg class="alert-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span>'+a+'</span></div>';
   }).join('');
 
-  // top deals table
-  var topOpen=open.slice().sort(function(a,b){return parseFloat(b.ExpectedRevenueAmount||0)-parseFloat(a.ExpectedRevenueAmount||0);}).slice(0,8);
-  var dealsHtml=topOpen.map(function(row){
-    var link=C4C_BASE+'&param.InternalID='+row.ID+'&param.Type=COD_OPPORTUNITY_THINGTYPE';
+  // top deals table — use topDeals from summary (top 20 open by revenue)
+  var topDeals=(d.topDeals||[]).slice(0,8);
+  var dealsHtml=topDeals.map(function(row){
+    var link=C4C_BASE+'&param.InternalID='+row.id+'&param.Type=COD_OPPORTUNITY_THINGTYPE';
     return '<tr>'+
-      '<td style="font-weight:600;color:var(--blue)">'+fmt(parseFloat(row.ExpectedRevenueAmount||0))+'</td>'+
-      '<td style="font-weight:500;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(row.Name||'—')+'</td>'+
-      '<td style="color:var(--muted)">'+(row.ProspectPartyName||'—')+'</td>'+
-      '<td style="color:var(--muted);font-size:0.7rem">'+(row.MainEmployeeResponsiblePartyName||'—')+'</td>'+
-      '<td style="color:var(--muted);font-size:0.7rem">'+(row.SalesCyclePhaseCodeText||'—')+'</td>'+
-      '<td style="color:var(--muted);font-size:0.7rem">'+pds(row.ExpectedProcessingEndDate)+'</td>'+
+      '<td style="font-weight:600;color:var(--blue)">'+fmt(row.rev||0)+'</td>'+
+      '<td style="font-weight:500;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(row.name||'—')+'</td>'+
+      '<td style="color:var(--muted)">'+(row.customer||'—')+'</td>'+
+      '<td style="color:var(--muted);font-size:0.7rem">'+(row.segment||'—')+'</td>'+
+      '<td style="color:var(--muted);font-size:0.7rem">'+(row.phase||'—')+'</td>'+
+      '<td style="color:var(--muted);font-size:0.7rem">'+(row.sop||'—')+'</td>'+
       '<td><a class="c4c-link" href="'+link+'" target="_blank">Open <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 2h3v3M10 2 5 7M4 3H2v7h7V8"/></svg></a></td>'+
       '</tr>';
   }).join('');
@@ -742,7 +736,7 @@ function renderBrief(brief){
           '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="10" height="10"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>'+
           selectedAud+
         '</div>'+
-        '<div class="brief-record-ct">'+d.length.toLocaleString()+' opportunities · C4C QUA MY352500</div>'+
+        '<div class="brief-record-ct">'+(d.total||0).toLocaleString()+' opportunities · C4C QUA MY352500</div>'+
       '</div>'+
     '</div>'+
     '<div class="brief-highlights">'+hlHtml+'</div>'+
@@ -773,16 +767,13 @@ function renderBrief(brief){
       '<span>Generated '+today.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})+' · AI-assisted, verify before distribution</span>'+
     '</div>';
 
-  // Charts
+  // Charts — use pre-computed summary arrays
   var gc='#f1f5f9',tc='#94a3b8';
-  var om={};d.forEach(function(x){var k=(x.SalesOrganisationName||'?').replace(/TSS\s*/,'').substring(0,22);om[k]=(om[k]||0)+parseFloat(x.ExpectedRevenueAmount||0);});
-  var os=Object.entries(om).sort(function(a,b){return b[1]-a[1];}).slice(0,8);
-  briefCharts.org=new Chart(document.getElementById('cOrg'),{type:'bar',data:{labels:os.map(function(e){return e[0];}),datasets:[{data:os.map(function(e){return e[1];}),backgroundColor:SAP,borderRadius:3,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return' '+fmt(c.raw);}}}},scales:{x:{ticks:{color:tc,callback:function(v){return fmtN(v);}},grid:{color:gc}},y:{ticks:{color:tc,font:{size:9}},grid:{display:false}}}}});
+  var os=(d.byOrg||[]).slice(0,8);
+  briefCharts.org=new Chart(document.getElementById('cOrg'),{type:'bar',data:{labels:os.map(function(e){return e.name;}),datasets:[{data:os.map(function(e){return e.openRev;}),backgroundColor:SAP,borderRadius:3,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return' '+fmt(c.raw);}}}},scales:{x:{ticks:{color:tc,callback:function(v){return fmtN(v);}},grid:{color:gc}},y:{ticks:{color:tc,font:{size:9}},grid:{display:false}}}}});
 
-  var today2=new Date();today2.setHours(0,0,0,0);
-  var sopY={};open.forEach(function(x){var s=pd(x.ExpectedProcessingEndDate);if(s&&s>today2){var yr=s.getFullYear();sopY[yr]=(sopY[yr]||0)+parseFloat(x.ExpectedRevenueAmount||0);}});
-  var soye=Object.entries(sopY).sort(function(a,b){return a[0]-b[0];});
-  briefCharts.sop=new Chart(document.getElementById('cSop'),{type:'bar',data:{labels:soye.map(function(e){return e[0];}),datasets:[{data:soye.map(function(e){return e[1];}),backgroundColor:'rgba(108,50,169,0.75)',borderRadius:3,borderSkipped:false}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return' '+fmt(c.raw);}}}},scales:{x:{ticks:{color:tc,font:{size:10}},grid:{color:gc}},y:{ticks:{color:tc,callback:function(v){return fmtN(v);}},grid:{color:gc}}}}});
+  var soye=(d.sopByYear||[]);
+  briefCharts.sop=new Chart(document.getElementById('cSop'),{type:'bar',data:{labels:soye.map(function(e){return e.year;}),datasets:[{data:soye.map(function(e){return e.rev;}),backgroundColor:'rgba(108,50,169,0.75)',borderRadius:3,borderSkipped:false}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return' '+fmt(c.raw);}}}},scales:{x:{ticks:{color:tc,font:{size:10}},grid:{color:gc}},y:{ticks:{color:tc,callback:function(v){return fmtN(v);}},grid:{color:gc}}}}});
 
   showPage(3);
 }
@@ -802,27 +793,19 @@ async function refineBrief(){
 }
 
 function buildDataSummary(d){
-  var won=d.filter(function(x){return x.LifeCycleStatusCode==='3';});
-  var lost=d.filter(function(x){return x.LifeCycleStatusCode==='5';});
-  var open=d.filter(isOpen);
-  var today=new Date();today.setHours(0,0,0,0);
-  var next12=new Date(today);next12.setFullYear(next12.getFullYear()+1);
-  var sopN12=open.filter(function(x){var s=pd(x.ExpectedProcessingEndDate);return s&&s>=today&&s<=next12;}).reduce(function(s,x){return s+parseFloat(x.ExpectedRevenueAmount||0);},0);
-  var openRev=open.reduce(function(s,x){return s+parseFloat(x.ExpectedRevenueAmount||0);},0);
-  var wr=won.length+lost.length>0?Math.round(won.length/(won.length+lost.length)*100):0;
-  var stale90=open.filter(function(x){var lc=pd(x.LastChangeDate);return!lc||Math.floor((today-lc)/86400000)>90;}).length;
-  var segs=new Set(d.map(function(x){return x.BUS_SEG_CDE_KUTText;}).filter(Boolean)).size;
-  var orgs=new Set(d.map(function(x){return x.SalesOrganisationName;}).filter(Boolean)).size;
-  var owners=new Set(d.map(function(x){return x.MainEmployeeResponsiblePartyName;}).filter(Boolean)).size;
+  // d is a summary object from getSummary()
+  var segs=(d.bySeg||[]).length;
+  var orgs=(d.byOrg||[]).length;
+  var owners=(d.byOwner||[]).length;
 
   document.getElementById('dataSummaryGrid').innerHTML=
-    '<div class="ds-tile"><div class="ds-val">'+d.length.toLocaleString()+'</div><div class="ds-lbl">Total Opportunities</div></div>'+
-    '<div class="ds-tile"><div class="ds-val">'+fmt(openRev)+'</div><div class="ds-lbl">Open Pipeline</div></div>'+
-    '<div class="ds-tile"><div class="ds-val">'+wr+'%</div><div class="ds-lbl">Win Rate</div></div>'+
-    '<div class="ds-tile"><div class="ds-val">'+fmt(sopN12)+'</div><div class="ds-lbl">SOP Next 12 Months</div></div>'+
-    '<div class="ds-tile"><div class="ds-val">'+open.length+'</div><div class="ds-lbl">Open Deals</div></div>'+
-    '<div class="ds-tile"><div class="ds-val">'+won.length+'</div><div class="ds-lbl">Won</div></div>'+
-    '<div class="ds-tile"><div class="ds-val">'+stale90+'</div><div class="ds-lbl">Stale >90 Days</div></div>'+
+    '<div class="ds-tile"><div class="ds-val">'+(d.total||0).toLocaleString()+'</div><div class="ds-lbl">Total Opportunities</div></div>'+
+    '<div class="ds-tile"><div class="ds-val">'+fmt(d.openRev||0)+'</div><div class="ds-lbl">Open Pipeline</div></div>'+
+    '<div class="ds-tile"><div class="ds-val">'+(d.winRate||0)+'%</div><div class="ds-lbl">Win Rate</div></div>'+
+    '<div class="ds-tile"><div class="ds-val">'+fmt(d.sopNext12Months||0)+'</div><div class="ds-lbl">SOP Next 12 Months</div></div>'+
+    '<div class="ds-tile"><div class="ds-val">'+(d.openCount||0)+'</div><div class="ds-lbl">Open Deals</div></div>'+
+    '<div class="ds-tile"><div class="ds-val">'+(d.wonCount||0)+'</div><div class="ds-lbl">Won</div></div>'+
+    '<div class="ds-tile"><div class="ds-val">'+((d.health&&d.health.stale90)||0)+'</div><div class="ds-lbl">Stale >90 Days</div></div>'+
     '<div class="ds-tile"><div class="ds-val">'+orgs+' orgs · '+owners+' owners</div><div class="ds-lbl">Coverage</div></div>'+
     '<div class="ds-fields">'+
       '<span class="ds-field">Revenue</span>'+
