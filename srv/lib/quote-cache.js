@@ -38,9 +38,9 @@ function getCache() {
 async function fetch24mQuotes(c4c) {
     const since = new Date();
     since.setMonth(since.getMonth() - 24);
-    const sinceStr = since.toISOString().replace(/\.\d{3}Z$/, '');
-    const path = `SalesQuoteCollection?$filter=CreationDateTime ge datetime'${sinceStr}'&$top=500&$select=${QUOTE_SEL}`;
-    console.log('[QuoteCache] Fetching:', path.substring(0, 120));
+    const sinceStr = since.toISOString().replace(/\.\d{3}Z$/, 'Z');
+    const path = `SalesQuoteCollection?$filter=CreationDateTime ge datetimeoffset'${sinceStr}'&$top=500&$select=${QUOTE_SEL}`;
+    console.log('[QuoteCache] Fetching:', path.substring(0, 140));
     const result = await c4c.send({ method: 'GET', path });
     return Array.isArray(result) ? result : (result.value || result || []);
 }
