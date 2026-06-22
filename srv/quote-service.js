@@ -19,11 +19,12 @@ module.exports = cds.service.impl(async function () {
 
     this.on('READ', 'SalesQuotes', async (req) => {
         const { quotes, status } = quoteCache.getCache();
-        if (status === 'ready' || (quotes && quotes.length > 0)) {
-            console.log('[CAP] SalesQuotes: serving ' + (quotes || []).length + ' from cache');
+        // Return data if ready or errored (error = fetch failed, return empty rather than 503 loop)
+        if (status === 'ready' || status === 'error' || quotes !== null) {
+            console.log('[CAP] SalesQuotes: serving ' + (quotes||[]).length + ' (status=' + status + ')');
             return quotes || [];
         }
-        console.log('[CAP] SalesQuotes: cache not ready (status=' + status + ')');
+        console.log('[CAP] SalesQuotes: cache pending (status=' + status + ')');
         req.error(503, 'Quote data is loading. Please refresh in 30 seconds.');
     });
 

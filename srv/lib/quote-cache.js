@@ -59,7 +59,10 @@ async function compute(cds) {
     } catch (err) {
         _status = 'error';
         _error = err.message;
+        _quotes = _quotes || []; // keep whatever we had, or empty
         console.error('[QuoteCache] Failed:', err.message, err.code || '', JSON.stringify(err).substring(0, 400));
+        // Retry after 60s on failure (don't wait the full 6h interval)
+        setTimeout(() => compute(cds), 60000);
     }
 }
 
