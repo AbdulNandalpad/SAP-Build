@@ -1,5 +1,5 @@
 const cds = require('@sap/cds');
-const preAssessment = require('./lib/pre-assessment');
+const quoteCache = require('./lib/quote-cache');
 
 // Fetch opportunity link for a specific quote by expanding SalesQuoteReference
 async function fetchQuoteOpportunityLink(c4c, objectID) {
@@ -18,20 +18,13 @@ module.exports = cds.service.impl(async function () {
     const c4c = await cds.connect.to('c4c');
 
     this.on('READ', 'SalesQuotes', async (req) => {
-        const { cache, status } = preAssessment.getCache();
-        // If pre-assessment finished (ready), serve from cache — even if quote fetch failed (empty)
-        if (status === 'ready') {
-            const quotes = (cache && cache.salesQuotes) || [];
-            console.log('[CAP] SalesQuotes: serving ' + quotes.length + ' from cache (status=ready)');
-            return quotes;
-        }
-        // Still computing — tell UI to retry
-        if (cache && cache.salesQuotes) {
-            console.log('[CAP] SalesQuotes: serving ' + cache.salesQuotes.length + ' from partial cache');
-            return cache.salesQuotes;
+        const { quotes, status } = quoteCache.getCache();
+        if (status === 'ready' || (quotes && quotes.length > 0)) {
+            console.log('[CAP] SalesQuotes: serving ' + (quotes || []).length + ' from cache');
+            return quotes || [];
         }
         console.log('[CAP] SalesQuotes: cache not ready (status=' + status + ')');
-        req.error(503, 'Pipeline data is loading. Please refresh in 30 seconds.');
+        req.error(503, 'Quote data is loading. Please refresh in 30 seconds.');
     });
 
     this.on('getQuoteOpportunityLink', async (req) => {

@@ -234,31 +234,7 @@ async function compute(cds, businessContext, apiKey) {
         }
         console.log('[PreAssessment] Fetched ' + all.length + ' opportunities in ' + page + ' pages');
 
-        // 2. Fetch sales quotes in background (same session)
-        const QUOTE_SEL = 'ObjectID,ID,Name,BuyerPartyID,BuyerPartyName,' +
-            'SalesOrganisationID,EmployeeResponsiblePartyID,EmployeeResponsiblePartyName,' +
-            'SalesTerritoryID,SalesTerritoryName,LifeCycleStatusCode,LifeCycleStatusCodeText,' +
-            'ResultStatusCode,ResultStatusCodeText,ApprovalStatusCode,ApprovalStatusCodeText,' +
-            'ProcessingTypeCode,ProcessingTypeCodeText,NetAmount,NetAmountCurrencyCode,' +
-            'GrossAmount,CurrencyCode,CreationDateTime,LastChangeDateTime,' +
-            'ValidFromDate,ValidToDate,ProbabilityPercent,MainDiscount,' +
-            'IncotermsClassificationCode,VersionGroupID,VersionID,' +
-            'BUS_SEG_CDE_KUT,BUS_SEG_CDE_KUTText,MKT_SEG_CODE_KUT,MKT_SEG_CODE_KUTText,' +
-            'OrderProbability_KUT,ZConfidntial_SDK,ZBIZTYPEText,' +
-            'ZOutDate_SDK,ZInqDate_SDK,ZSubmitDate_SDK,Inquiry';
-        const qSince = new Date(); qSince.setMonth(qSince.getMonth() - 24);
-        const qSinceStr = qSince.toISOString().replace(/\.\d{3}Z$/, '');
-        let quotes = [];
-        try {
-            const qPath = `SalesQuoteCollection?$filter=CreationDateTime ge datetime'${qSinceStr}'&$top=500&$select=${QUOTE_SEL}`;
-            const qResult = await c4c.send({ method: 'GET', path: qPath });
-            quotes = Array.isArray(qResult) ? qResult : (qResult.value || qResult || []);
-            console.log('[PreAssessment] Fetched ' + quotes.length + ' sales quotes');
-        } catch (qErr) {
-            console.warn('[PreAssessment] Sales quote fetch failed (non-fatal):', qErr.message, qErr.code || '', JSON.stringify(qErr).substring(0, 300));
-        }
-
-        // 3. Compute metrics in JS
+        // 2. Compute metrics in JS
         const metrics = computeMetrics(all);
         const opportunitySummary = computeSummary(all);
 
@@ -280,7 +256,6 @@ async function compute(cds, businessContext, apiKey) {
             metrics,
             aiNarrative,
             opportunitySummary,
-            salesQuotes: quotes,
             recordCount: all.length,
             computedAt: new Date().toISOString(),
             computeDurationMs: Date.now() - t0

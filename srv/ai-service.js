@@ -3,6 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const { callClaude } = require(path.join(__dirname, 'lib', 'claude'));
 const preAssessment = require(path.join(__dirname, 'lib', 'pre-assessment'));
+const quoteCache = require(path.join(__dirname, 'lib', 'quote-cache'));
 
 // Load business context once at startup — injected into every AI call
 let businessContext = '';
@@ -23,6 +24,7 @@ module.exports = cds.service.impl(async function () {
     // Start pre-assessment engine on service init
     const apiKey = process.env.ANTHROPIC_API_KEY || cds.env.ANTHROPIC_API_KEY;
     preAssessment.start(cds, businessContext, apiKey);
+    quoteCache.start(cds);
 
     this.on('analyze', async (req) => {
         const { question, summary } = req.data;
