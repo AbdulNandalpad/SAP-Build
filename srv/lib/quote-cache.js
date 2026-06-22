@@ -9,7 +9,7 @@ const REFRESH_MS = 6 * 60 * 60 * 1000;
 const QUOTE_SEL = [
     'ObjectID', 'ID', 'Name',
     'BuyerPartyID', 'BuyerPartyName',
-    'SalesOrganisationID',
+    'SalesOrganisationID', 'SalesOrganisationName',
     'EmployeeResponsiblePartyID', 'EmployeeResponsiblePartyName',
     'SalesTerritoryID', 'SalesTerritoryName',
     'LifeCycleStatusCode', 'LifeCycleStatusCodeText',
