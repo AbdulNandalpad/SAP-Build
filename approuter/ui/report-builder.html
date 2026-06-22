@@ -472,14 +472,6 @@ var pendingQuestions = [];
 async function goToConfirm(){
   var q=document.getElementById('defineInput').value.trim();
   if(!q)return;
-  if(allData.length===0){
-    var btn=document.getElementById('defineBtn');
-    btn.textContent='Loading data...';
-    btn.disabled=true;
-    await fetchData();
-    btn.disabled=false;
-    btn.innerHTML='Continue <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
-  }
   currentQ=q;
   // Reset panels
   document.getElementById('clarifyPanel').style.display='none';
@@ -493,11 +485,11 @@ async function goToConfirm(){
 
   try{
     var summary=buildQuickSummary();
-    var availableOrgs=[...new Set(allData.map(function(x){return x.SalesOrganisationName||'';}).filter(Boolean))].slice(0,15).join(', ');
-    var availableSegs=[...new Set(allData.map(function(x){return x.BUS_SEG_CDE_KUTText||'';}).filter(Boolean))].join(', ');
+    var availableOrgs=(allData.byOrg||[]).slice(0,15).map(function(x){return x.name||x.id||'';}).filter(Boolean).join(', ');
+    var availableSegs=(allData.bySeg||[]).map(function(x){return x.seg||'';}).filter(Boolean).join(', ');
 
     var prompt='You are a professional TSS sales analyst. A user has submitted a report request.\n\n'+
-      'Available data: '+allData.length+' C4C opportunities. Sales orgs in data: '+availableOrgs+'. Segments: '+availableSegs+'.\n\n'+
+      'Available data: '+(allData.total||0)+' C4C opportunities. Sales orgs in data: '+availableOrgs+'. Segments: '+availableSegs+'.\n\n'+
       'User request: "'+q+'"\n\n'+
       'First, decide if you need clarification before building a meaningful report.\n'+
       'Ask clarifying questions ONLY if: (1) geography is mentioned but ambiguous, (2) time period is unclear and would significantly affect the result, (3) the request could mean multiple very different reports, (4) a key filter (segment, status, owner) is partially specified.\n'+

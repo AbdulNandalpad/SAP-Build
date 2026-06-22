@@ -3,7 +3,7 @@ const cds = require('@sap/cds');
 const QUOTE_SEL = [
     "ObjectID,ID,Name",
     "BuyerPartyID,BuyerPartyName,BuyerContactPartyID,BuyerContactPartyName",
-    "SalesOrganisationID,EmployeeResponsiblePartyID,EmployeeResponsiblePartyName",
+    "SalesOrganisationID,SalesOrganisationName,EmployeeResponsiblePartyID,EmployeeResponsiblePartyName",
     "SalesTerritoryID,SalesTerritoryName",
     "LifeCycleStatusCode,LifeCycleStatusCodeText",
     "ResultStatusCode,ResultStatusCodeText",
