@@ -462,9 +462,19 @@ function goTo(n){
 }
 
 function buildQuickSummary(){
-  // allData is now the server-computed summary object (full pipeline)
-  if(allData && allData.total) return JSON.stringify(allData);
-  return JSON.stringify({total:0,open:0,won:0,lost:0,rev:0,winRate:0});
+  var d=allData;
+  if(!d || !d.total) return 'No data available.';
+  // Compact text — full JSON too large, causes 504 on AI calls
+  var topOrgs=(d.byOrg||[]).slice(0,8).map(function(o){return o.name+': $'+Math.round((o.openRev||0)/1000)+'K open ('+o.wonCount+'W/'+o.lostCount+'L)';}).join('; ');
+  var topSegs=(d.bySeg||[]).slice(0,6).map(function(s){return s.seg+': $'+Math.round((s.openRev||0)/1000)+'K';}).join('; ');
+  var sopY=(d.sopByYear||[]).map(function(s){return s.year+': $'+Math.round((s.rev||0)/1000)+'K';}).join(', ');
+  var reasons=(d.byReason||[]).slice(0,5).map(function(r){return r.reason+'('+r.count+')';}).join(', ');
+  var h=d.health||{};
+  return 'Pipeline: '+(d.total||0)+' opps total. Open: '+(d.openCount||0)+' deals, $'+Math.round((d.openRev||0)/1000)+'K. '+
+    'Won: '+(d.wonCount||0)+'. Lost: '+(d.lostCount||0)+'. Win rate: '+(d.winRate||0)+'%. '+
+    'SOP next 12m: $'+Math.round((d.sopNext12Months||0)/1000)+'K. '+
+    'Health: '+(h.stale90||0)+' stale >90d, '+(h.zeroPct||0)+' at 0% prob. '+
+    'By org: '+topOrgs+'. By segment: '+topSegs+'. SOP by year: '+sopY+'. Loss reasons: '+reasons+'.';
 }
 
 var pendingQuestions = [];
