@@ -164,7 +164,7 @@ tr:hover td{background:#f8fafc;}
   <span class="fl">Owner</span>
   <select id="fOwner" onchange="applyFilters()"><option value="">All</option></select>
   <span class="fl">From Year</span>
-  <input type="number" id="fYear" value="2024" min="2020" max="2030" style="width:74px;" onchange="applyFilters()" />
+  <input type="number" id="fYear" value="" placeholder="All" min="2020" max="2030" style="width:74px;" onchange="applyFilters()" />
   <button class="btn-clear" onclick="clearFilters()">Clear</button>
   <div class="filter-right">
     <div class="shell-status"><div class="live-dot"></div></div>
@@ -189,15 +189,26 @@ var allData=[], filtered=[], charts={};
 var C4C_BASE='https://my352500.crm.ondemand.com/sap/public/byd/runtime?bo_ns=http://sap.com/thingTypes&bo=COD_GENERIC&node=Root&operation=OnExtInspect&OBNRedirect=X';
 var SAP=['#2563eb','#059669','#d97706','#dc2626','#7c3aed','#0d9488','#b45309','#64748b','#1589ee','#0aaf67'];
 
+// ── BASE RULES ────────────────────────────────────────────────────────────────
+// Field names must match exactly what quote-cache.js fetches from C4C.
+// NEVER use TotalNetAmount — C4C field is NetAmount. NEVER use SalesOrganisationName
+// (not available in SalesQuoteCollection) — always use SalesOrganisationID.
+// Status: LifeCycleStatusCode 1=Open/InProcess 3=Completed
+//         ResultStatusCode    3=Won 4=Lost 5=Cancelled
+// Amount: always parseFloat(row.NetAmount || row.GrossAmount || 0)
+// Date:   always pd(row.CreationDateTime) — stored as OData DateTime string
+// ─────────────────────────────────────────────────────────────────────────────
+
 function fmt(n){n=parseFloat(n)||0;if(n>=1e9)return'$'+(n/1e9).toFixed(1)+'B';if(n>=1e6)return'$'+(n/1e6).toFixed(1)+'M';if(n>=1e3)return'$'+(n/1e3).toFixed(0)+'K';return'$'+n.toFixed(0);}
 function fmtN(n){n=parseFloat(n)||0;if(n>=1e6)return(n/1e6).toFixed(1)+'M';if(n>=1e3)return(n/1e3).toFixed(0)+'K';return n.toFixed(0);}
 function pd(v){if(!v)return null;var m=String(v).match(/\/Date\((\d+)\)\//);if(m)return new Date(parseInt(m[1]));return new Date(v);}
 function pds(v){var d=pd(v);if(!d||isNaN(d))return'—';return d.toISOString().substring(0,10);}
 function yr(v){var d=pd(v);return(!d||isNaN(d))?null:d.getFullYear();}
+function amt(row){return parseFloat(row.NetAmount||row.GrossAmount||0);}
+function orgLabel(row){return row.SalesOrganisationID||'—';}
 
-// LifeCycleStatusCode: 1=In Process, 3=Completed   ResultStatusCode: 3=Won, 4=Lost, 5=Cancelled
-function stLabel(lc, rs){ if(lc==='1')return'Open'; if(rs==='3')return'Won'; if(rs==='4')return'Lost'; if(rs==='5')return'Cancelled'; if(lc==='3')return'Completed'; return'Other'; }
-function stClass(lc, rs){ if(lc==='1')return'b-open'; if(rs==='3')return'b-won'; if(rs==='4')return'b-lost'; if(rs==='5')return'b-expired'; if(lc==='3')return'b-won'; return'b-other'; }
+function stLabel(lc, rs){ if(rs==='3')return'Won'; if(rs==='4')return'Lost'; if(rs==='5')return'Cancelled'; if(lc==='1')return'Open'; if(lc==='3')return'Completed'; return'Other'; }
+function stClass(lc, rs){ if(rs==='3')return'b-won'; if(rs==='4')return'b-lost'; if(rs==='5')return'b-expired'; if(lc==='1')return'b-open'; if(lc==='3')return'b-won'; return'b-other'; }
 var stColors={'Open':'#0a6ed1','Won':'#107e3e','Lost':'#bb0000','Cancelled':'#e9730c','Completed':'#059669','Other':'#94a3b8'};
 
 async function fetchAll(){
@@ -218,7 +229,8 @@ async function fetchAll(){
 }
 
 function populateFilters(data){
-  var orgs=[...new Set(data.map(function(d){return d.SalesOrganisationName||d.SalesOrganisationID;}).filter(Boolean))].sort();
+  // Org: use SalesOrganisationID (SalesOrganisationName not available in C4C SalesQuoteCollection)
+  var orgs=[...new Set(data.map(function(d){return d.SalesOrganisationID;}).filter(Boolean))].sort();
   orgs.forEach(function(o){var e=document.createElement('option');e.value=o;e.textContent=o;document.getElementById('fOrg').appendChild(e);});
   var owners=[...new Set(data.map(function(d){return d.EmployeeResponsiblePartyName;}).filter(Boolean))].sort();
   owners.forEach(function(o){var e=document.createElement('option');e.value=o;e.textContent=o;document.getElementById('fOwner').appendChild(e);});
@@ -228,7 +240,7 @@ function clearFilters(){
   document.getElementById('fOrg').value='';
   document.getElementById('fStatus').value='';
   document.getElementById('fOwner').value='';
-  document.getElementById('fYear').value='2024';
+  document.getElementById('fYear').value='';
   applyFilters();
 }
 
@@ -236,13 +248,20 @@ function applyFilters(){
   var org=document.getElementById('fOrg').value;
   var status=document.getElementById('fStatus').value;
   var owner=document.getElementById('fOwner').value;
-  var year=parseInt(document.getElementById('fYear').value)||2024;
+  var year=parseInt(document.getElementById('fYear').value)||0;
   filtered=allData.filter(function(d){
-    if(org&&(d.SalesOrganisationName||d.SalesOrganisationID)!==org)return false;
-    if(status){var lc=status.startsWith('lc')?status.slice(2):null;var rs=status.startsWith('rs')?status.slice(2):null;if(lc&&d.LifeCycleStatusCode!==lc)return false;if(rs&&d.ResultStatusCode!==rs)return false;}
+    // Org filter — match on SalesOrganisationID
+    if(org&&d.SalesOrganisationID!==org)return false;
+    // Status filter — check LifeCycleStatusCode and ResultStatusCode independently
+    if(status){
+      var lc=status.startsWith('lc')?status.slice(2):null;
+      var rs=status.startsWith('rs')?status.slice(2):null;
+      if(lc&&d.LifeCycleStatusCode!==lc)return false;
+      if(rs&&d.ResultStatusCode!==rs)return false;
+    }
     if(owner&&d.EmployeeResponsiblePartyName!==owner)return false;
-    var y=yr(d.CreationDateTime);
-    if(y&&y<year)return false;
+    // Year filter — 0 means "All years"
+    if(year>0){var y=yr(d.CreationDateTime);if(y&&y<year)return false;}
     return true;
   });
   renderKPIs();renderContent();
@@ -254,7 +273,7 @@ function renderKPIs(){
   var won=d.filter(function(x){return x.ResultStatusCode==='3';}).length;
   var lost=d.filter(function(x){return x.ResultStatusCode==='4';}).length;
   var cancelled=d.filter(function(x){return x.ResultStatusCode==='5';}).length;
-  var rev=d.reduce(function(s,x){return s+parseFloat(x.NetAmount||x.GrossAmount||0);},0);
+  var rev=d.reduce(function(s,x){return s+amt(x);},0);
   var wr=won+lost>0?Math.round(won/(won+lost)*100):0;
   document.getElementById('kpiRow').innerHTML=
     '<div class="kpi"><div class="kl">Total Quotes</div><div class="kv">'+d.length.toLocaleString()+'</div><div class="ks">filtered records</div></div>'+
@@ -283,7 +302,7 @@ function renderContent(){
     '<tbody id="tBody"></tbody></table></div>';
 
   // Net value by org
-  var om={};d.forEach(function(x){var o=(x.SalesOrganisationName||x.SalesOrganisationID||'Unknown').substring(0,22);om[o]=(om[o]||0)+parseFloat(x.NetAmount||x.GrossAmount||0);});
+  var om={};d.forEach(function(x){var o=(x.SalesOrganisationName||x.SalesOrganisationID||'Unknown').substring(0,22);om[o]=(om[o]||0)+amt(x);});
   var os=Object.entries(om).sort(function(a,b){return b[1]-a[1];}).slice(0,8);
   charts.org=new Chart(document.getElementById('cOrg'),{type:'bar',data:{labels:os.map(function(e){return e[0];}),datasets:[{data:os.map(function(e){return e[1];}),backgroundColor:SAP,borderRadius:3,borderSkipped:false}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return' '+fmt(c.raw);}}}},scales:{x:{ticks:{color:tc,font:{size:9}},grid:{color:gc}},y:{ticks:{color:tc,callback:function(v){return fmtN(v);}},grid:{color:gc}}}}});
 
@@ -300,7 +319,7 @@ function renderContent(){
   charts.trend=new Chart(document.getElementById('cTrend'),{type:'line',data:{labels:tms,datasets:[{label:'Quotes',data:tms.map(function(m){return tm[m];}),borderColor:'#0a6ed1',backgroundColor:'rgba(10,110,209,0.06)',tension:0.4,fill:true,pointBackgroundColor:'#0a6ed1',pointRadius:3}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:tc,font:{size:8}},grid:{color:gc}},y:{ticks:{color:tc},grid:{color:gc}}}}});
 
   // Top customers by net value
-  var cm={};d.forEach(function(x){var c=(x.BuyerPartyName||'Unknown').substring(0,20);cm[c]=(cm[c]||0)+parseFloat(x.NetAmount||x.GrossAmount||0);});
+  var cm={};d.forEach(function(x){var c=(x.BuyerPartyName||'Unknown').substring(0,20);cm[c]=(cm[c]||0)+amt(x);});
   var cs=Object.entries(cm).sort(function(a,b){return b[1]-a[1];}).slice(0,8);
   charts.customer=new Chart(document.getElementById('cCustomer'),{type:'bar',data:{labels:cs.map(function(e){return e[0];}),datasets:[{data:cs.map(function(e){return e[1];}),backgroundColor:'rgba(108,50,169,0.75)',borderRadius:3,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return' '+fmt(c.raw);}}}},scales:{x:{ticks:{color:tc,callback:function(v){return fmtN(v);}},grid:{color:gc}},y:{ticks:{color:tc,font:{size:9}},grid:{color:gc}}}}});
 
@@ -310,21 +329,21 @@ function renderContent(){
   charts.winRate=new Chart(document.getElementById('cWinRate'),{type:'bar',data:{labels:wrs.map(function(e){return e.k;}),datasets:[{data:wrs.map(function(e){return e.r;}),backgroundColor:wrs.map(function(e){return e.r>=50?'#107e3e':e.r>=25?'#0a6ed1':'#e9730c';}),borderRadius:3,borderSkipped:false}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return' '+c.raw.toFixed(1)+'%';}}}},scales:{x:{ticks:{color:tc,font:{size:9}},grid:{color:gc}},y:{ticks:{color:tc,callback:function(v){return v+'%';}},grid:{color:gc},max:100}}}});
 
   // Value by business segment
-  var pm={};d.forEach(function(x){var p=x.BUS_SEG_CDE_KUTText||x.BUS_SEG_CDE_KUT||'(Unknown)';pm[p]=(pm[p]||0)+parseFloat(x.NetAmount||x.GrossAmount||0);});
+  var pm={};d.forEach(function(x){var p=x.BUS_SEG_CDE_KUTText||x.BUS_SEG_CDE_KUT||'(Unknown)';pm[p]=(pm[p]||0)+amt(x);});
   var ps=Object.entries(pm).sort(function(a,b){return b[1]-a[1];}).slice(0,6);
   charts.phase=new Chart(document.getElementById('cPhase'),{type:'bar',data:{labels:ps.map(function(e){return e[0].substring(0,16);}),datasets:[{data:ps.map(function(e){return e[1];}),backgroundColor:SAP.slice(0,ps.length),borderRadius:3,borderSkipped:false}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return' '+fmt(c.raw);}}}},scales:{x:{ticks:{color:tc,font:{size:9}},grid:{color:gc}},y:{ticks:{color:tc,callback:function(v){return fmtN(v);}},grid:{color:gc}}}}});
 
   // Table — sorted by net value desc
-  var rows=d.slice().sort(function(a,b){return parseFloat(b.TotalNetAmount||b.TotalGrossAmount||0)-parseFloat(a.TotalNetAmount||a.TotalGrossAmount||0);}).slice(0,50);
+  var rows=d.slice().sort(function(a,b){return amt(b)-amt(a);}).slice(0,50);
   document.getElementById('tblCt').textContent='Top 50 of '+d.length.toLocaleString();
   document.getElementById('tBody').innerHTML=rows.map(function(row){
-    var val=parseFloat(row.TotalNetAmount||row.TotalGrossAmount||0);
+    var val=amt(row);
     var link=C4C_BASE+'&param.InternalID='+row.ID+'&param.Type=COD_SALESQUOTE_THINGTYPE';
     return '<tr>'+
       '<td style="font-family:monospace;font-size:0.68rem;color:var(--muted)">'+(row.ID||'—')+'</td>'+
       '<td style="font-weight:500;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(row.Name||'—')+'</td>'+
       '<td style="color:var(--muted);max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(row.BuyerPartyName||'—')+'</td>'+
-      '<td style="color:var(--muted);font-size:0.7rem">'+(row.SalesOrganisationName||row.SalesOrganisationID||'—')+'</td>'+
+      '<td style="color:var(--muted);font-size:0.7rem">'+orgLabel(row)+'</td>'+
       '<td style="color:var(--muted);font-size:0.7rem">'+(row.EmployeeResponsiblePartyName||'—')+'</td>'+
       '<td style="font-weight:600;color:var(--blue)">'+fmt(val)+'</td>'+
       '<td><span class="badge '+stClass(row.LifeCycleStatusCode,row.ResultStatusCode)+'">'+stLabel(row.LifeCycleStatusCode,row.ResultStatusCode)+'</span></td>'+
