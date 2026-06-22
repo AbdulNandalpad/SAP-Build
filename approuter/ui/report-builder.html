@@ -641,11 +641,11 @@ function renderReport(config){
   goTo(4);
   Object.values(reportCharts).forEach(function(c){c.destroy();});
   reportCharts={};
-  var d = (filteredData && filteredData.length > 0) ? filteredData : allData;
+  var d = allData; // summary object from getSummary()
   var filterLabel = activeFilters.geography ? ' · '+activeFilters.geography.toUpperCase()+' filter' : (activeFilters.segment ? ' · '+activeFilters.segment+' segment' : '');
 
   document.getElementById('rTopTitle').textContent=config.reportTitle||currentQ;
-  document.getElementById('rTopSub').textContent='C4C QUA · MY352500 · '+new Date().toLocaleString('en-GB',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})+filterLabel+' · '+d.length.toLocaleString()+' records';
+  document.getElementById('rTopSub').textContent='C4C QUA · MY352500 · '+new Date().toLocaleString('en-GB',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})+filterLabel+' · '+(d.total||0).toLocaleString()+' records';
 
   var isText=config.reportType==='executive_summary'||!config.primaryChart||!config.primaryChart.labels||config.primaryChart.labels.length===0;
   var supporting=config.supportingCharts||['revenue','winRate','phase','reasons','owners','trend'];
@@ -659,13 +659,12 @@ function renderReport(config){
     return '<div class="kpi-tile"><div class="kl">'+k.label+'</div><div class="kv">'+k.val+'</div><div class="ks">'+k.sub+'</div></div>';
   }).join('')+'</div>';
 
-  // Recalculate these for use below
-  var won=d.filter(function(x){return x.LifeCycleStatusCode==='3';});
-  var lost=d.filter(function(x){return x.LifeCycleStatusCode==='5';});
-  var open=d.filter(function(x){return x.LifeCycleStatusCode==='1';});
-  var rev=d.reduce(function(s,x){return s+parseFloat(x.ExpectedRevenueAmount||0);},0);
-  var wr=won.length+lost.length>0?((won.length/(won.length+lost.length))*100).toFixed(1):'0.0';
-  var orgs=[...new Set(d.map(function(x){return x.SalesOrganisationID;}).filter(Boolean))].length;
+  // Derived from summary object
+  var wonCnt=d.wonCount||0, lostCnt=d.lostCount||0, openCnt=d.openCount||0;
+  var won={length:wonCnt}, lost={length:lostCnt}, open={length:openCnt};
+  var rev=d.openRev||0;
+  var wr=d.winRate||0;
+  var orgs=(d.byOrg||[]).length;
 
   // Insight
   var insightIcon=isText?
@@ -750,23 +749,20 @@ function renderReport(config){
     reportCharts.donut=makeChart('cDonut','doughnut',['Won','Lost','Open'],[{data:[won.length,lost.length,open.length],backgroundColor:dColors}]);
   }
 
-  if(document.getElementById('cOrg')){var om={};d.forEach(function(x){var o=(x.SalesOrganisationName||'?').replace(/TSS\s*/,'');om[o]=(om[o]||0)+parseFloat(x.ExpectedRevenueAmount||0);});var os=Object.entries(om).sort(function(a,b){return b[1]-a[1];}).slice(0,8);reportCharts.org=makeChart('cOrg','bar',os.map(function(e){return e[0];}),  [{data:os.map(function(e){return e[1];}),backgroundColor:SAP}]);}
-  if(document.getElementById('cWin')){var wm={};d.forEach(function(x){var k=(x.SalesOrganisationName||'?').replace(/TSS\s*/,'');if(!wm[k])wm[k]={w:0,l:0};if(x.LifeCycleStatusCode==='3')wm[k].w++;if(x.LifeCycleStatusCode==='5')wm[k].l++;});var ws=Object.entries(wm).filter(function(e){return e[1].w+e[1].l>=3;}).map(function(e){return{k:e[0],r:e[1].w/(e[1].w+e[1].l)*100};}).sort(function(a,b){return b.r-a.r;}).slice(0,8);reportCharts.win=makeChart('cWin','bar',ws.map(function(e){return e.k;}),[{data:ws.map(function(e){return e.r;}),backgroundColor:ws.map(function(e){return e.r>=30?'#22c55e':e.r>=20?'#3b82f6':'#f97316';})}]);}
-  if(document.getElementById('cPhase')){var pm={};d.forEach(function(x){var p=(x.SalesCyclePhaseCodeText||'?').replace(/^\d+\s/,'').substring(0,22);pm[p]=(pm[p]||0)+1;});var ps=Object.entries(pm).sort(function(a,b){return b[1]-a[1];});reportCharts.phase=makeChart('cPhase','horizontalBar',ps.map(function(e){return e[0];}), [{data:ps.map(function(e){return e[1];}),backgroundColor:'rgba(168,85,247,0.75)'}]);}
-  if(document.getElementById('cReason')){var rm={};lost.forEach(function(x){var k=x.ResultReasonCodeText||'(Null)';rm[k]=(rm[k]||0)+1;});var rs=Object.entries(rm).sort(function(a,b){return b[1]-a[1];}).slice(0,6);var rTot=rs.reduce(function(s,e){return s+e[1];},0);document.getElementById('reasonLeg').innerHTML=rs.map(function(e,i){return '<div class="leg-item"><div class="leg-dot" style="background:'+SAP[i]+'"></div>'+e[0].substring(0,16)+' '+(e[1]/rTot*100).toFixed(1)+'%</div>';}).join('');reportCharts.reason=makeChart('cReason','doughnut',rs.map(function(e){return e[0].substring(0,16);}), [{data:rs.map(function(e){return e[1];}),backgroundColor:SAP}]);}
-  if(document.getElementById('cOwner')){var oo={};open.forEach(function(x){var k=x.MainEmployeeResponsiblePartyName||'?';oo[k]=(oo[k]||0)+parseFloat(x.ExpectedRevenueAmount||0);});var ooe=Object.entries(oo).sort(function(a,b){return b[1]-a[1];}).slice(0,8);reportCharts.owner=makeChart('cOwner','horizontalBar',ooe.map(function(e){return e[0].split(' ').slice(-1)[0];}), [{data:ooe.map(function(e){return e[1];}),backgroundColor:'rgba(99,102,241,0.75)'}]);}
-  if(document.getElementById('cTrend')){var tm={};d.forEach(function(x){if(x.CreationDate){var m=x.CreationDate.substring(0,7);if(!tm[m])tm[m]=0;tm[m]+=parseFloat(x.ExpectedRevenueAmount||0);}});var tms=Object.keys(tm).sort().slice(-12);reportCharts.trend=makeChart('cTrend','line',tms,[{data:tms.map(function(m){return tm[m];}),backgroundColor:'rgba(249,115,22,0.06)',borderColor:'#f97316',tension:0.4,fill:true,pointBackgroundColor:'#f97316',pointRadius:3}]);}
-  var isOp=function(x){return x.LifeCycleStatusCode==='1'||x.LifeCycleStatusCode==='2';};
-  if(document.getElementById('cSegment')){var segm={};d.filter(isOp).forEach(function(x){var k=x.BUS_SEG_CDE_KUTText||'(Not Set)';segm[k]=(segm[k]||0)+parseFloat(x.ExpectedRevenueAmount||0);});var segs=Object.entries(segm).sort(function(a,b){return b[1]-a[1];}).slice(0,8);reportCharts.segment=makeChart('cSegment','horizontalBar',segs.map(function(e){return e[0].substring(0,22);}), [{data:segs.map(function(e){return e[1];}),backgroundColor:'rgba(14,126,118,0.75)'}]);}
-  if(document.getElementById('cLevel')){var lvm={};d.filter(isOp).forEach(function(x){var k=x.OpportunityLevel_KUTText||'(Not Set)';lvm[k]=(lvm[k]||0)+1;});var lvKeys=Object.keys(lvm);var lvColors=['#0a6ed1','#6c32a9','#e9730c','#64748b'];if(document.getElementById('levelLeg'))document.getElementById('levelLeg').innerHTML=lvKeys.map(function(k,i){return '<div class="leg-item"><div class="leg-dot" style="background:'+lvColors[i%lvColors.length]+'"></div>'+k.substring(0,22)+'</div>';}).join('');reportCharts.level=makeChart('cLevel','doughnut',lvKeys,[{data:lvKeys.map(function(k){return lvm[k];}),backgroundColor:lvColors}]);}
-  if(document.getElementById('cSopYear')){var soym={};d.filter(isOp).forEach(function(x){if(x.ExpectedProcessingEndDate){var m=String(x.ExpectedProcessingEndDate).match(/\/Date\((\d+)\)\//);var dt=m?new Date(parseInt(m[1])):new Date(x.ExpectedProcessingEndDate);var yr=dt.getFullYear();if(yr>=new Date().getFullYear()){soym[yr]=(soym[yr]||0)+parseFloat(x.ExpectedRevenueAmount||0);}}});var soye=Object.entries(soym).sort(function(a,b){return a[0]-b[0];});reportCharts.sopYear=makeChart('cSopYear','bar',soye.map(function(e){return e[0];}), [{data:soye.map(function(e){return e[1];}),backgroundColor:SAP}]);}
+  if(document.getElementById('cOrg')){var os=(d.byOrg||[]).slice(0,8);reportCharts.org=makeChart('cOrg','bar',os.map(function(e){return e.name;}), [{data:os.map(function(e){return e.openRev;}),backgroundColor:SAP}]);}
+  if(document.getElementById('cWin')){var ws=(d.byOrg||[]).filter(function(e){return e.wonCount+e.lostCount>=3;}).map(function(e){return{k:e.name,r:e.wonCount/(e.wonCount+e.lostCount)*100};}).sort(function(a,b){return b.r-a.r;}).slice(0,8);reportCharts.win=makeChart('cWin','bar',ws.map(function(e){return e.k;}),[{data:ws.map(function(e){return e.r;}),backgroundColor:ws.map(function(e){return e.r>=30?'#22c55e':e.r>=20?'#3b82f6':'#f97316';})}]);}
+  if(document.getElementById('cPhase')){var ps=(d.byPhase||[]).slice(0,10);reportCharts.phase=makeChart('cPhase','horizontalBar',ps.map(function(e){return e.phase.replace(/^\d+\s/,'').substring(0,22);}), [{data:ps.map(function(e){return e.count;}),backgroundColor:'rgba(168,85,247,0.75)'}]);}
+  if(document.getElementById('cReason')){var rs=(d.byReason||[]).slice(0,6);var rTot=rs.reduce(function(s,e){return s+e.count;},0);document.getElementById('reasonLeg').innerHTML=rs.map(function(e,i){return '<div class="leg-item"><div class="leg-dot" style="background:'+SAP[i]+'"></div>'+e.reason.substring(0,16)+' '+(e.count/(rTot||1)*100).toFixed(1)+'%</div>';}).join('');reportCharts.reason=makeChart('cReason','doughnut',rs.map(function(e){return e.reason.substring(0,16);}), [{data:rs.map(function(e){return e.count;}),backgroundColor:SAP}]);}
+  if(document.getElementById('cOwner')){var ooe=(d.byOwner||[]).slice(0,8);reportCharts.owner=makeChart('cOwner','horizontalBar',ooe.map(function(e){return e.owner.split(' ').slice(-1)[0];}), [{data:ooe.map(function(e){return e.openRev;}),backgroundColor:'rgba(99,102,241,0.75)'}]);}
+  if(document.getElementById('cTrend')){var tms=(d.byMonth||[]).slice(-12);reportCharts.trend=makeChart('cTrend','line',tms.map(function(e){return e.month;}),[{data:tms.map(function(e){return e.count;}),backgroundColor:'rgba(249,115,22,0.06)',borderColor:'#f97316',tension:0.4,fill:true,pointBackgroundColor:'#f97316',pointRadius:3}]);}
+  if(document.getElementById('cSegment')){var segs=(d.bySeg||[]).slice(0,8);reportCharts.segment=makeChart('cSegment','horizontalBar',segs.map(function(e){return e.seg.substring(0,22);}), [{data:segs.map(function(e){return e.openRev;}),backgroundColor:'rgba(14,126,118,0.75)'}]);}
+  if(document.getElementById('cSopYear')){var soye=(d.sopByYear||[]);reportCharts.sopYear=makeChart('cSopYear','bar',soye.map(function(e){return e.year;}), [{data:soye.map(function(e){return e.rev;}),backgroundColor:SAP}]);}
 
-  var sc=function(s){return s==='3'?'b-won':s==='5'?'b-lost':'b-open';};
-  var st=function(s){return s==='3'?'Won':s==='5'?'Lost':'Open';};
-  document.getElementById('tblCt').textContent='Top 50 of '+d.length.toLocaleString();
-  document.getElementById('tBody').innerHTML=d.slice(0,50).map(function(row){
-    var link=C4C_BASE+'&param.InternalID='+row.ID+'&param.Type=COD_OPPORTUNITY_THINGTYPE';
-    return '<tr><td style="color:var(--muted);font-family:monospace;font-size:0.68rem">'+row.ID+'</td><td style="font-weight:500">'+(row.Name||'—')+'</td><td style="color:var(--muted)">'+(row.ProspectPartyName||'—')+'</td><td style="color:var(--muted)">'+(row.SalesOrganisationName||'').replace(/TSS\s*/,'')+'</td><td style="color:var(--muted);font-size:0.7rem">'+(row.SalesCyclePhaseCodeText||'—')+'</td><td style="font-weight:500">'+fmt(parseFloat(row.ExpectedRevenueAmount||0))+'</td><td><span class="badge '+sc(row.LifeCycleStatusCode)+'">'+st(row.LifeCycleStatusCode)+'</span></td><td style="color:var(--muted);font-size:0.7rem">'+(row.MainEmployeeResponsiblePartyName||'—')+'</td><td><a class="c4c-link" href="'+link+'" target="_blank">Open<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 2h3v3M10 2 5 7M4 3H2v7h7V8"/></svg></a></td></tr>';
+  var deals=d.topDeals||[];
+  document.getElementById('tblCt').textContent='Top '+deals.length+' open deals of '+(d.total||0).toLocaleString();
+  document.getElementById('tBody').innerHTML=deals.map(function(row){
+    var link=C4C_BASE+'&param.InternalID='+row.id+'&param.Type=COD_OPPORTUNITY_THINGTYPE';
+    return '<tr><td style="color:var(--muted);font-family:monospace;font-size:0.68rem">'+(row.id||'')+'</td><td style="font-weight:500">'+(row.name||'—')+'</td><td style="color:var(--muted)">'+(row.customer||'—')+'</td><td style="color:var(--muted)">'+(row.org||'').replace(/TSS\s*/i,'')+'</td><td style="color:var(--muted);font-size:0.7rem">'+(row.phase||'—')+'</td><td style="font-weight:500">'+fmt(row.rev||0)+'</td><td><span class="badge b-open">Open</span></td><td style="color:var(--muted);font-size:0.7rem">'+(row.prob||0)+'%</td><td><a class="c4c-link" href="'+link+'" target="_blank">Open<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 2h3v3M10 2 5 7M4 3H2v7h7V8"/></svg></a></td></tr>';
   }).join('');
 }
 
@@ -801,62 +797,47 @@ function extractFilters(q) {
 }
 
 function applyFilters(data, filters) {
-    var d = data;
-    if (filters.geography) {
-        var geo = filters.geography.toLowerCase();
-        var geoFiltered = d.filter(function(x){ return (x.SalesOrganisationName||'').toLowerCase().includes(geo); });
-        if (geoFiltered.length > 0) d = geoFiltered;
-    }
-    if (filters.segment) {
-        var seg = filters.segment.toLowerCase();
-        var segFiltered = d.filter(function(x){ return (x.BUS_SEG_CDE_KUTText||'').toLowerCase().includes(seg); });
-        if (segFiltered.length > 0) d = segFiltered;
-    }
-    return d;
+    // allData is a summary object — raw record filtering not available.
+    // Filters are passed to AI as context in the question; return summary as-is.
+    return data;
 }
 
 function buildDynamicKPIs(d, q) {
     var ql = q.toLowerCase();
-    var won = d.filter(function(x){return x.LifeCycleStatusCode==='3';});
-    var lost = d.filter(function(x){return x.LifeCycleStatusCode==='5';});
-    var open = d.filter(function(x){return x.LifeCycleStatusCode==='1'||x.LifeCycleStatusCode==='2';});
-    var rev = d.reduce(function(s,x){return s+parseFloat(x.ExpectedRevenueAmount||0);},0);
-    var openRev = open.reduce(function(s,x){return s+parseFloat(x.ExpectedRevenueAmount||0);},0);
-    var wr = won.length+lost.length>0?((won.length/(won.length+lost.length))*100).toFixed(1):'0.0';
-    var orgs = [...new Set(d.map(function(x){return x.SalesOrganisationID;}).filter(Boolean))].length;
-    var avgDeal = won.length>0?(won.reduce(function(s,x){return s+parseFloat(x.ExpectedRevenueAmount||0);},0)/won.length):0;
+    var wonCnt = d.wonCount||0, lostCnt = d.lostCount||0, openCnt = d.openCount||0, total = d.total||0;
+    var openRev = d.openRev||0, wr = d.winRate||0, orgs = (d.byOrg||[]).length;
 
     if (ql.includes('win') || ql.includes('rate') || ql.includes('performance') || ql.includes('scorecard')) {
         return [
-            {label:'Win Rate', val:wr+'%', sub:won.length+' won of '+(won.length+lost.length)+' closed'},
-            {label:'Deals Won', val:won.length.toLocaleString(), sub:fmt(won.reduce(function(s,x){return s+parseFloat(x.ExpectedRevenueAmount||0);},0))+' revenue'},
-            {label:'Deals Lost', val:lost.length.toLocaleString(), sub:((lost.length/(d.length||1))*100).toFixed(1)+'% of total'},
-            {label:'Avg Won Deal', val:fmt(avgDeal), sub:'average deal size'},
-            {label:'Total Analyzed', val:d.length.toLocaleString(), sub:orgs+' sales orgs'}
+            {label:'Win Rate', val:wr+'%', sub:wonCnt+' won of '+(wonCnt+lostCnt)+' closed'},
+            {label:'Deals Won', val:wonCnt.toLocaleString(), sub:'closed won'},
+            {label:'Deals Lost', val:lostCnt.toLocaleString(), sub:((lostCnt/(total||1))*100).toFixed(1)+'% of total'},
+            {label:'Open Pipeline', val:fmt(openRev), sub:openCnt+' active deals'},
+            {label:'Total Analyzed', val:total.toLocaleString(), sub:orgs+' sales orgs'}
         ];
     } else if (ql.includes('lost') || ql.includes('losing') || ql.includes('loss')) {
         return [
-            {label:'Lost Deals', val:lost.length.toLocaleString(), sub:((lost.length/(d.length||1))*100).toFixed(1)+'% of total'},
-            {label:'Revenue Lost', val:fmt(lost.reduce(function(s,x){return s+parseFloat(x.ExpectedRevenueAmount||0);},0)), sub:'expected at time of loss'},
-            {label:'Win Rate', val:wr+'%', sub:won.length+' won · '+lost.length+' lost'},
-            {label:'Open Pipeline', val:open.length.toLocaleString(), sub:'still active'},
-            {label:'Total Analyzed', val:d.length.toLocaleString(), sub:orgs+' sales orgs'}
+            {label:'Lost Deals', val:lostCnt.toLocaleString(), sub:((lostCnt/(total||1))*100).toFixed(1)+'% of total'},
+            {label:'Loss Reasons', val:(d.byReason||[]).length, sub:'distinct reasons recorded'},
+            {label:'Win Rate', val:wr+'%', sub:wonCnt+' won · '+lostCnt+' lost'},
+            {label:'Open Pipeline', val:openCnt.toLocaleString(), sub:'still active'},
+            {label:'Total Analyzed', val:total.toLocaleString(), sub:orgs+' sales orgs'}
         ];
     } else if (ql.includes('pipeline') || ql.includes('open') || ql.includes('active') || ql.includes('forecast')) {
         return [
-            {label:'Open Pipeline', val:open.length.toLocaleString(), sub:'active deals'},
+            {label:'Open Deals', val:openCnt.toLocaleString(), sub:'active opportunities'},
             {label:'Open Revenue', val:fmt(openRev), sub:'total open pipeline value'},
-            {label:'Won Deals', val:won.length.toLocaleString(), sub:fmt(won.reduce(function(s,x){return s+parseFloat(x.ExpectedRevenueAmount||0);},0))},
-            {label:'Win Rate', val:wr+'%', sub:won.length+' won · '+lost.length+' lost'},
-            {label:'Total Analyzed', val:d.length.toLocaleString(), sub:orgs+' sales orgs'}
+            {label:'Won Deals', val:wonCnt.toLocaleString(), sub:'closed won'},
+            {label:'Win Rate', val:wr+'%', sub:wonCnt+' won · '+lostCnt+' lost'},
+            {label:'Total Analyzed', val:total.toLocaleString(), sub:orgs+' sales orgs'}
         ];
     } else {
         return [
-            {label:'Total Opportunities', val:d.length.toLocaleString(), sub:orgs+' sales orgs'},
-            {label:'Expected Revenue', val:fmt(rev), sub:'pipeline value'},
-            {label:'Win Rate', val:wr+'%', sub:won.length+' won · '+lost.length+' lost'},
-            {label:'Open Pipeline', val:open.length.toLocaleString(), sub:'active deals'},
-            {label:'Lost Deals', val:lost.length.toLocaleString(), sub:((lost.length/(d.length||1))*100).toFixed(1)+'% of total'}
+            {label:'Total Opportunities', val:total.toLocaleString(), sub:orgs+' sales orgs'},
+            {label:'Open Pipeline', val:fmt(openRev), sub:openCnt+' active deals'},
+            {label:'Win Rate', val:wr+'%', sub:wonCnt+' won · '+lostCnt+' lost'},
+            {label:'Won Deals', val:wonCnt.toLocaleString(), sub:'closed won'},
+            {label:'Lost Deals', val:lostCnt.toLocaleString(), sub:((lostCnt/(total||1))*100).toFixed(1)+'% of total'}
         ];
     }
 }
