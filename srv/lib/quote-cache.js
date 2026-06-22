@@ -36,10 +36,8 @@ function getCache() {
 }
 
 async function fetch24mQuotes(c4c) {
-    const since = new Date();
-    since.setMonth(since.getMonth() - 24);
-    const sinceStr = since.toISOString().replace(/\.\d{3}Z$/, 'Z');
-    const path = `SalesQuoteCollection?$filter=CreationDateTime ge datetimeoffset'${sinceStr}'&$top=500&$select=${QUOTE_SEL}`;
+    // No date filter — let C4C return latest records, rely on $top=500
+    const path = `SalesQuoteCollection?$top=500&$select=${QUOTE_SEL}`;
     console.log('[QuoteCache] Fetching:', path.substring(0, 140));
     const result = await c4c.send({ method: 'GET', path });
     return Array.isArray(result) ? result : (result.value || result || []);
@@ -67,8 +65,12 @@ async function compute(cds) {
 }
 
 function start(cds) {
-    setTimeout(() => compute(cds), 10000); // 10s after boot (after pre-assessment starts)
-    setInterval(() => compute(cds), REFRESH_MS);
+    console.log('[QuoteCache] Scheduled — first run in 10s');
+    setTimeout(() => {
+        console.log('[QuoteCache] Timer fired — starting compute');
+        compute(cds).catch(err => console.error('[QuoteCache] Unhandled error in compute:', err.message));
+    }, 10000);
+    setInterval(() => compute(cds).catch(err => console.error('[QuoteCache] Refresh error:', err.message)), REFRESH_MS);
 }
 
 module.exports = { start, getCache };
