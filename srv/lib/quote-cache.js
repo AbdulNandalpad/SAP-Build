@@ -36,8 +36,8 @@ function getCache() {
 }
 
 async function fetch24mQuotes(c4c) {
-    // No date filter — let C4C return latest records, rely on $top=500
-    const path = `SalesQuoteCollection?$top=500&$select=${QUOTE_SEL}`;
+    // Order by creation date desc so $top=500 returns the most recent quotes
+    const path = `SalesQuoteCollection?$top=500&$orderby=CreationDateTime desc&$select=${QUOTE_SEL}`;
     console.log('[QuoteCache] Fetching:', path.substring(0, 140));
     const result = await c4c.send({ method: 'GET', path });
     return Array.isArray(result) ? result : (result.value || result || []);
