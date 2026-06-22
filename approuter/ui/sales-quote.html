@@ -163,8 +163,12 @@ tr:hover td{background:#f8fafc;}
   </select>
   <span class="fl">Owner</span>
   <select id="fOwner" onchange="applyFilters()"><option value="">All</option></select>
-  <span class="fl">From Year</span>
-  <input type="number" id="fYear" value="" placeholder="All" min="2020" max="2030" style="width:74px;" onchange="applyFilters()" />
+  <span class="fl">Period</span>
+  <select id="fPeriod" onchange="applyFilters()">
+    <option value="12">Last 12 months</option>
+    <option value="24">Last 24 months</option>
+    <option value="0">All</option>
+  </select>
   <button class="btn-clear" onclick="clearFilters()">Clear</button>
   <div class="filter-right">
     <div class="shell-status"><div class="live-dot"></div></div>
@@ -240,7 +244,7 @@ function clearFilters(){
   document.getElementById('fOrg').value='';
   document.getElementById('fStatus').value='';
   document.getElementById('fOwner').value='';
-  document.getElementById('fYear').value='';
+  document.getElementById('fPeriod').value='12';
   applyFilters();
 }
 
@@ -248,11 +252,10 @@ function applyFilters(){
   var org=document.getElementById('fOrg').value;
   var status=document.getElementById('fStatus').value;
   var owner=document.getElementById('fOwner').value;
-  var year=parseInt(document.getElementById('fYear').value)||0;
+  var months=parseInt(document.getElementById('fPeriod').value)||0;
+  var cutoff=months>0?new Date(Date.now()-months*30.44*24*60*60*1000):null;
   filtered=allData.filter(function(d){
-    // Org filter — match on SalesOrganisationID
     if(org&&d.SalesOrganisationID!==org)return false;
-    // Status filter — check LifeCycleStatusCode and ResultStatusCode independently
     if(status){
       var lc=status.startsWith('lc')?status.slice(2):null;
       var rs=status.startsWith('rs')?status.slice(2):null;
@@ -260,8 +263,7 @@ function applyFilters(){
       if(rs&&d.ResultStatusCode!==rs)return false;
     }
     if(owner&&d.EmployeeResponsiblePartyName!==owner)return false;
-    // Year filter — 0 means "All years"
-    if(year>0){var y=yr(d.CreationDateTime);if(y&&y<year)return false;}
+    if(cutoff){var dt=pd(d.CreationDateTime);if(!dt||dt<cutoff)return false;}
     return true;
   });
   renderKPIs();renderContent();
