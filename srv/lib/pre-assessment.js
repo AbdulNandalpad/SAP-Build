@@ -255,7 +255,7 @@ async function compute(cds, businessContext, apiKey) {
             quotes = Array.isArray(qResult) ? qResult : (qResult.value || qResult || []);
             console.log('[PreAssessment] Fetched ' + quotes.length + ' sales quotes');
         } catch (qErr) {
-            console.warn('[PreAssessment] Sales quote fetch failed (non-fatal):', qErr.message);
+            console.warn('[PreAssessment] Sales quote fetch failed (non-fatal):', qErr.message, qErr.code || '', JSON.stringify(qErr).substring(0, 300));
         }
 
         // 3. Compute metrics in JS

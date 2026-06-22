@@ -18,13 +18,18 @@ module.exports = cds.service.impl(async function () {
     const c4c = await cds.connect.to('c4c');
 
     this.on('READ', 'SalesQuotes', async (req) => {
-        // Serve from pre-assessment cache — no live C4C fetch in request path
         const { cache, status } = preAssessment.getCache();
-        if (cache && cache.salesQuotes && cache.salesQuotes.length > 0) {
-            console.log('[CAP] SalesQuotes: serving ' + cache.salesQuotes.length + ' from cache');
+        // If pre-assessment finished (ready), serve from cache — even if quote fetch failed (empty)
+        if (status === 'ready') {
+            const quotes = (cache && cache.salesQuotes) || [];
+            console.log('[CAP] SalesQuotes: serving ' + quotes.length + ' from cache (status=ready)');
+            return quotes;
+        }
+        // Still computing — tell UI to retry
+        if (cache && cache.salesQuotes) {
+            console.log('[CAP] SalesQuotes: serving ' + cache.salesQuotes.length + ' from partial cache');
             return cache.salesQuotes;
         }
-        // Cache not ready — return empty with status hint
         console.log('[CAP] SalesQuotes: cache not ready (status=' + status + ')');
         req.error(503, 'Pipeline data is loading. Please refresh in 30 seconds.');
     });
